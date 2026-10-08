@@ -28,8 +28,15 @@ export default function Home() {
       subscription.remove();
     };
   }, []);
+  const hour = today.getHours();
+  const greeting =
+    hour >= 5 && hour < 12
+      ? "Good Morning"
+      : hour >= 12 && hour < 17
+        ? "Good Afternoon"
+        : "Good Evening";
   return (
-    <Screen contentStyle={{ gap: 12 }}>
+    <Screen contentStyle={{ gap: 12, paddingTop: 6 }}>
       <View
         testID="home-header"
         style={[s.between, { height: 68, marginBottom: -4 }]}
@@ -49,7 +56,7 @@ export default function Home() {
         </View>
       </View>
       <View style={{ marginVertical: 2 }}>
-        <Text style={s.muted}>Good Morning,</Text>
+        <Text style={s.muted}>{greeting},</Text>
         <Text style={[s.title, { fontSize: 30 }]}>{workspace.user}</Text>
       </View>
       <View

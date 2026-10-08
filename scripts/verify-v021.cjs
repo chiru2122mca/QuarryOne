@@ -95,7 +95,7 @@ const assert = require("node:assert/strict");
           .locator("..")
           .boundingBox();
         const greeting = await page
-          .getByText("Good Morning,", { exact: true })
+          .getByText(/^Good (Morning|Afternoon|Evening),$/, { exact: true })
           .boundingBox();
         assert.ok(
           header.height >= 64 && header.height <= 76,
@@ -217,7 +217,9 @@ const assert = require("node:assert/strict");
   await page.goto("http://127.0.0.1:8082/");
   await page.getByRole("button", { name: "Get started" }).click();
   await page.getByRole("button", { name: "Login", exact: true }).click();
-  await page.getByText("Good Morning,", { exact: true }).waitFor();
+  await page
+    .getByText(/^Good (Morning|Afternoon|Evening),$/, { exact: true })
+    .waitFor();
   await page.getByRole("tab", { name: /Production/ }).click();
   await page.getByRole("button", { name: "+", exact: true }).click();
   await page
