@@ -56,13 +56,13 @@ export default function EntryForm({
     );
   }
   return (
-    <Screen>
+    <Screen contentStyle={{ gap: 12 }}>
       <AppHeader
         title={config.title}
         subtitle="Keep your day's operations on track."
         back
       />
-      <View style={[s.card, { gap: 20 }]}>
+      <View style={[s.card, { gap: 14, padding: 16 }]}>
         {config.fields.map((f) => (
           <View key={f.key}>
             {f.options ? (
@@ -78,6 +78,7 @@ export default function EntryForm({
                 value={values[f.key]}
                 onChange={(v) => setValues({ ...values, [f.key]: v })}
                 number={f.number}
+                uppercase={f.key === "vehicle"}
               />
             )}
           </View>

@@ -1,5 +1,6 @@
 import { Text } from "react-native";
 import { Screen, AppHeader, ListCard, Brand, s } from "../components/ui";
+import { branding } from "../config/theme";
 export default function Settings() {
   return (
     <Screen>
@@ -20,7 +21,7 @@ export default function Settings() {
       </ListCard>
       <ListCard>
         <Brand />
-        <Text style={s.muted}>Version 0.1 Prototype</Text>
+        <Text style={s.muted}>Version {branding.version}</Text>
       </ListCard>
     </Screen>
   );

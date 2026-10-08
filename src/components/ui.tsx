@@ -8,12 +8,14 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Image,
   Modal,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import { colors as c, branding } from "../config/theme";
+import { QuarryOneLogo } from "./QuarryOneLogo";
 export const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: c.background },
   content: {
@@ -72,7 +74,13 @@ export const s = StyleSheet.create({
   label: { fontSize: 15, fontWeight: "600", color: c.text, marginBottom: 8 },
   icon: { fontSize: 23, color: c.orange, fontWeight: "700" },
 });
-export function Screen({ children }: { children: React.ReactNode }) {
+export function Screen({
+  children,
+  contentStyle,
+}: {
+  children: React.ReactNode;
+  contentStyle?: StyleProp<ViewStyle>;
+}) {
   return (
     <SafeAreaView style={s.screen} edges={["top", "left", "right", "bottom"]}>
       <KeyboardAvoidingView
@@ -80,7 +88,7 @@ export function Screen({ children }: { children: React.ReactNode }) {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={s.content}
+          contentContainerStyle={[s.content, contentStyle]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode="on-drag"
         >
@@ -92,17 +100,9 @@ export function Screen({ children }: { children: React.ReactNode }) {
 }
 export function Brand({ large = false }: { large?: boolean }) {
   return (
-    <View style={s.row}>
-      <Image
-        source={branding.logo}
-        style={{ width: large ? 64 : 38, height: large ? 64 : 38 }}
-      />
-      <View>
-        <Text style={[s.heading, large && { fontSize: 30 }]}>
-          {branding.name}
-        </Text>
-        {large && <Text style={s.muted}>{branding.tagline}</Text>}
-      </View>
+    <View style={{ gap: 8, alignItems: large ? "center" : "flex-start" }}>
+      <QuarryOneLogo variant={large ? "login" : "header"} />
+      {large && <Text style={s.muted}>{branding.tagline}</Text>}
     </View>
   );
 }
@@ -171,17 +171,20 @@ export function KpiCard({
   value,
   icon = "▥",
   dark = false,
+  compact = false,
 }: {
   label: string;
   value: string;
   icon?: string;
   dark?: boolean;
+  compact?: boolean;
 }) {
   return (
     <View
       style={[
         s.card,
         { width: "47%", flexGrow: 1 },
+        compact && { paddingVertical: 13, gap: 6 },
         dark && { backgroundColor: c.primary, borderColor: c.primary },
       ]}
     >
@@ -268,14 +271,35 @@ export function QuickActionCard({
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityLabel={title}
       onPress={onPress}
       style={[
         s.card,
-        { flex: 1, minHeight: 88, alignItems: "center", padding: 8 },
+        {
+          flex: 1,
+          minWidth: 0,
+          minHeight: 76,
+          alignItems: "center",
+          justifyContent: "center",
+          paddingHorizontal: 2,
+          paddingVertical: 8,
+          gap: 6,
+        },
       ]}
     >
       <Text style={s.icon}>{icon}</Text>
-      <Text style={{ fontSize: 12, fontWeight: "700", color: c.text }}>
+      <Text
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.85}
+        style={{
+          fontSize: 12,
+          fontWeight: "700",
+          color: c.text,
+          textAlign: "center",
+          alignSelf: "stretch",
+        }}
+      >
         {title}
       </Text>
     </Pressable>
@@ -296,6 +320,7 @@ export function FormField({
   number = false,
   multiline = false,
   secure = false,
+  uppercase = false,
 }: {
   label: string;
   value: string;
@@ -303,6 +328,7 @@ export function FormField({
   number?: boolean;
   multiline?: boolean;
   secure?: boolean;
+  uppercase?: boolean;
 }) {
   return (
     <View>
@@ -318,7 +344,11 @@ export function FormField({
           },
         ]}
         value={value}
-        onChangeText={onChange}
+        onChangeText={(text) => onChange(uppercase ? text.toUpperCase() : text)}
+        autoCapitalize={
+          uppercase ? "characters" : number ? "none" : "sentences"
+        }
+        autoCorrect={!uppercase && !number && !secure}
         keyboardType={number ? "decimal-pad" : "default"}
         secureTextEntry={secure}
         multiline={multiline}

@@ -2,32 +2,32 @@
   "expo": {
     "name": "QuarryOne",
     "slug": "quarryone",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
-    "icon": "./assets/images/quarryone.png",
+    "icon": "./assets/branding/quarryone-icon.png",
     "scheme": "quarryone",
     "userInterfaceStyle": "light",
     "ios": {
-      "icon": "./assets/images/quarryone.png"
+      "icon": "./assets/branding/quarryone-icon.png"
     },
     "android": {
       "package": "com.quarryone.prototype",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/quarryone.png",
-        "backgroundColor": "#263238"
+        "foregroundImage": "./assets/branding/quarryone-adaptive-foreground.png",
+        "backgroundColor": "#FFFFFF"
       }
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/quarryone.png"
+      "favicon": "./assets/branding/quarryone-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/quarryone.png",
+          "image": "./assets/branding/quarryone-icon.png",
           "imageWidth": 140,
           "resizeMode": "contain",
           "backgroundColor": "#F5F6F4"

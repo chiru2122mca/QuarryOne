@@ -8,7 +8,7 @@ export default function Login() {
     [notice, setNotice] = useState("");
   return (
     <Screen>
-      <View style={{ paddingTop: 44, paddingBottom: 32 }}>
+      <View style={{ paddingTop: 12, paddingBottom: 8 }}>
         <Brand large />
       </View>
       <Text style={s.title}>Welcome back</Text>

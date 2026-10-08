@@ -1,29 +1,34 @@
 import { View, Text } from "react-native";
 import { router } from "expo-router";
-import { Screen, Brand, PrimaryButton, s } from "../components/ui";
-import { colors as c } from "../config/theme";
+import { Screen, PrimaryButton, s } from "../components/ui";
+import { QuarryOneLogo } from "../components/QuarryOneLogo";
+import { colors as c, branding } from "../config/theme";
 export default function Splash() {
   return (
-    <Screen>
+    <Screen contentStyle={{ flexGrow: 1, paddingBottom: 20 }}>
       <View
         style={{
-          minHeight: 640,
+          flexGrow: 1,
           justifyContent: "space-between",
-          paddingVertical: 48,
+          paddingVertical: 12,
+          gap: 20,
         }}
       >
-        <Brand large />
+        <View style={{ alignItems: "center", gap: 8 }}>
+          <QuarryOneLogo variant="welcome" />
+          <Text style={s.muted}>{branding.tagline}</Text>
+        </View>
         <View>
           <View
             style={{
-              height: 180,
+              height: 80,
               flexDirection: "row",
               alignItems: "flex-end",
               gap: 8,
-              marginBottom: 32,
+              marginBottom: 16,
             }}
           >
-            {[70, 120, 160, 100].map((h, i) => (
+            {[35, 60, 80, 50].map((h, i) => (
               <View
                 key={i}
                 style={{
@@ -36,7 +41,7 @@ export default function Splash() {
               />
             ))}
           </View>
-          <Text style={[s.title, { fontSize: 38, lineHeight: 44 }]}>
+          <Text style={[s.title, { fontSize: 30, lineHeight: 36 }]}>
             A stronger day.{"\n"}From the ground up.
           </Text>
           <Text style={[s.muted, { marginTop: 16 }]}>
@@ -49,7 +54,7 @@ export default function Splash() {
             onPress={() => router.replace("/login")}
           />
           <Text style={[s.muted, { textAlign: "center" }]}>
-            Version 0.1 · Static prototype
+            Version 0.2 · Static prototype
           </Text>
         </View>
       </View>

@@ -42,7 +42,7 @@ const items = [
 ] as const;
 export default function More() {
   return (
-    <Screen>
+    <Screen contentStyle={{ gap: 12 }}>
       <AppHeader title="More" subtitle="Everything else, in one place." />
       <View style={[s.card, { backgroundColor: c.primary }]}>
         <Text style={{ color: "white", fontSize: 22, fontWeight: "700" }}>
@@ -57,7 +57,11 @@ export default function More() {
           key={i.label}
           accessibilityRole="button"
           onPress={() => router.push(i.route)}
-          style={[s.card, s.row, { minHeight: 80 }]}
+          style={[
+            s.card,
+            s.row,
+            { minHeight: 66, paddingVertical: 10, paddingHorizontal: 16 },
+          ]}
         >
           <Text style={s.icon}>{i.icon}</Text>
           <View style={{ flex: 1 }}>

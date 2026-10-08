@@ -15,8 +15,9 @@ export const colors = {
 export const branding = {
   name: "QuarryOne",
   tagline: "Operate. Track. Sell. Grow.",
-  logo: require("../../assets/images/quarryone.png"),
-  version: "0.1 Prototype",
+  logo: require("../../assets/branding/quarryone-logo.png"),
+  logoAspectRatio: 1254 / 1254,
+  version: "0.2 Prototype",
 };
 export const workspace = {
   name: "Deccan Stone Quarry",

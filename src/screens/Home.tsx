@@ -1,4 +1,5 @@
-import { View, Text, Pressable } from "react-native";
+import { useEffect, useState } from "react";
+import { AppState, View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
 import {
   Screen,
@@ -15,8 +16,20 @@ import { workspace, colors as c } from "../config/theme";
 import { overview as o, lakh, money } from "../data/overview";
 import { mockDispatch } from "../data/mockDispatch";
 export default function Home() {
+  const [today, setToday] = useState(() => new Date());
+  useEffect(() => {
+    const refresh = () => setToday(new Date());
+    const timer = setInterval(refresh, 60000);
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") refresh();
+    });
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
+  }, []);
   return (
-    <Screen>
+    <Screen contentStyle={{ gap: 12 }}>
       <View style={s.between}>
         <Brand />
         <View
@@ -32,7 +45,7 @@ export default function Home() {
           <Text style={{ color: "white", fontWeight: "700" }}>RK</Text>
         </View>
       </View>
-      <View style={{ marginVertical: 6 }}>
+      <View style={{ marginVertical: 2 }}>
         <Text style={s.muted}>Good Morning,</Text>
         <Text style={[s.title, { fontSize: 30 }]}>{workspace.user}</Text>
       </View>
@@ -60,12 +73,26 @@ export default function Home() {
         </Text>
       </View>
       <SectionHeader title="Today's overview" />
-      <Text style={[s.muted, { marginTop: -10 }]}>{workspace.date}</Text>
+      <Text
+        accessibilityLabel="Current device date"
+        style={[s.muted, { marginTop: -6 }]}
+      >
+        {today.toLocaleDateString("en-IN", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}
+      </Text>
       <View style={s.grid}>
-        <KpiCard label="Production" value={`${o.production} Tons`} />
-        <KpiCard label="Dispatch" value={`${o.dispatch} Tons`} icon="⇥" />
-        <KpiCard label="Sales" value={lakh(o.sales)} icon="₹" />
-        <KpiCard label="Expenses" value={money(o.expenses)} icon="↗" />
+        <KpiCard compact label="Production" value={`${o.production} Tons`} />
+        <KpiCard
+          compact
+          label="Dispatch"
+          value={`${o.dispatch} Tons`}
+          icon="⇥"
+        />
+        <KpiCard compact label="Sales" value={lakh(o.sales)} icon="₹" />
+        <KpiCard compact label="Expenses" value={money(o.expenses)} icon="↗" />
       </View>
       <View style={[s.card, s.between]}>
         <Pressable
