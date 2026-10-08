@@ -30,7 +30,10 @@ export default function Home() {
   }, []);
   return (
     <Screen contentStyle={{ gap: 12 }}>
-      <View style={s.between}>
+      <View
+        testID="home-header"
+        style={[s.between, { height: 68, marginBottom: -4 }]}
+      >
         <Brand />
         <View
           style={{

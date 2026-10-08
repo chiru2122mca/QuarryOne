@@ -15,8 +15,20 @@ export const colors = {
 export const branding = {
   name: "QuarryOne",
   tagline: "Operate. Track. Sell. Grow.",
-  logo: require("../../assets/branding/quarryone-logo.png"),
-  logoAspectRatio: 1254 / 1254,
+  assets: {
+    full: {
+      source: require("../../assets/branding/quarryone-full-transparent.png"),
+      aspectRatio: 1124 / 1070,
+    },
+    emblem: {
+      source: require("../../assets/branding/quarryone-emblem-transparent.png"),
+      aspectRatio: 805 / 818,
+    },
+    wordmark: {
+      source: require("../../assets/branding/quarryone-wordmark-transparent.png"),
+      aspectRatio: 1124 / 238,
+    },
+  },
   version: "0.2 Prototype",
 };
 export const workspace = {

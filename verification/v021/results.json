@@ -1,0 +1,11 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "routesChecked": 17,
+  "interactions": "splash, login, tabs, production validation/save, sale calculation/save, challan, More/reports",
+  "pageErrors": [],
+  "refinementChecks": "logo ratio, welcome fit, Production label, live device date/rollover, numeric input modes, 48px button targets, reduced-height scrolling, uppercase vehicle"
+}
