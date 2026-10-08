@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "QuarryOne",
+    "slug": "quarryone",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/quarryone.png",
+    "scheme": "quarryone",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "icon": "./assets/images/quarryone.png"
+    },
+    "android": {
+      "package": "com.quarryone.prototype",
+      "softwareKeyboardLayoutMode": "resize",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/quarryone.png",
+        "backgroundColor": "#263238"
+      }
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/quarryone.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/quarryone.png",
+          "imageWidth": 140,
+          "resizeMode": "contain",
+          "backgroundColor": "#F5F6F4"
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

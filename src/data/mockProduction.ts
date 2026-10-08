@@ -1,0 +1,43 @@
+import { Production } from "./types";
+export const mockProduction: Production[] = [
+  {
+    id: "PR-0128",
+    date: "24 September 2026",
+    pit: "Pit A",
+    material: "Black Granite",
+    grade: "Grade A",
+    shift: "Morning",
+    quantity: 42,
+    supervisor: "Ramesh",
+  },
+  {
+    id: "PR-0127",
+    date: "24 September 2026",
+    pit: "Pit A",
+    material: "Black Granite",
+    grade: "Grade B",
+    shift: "Evening",
+    quantity: 38,
+    supervisor: "Suresh",
+  },
+  {
+    id: "PR-0126",
+    date: "24 September 2026",
+    pit: "Pit B",
+    material: "Grey Granite",
+    grade: "Grade A",
+    shift: "Afternoon",
+    quantity: 45,
+    supervisor: "Venkat",
+  },
+  {
+    id: "PR-0125",
+    date: "23 September 2026",
+    pit: "Pit B",
+    material: "Grey Granite",
+    grade: "Grade B",
+    shift: "Morning",
+    quantity: 36,
+    supervisor: "Suresh",
+  },
+];

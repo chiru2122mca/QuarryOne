@@ -1,0 +1,142 @@
+[
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\_layout.tsx",
+    "Hash": "4DE4AEAB3CF1855C59E4C7C6D41265DEA57FF8FF44C3A83F2FE25B6D57DA1658"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\add-expense.tsx",
+    "Hash": "E08BA903CCCA25AFB41A42B945598937B94303D1E73458F06DFA97E1A0B957D8"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\add-production.tsx",
+    "Hash": "3B7FF1E08BBB64DDC700B5B05FA08823D5FD85EFEB487AA3D4685729848BAC3F"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\customers.tsx",
+    "Hash": "7D7557E0FF2ED4C435F30DC7D2EE6546616688817B420C441E4A362F8CA0C092"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\expenses.tsx",
+    "Hash": "DCF1096862FF7C777F0E8BF2D440F00DDC6B929167C41EB6736643C06698AD2B"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\index.tsx",
+    "Hash": "E6BC3E745DA4060446F3A7DF337C060A70190BC6D888420D89F2AD7FAFC1C769"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\login.tsx",
+    "Hash": "8F8533D10F9984548199DA2146F9106B8AEDCB44FC3675D10712AE8F8AC12D7F"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\new-dispatch.tsx",
+    "Hash": "53869EC7DCDF4C13916F367C4C80078FA21D6884DCD7265D2DA38FA5847C89E9"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\new-sale.tsx",
+    "Hash": "B138E16E3FE09E84FF10A124B1DAF6727C086314ED6C31446D4B93E9DEC48AA7"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\profile.tsx",
+    "Hash": "A81FC78F73E7FF272D6FCCF4672D6E77735B8BEAB54D146D95D8CEEF47296732"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\reports.tsx",
+    "Hash": "42773495940E3CD4A9266D971CB15CCB7C0DFBBCFEB7E636F268D340E8946E4F"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\settings.tsx",
+    "Hash": "85BEF5FE36F537D8389C8378ECF57EED78564B329F87D73038CFE86FCE9B31A4"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\stock.tsx",
+    "Hash": "E1B391390B401B422F89B5BE218B6FFC14DA278827E3A064BAF731507BD19609"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\_layout.tsx",
+    "Hash": "5ED8FA167D026BF1A13B0DE794B58CF36C3BAF111E740430A863192F7FB038FD"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\dispatch.tsx",
+    "Hash": "0FDA12BA75C05DBFEFFAF028223264540E2DE947A1848051C7CDDE90113E8404"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\home.tsx",
+    "Hash": "D8664404D78049810CE14912F81102770379A38E966BDE019F6440C6C0EBC703"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\more.tsx",
+    "Hash": "797BF87574B7D60F5F14DB34D1215E1241EDA521B69983210D99B3EF2F22B9C5"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\production.tsx",
+    "Hash": "3F8A8A7EA2B41CFF0D2C10E176D4C4E0426A28A676CF72F214511C58C7358F0E"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\(tabs)\\sales.tsx",
+    "Hash": "C11BA9376BDF828E9E2E4D96A4299C7370B161938C96755B6C53750FEAC18FEA"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\app\\report\\[id].tsx",
+    "Hash": "6431020084F15A5D917625BE7433A9307447D3A58A5BE4C7A3316C2161B16E82"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\components\\ui.tsx",
+    "Hash": "A9D293BECF1F634DFA2D0C0F1CFDDCDDF4566A93AD6E5228F52AA2A6B56AEFE8"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\config\\theme.ts",
+    "Hash": "19FBE5ED910CB785AFFFBB65ADD3868FB526B46AEDB4D20361354265C0F2C355"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\forms.ts",
+    "Hash": "0571171763F965E878B4A62B800DB4265EC99DA1FCB95EE32E5F0E1D5000CEF1"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockCustomers.ts",
+    "Hash": "0A361D764DCE5AE7796D2A8DA063A411724A121E621E2BFF68F59016117521A8"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockDispatch.ts",
+    "Hash": "697460E9D16CCADE854C1D65F53D8E47B13CF5178531EDCD88382AD922A4A5C2"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockExpenses.ts",
+    "Hash": "65C3567CA538E6A85B67EEF092DB0DA7AA1655EB0F5753068E3F838924E3F86D"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockProduction.ts",
+    "Hash": "15FB38A4E0E3986AD9BFB54F14FBFFF6414E3F9AE786C3F410FABFE3D210BC25"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockSales.ts",
+    "Hash": "8DF88CD1BBB2B5A87FA670B57C4BB80C48D2E17CD898A2D22C0AF975DA15EB0C"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\mockStock.ts",
+    "Hash": "6A2B9307A7EA00E6285682B1474D8B921F3C910A4676B9D7B7E9817881C6B9C8"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\overview.ts",
+    "Hash": "C7C2F9951D8F2763D6DF2D4E4563FDF69E5763832E57E3D809230EC9D2337190"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\data\\types.ts",
+    "Hash": "9F26460585FB4DFF3F36F41329C29D3FADEF37DCCF5D99A852FA41E32FEFEE73"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\screens\\EntryForm.tsx",
+    "Hash": "711AD2FAE5174BBB2A24B8B624241486DED13F66A3F1F93D275E9C747AA59978"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\screens\\Home.tsx",
+    "Hash": "AE65969A5C717AD43F1A8870C8210825042B25251FCBAA60CC3A1289966DD944"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\screens\\Lists.tsx",
+    "Hash": "FEC1AF4C17DACD6B29E9C88EA816232BB57A6C66BC31C73902A0B330ED2943C8"
+  },
+  {
+    "Path": "C:\\Users\\Chiru\\Documents\\ChatGPT\\QuarryOne\\src\\screens\\More.tsx",
+    "Hash": "C49596521B7C3884E7213F82F11049EF6703076B401159C7DE587A05910DDEA4"
+  }
+]

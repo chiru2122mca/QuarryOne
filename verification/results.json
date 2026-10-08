@@ -1,0 +1,10 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "routesChecked": 17,
+  "interactions": "splash, login, tabs, production validation/save, sale calculation/save, challan, More/reports",
+  "pageErrors": []
+}
