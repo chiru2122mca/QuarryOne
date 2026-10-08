@@ -143,14 +143,18 @@ export function PrimaryButton({
   title,
   onPress,
   secondary = false,
+  disabled = false,
 }: {
   title: string;
   onPress: () => void;
   secondary?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         s.button,
@@ -160,6 +164,7 @@ export function PrimaryButton({
           borderColor: c.line,
         },
         pressed && { opacity: 0.75 },
+        disabled && { opacity: 0.6 },
       ]}
     >
       <Text style={s.buttonText}>{title}</Text>
@@ -233,12 +238,15 @@ export function SectionHeader({
   );
 }
 export function StatusChip({ status }: { status: string }) {
-  const good = ["PAID", "DELIVERED", "DISPATCHED"].includes(status);
+  const good = ["PAID", "DELIVERED", "DISPATCHED", "AVAILABLE"].includes(
+    status,
+  );
+  const rejected = status === "REJECTED";
   return (
     <View
       style={{
         alignSelf: "flex-start",
-        backgroundColor: good ? "#E8F3E9" : "#FFF3D8",
+        backgroundColor: rejected ? "#FBE9E7" : good ? "#E8F3E9" : "#FFF3D8",
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderRadius: 6,
@@ -248,7 +256,7 @@ export function StatusChip({ status }: { status: string }) {
         style={{
           fontSize: 12,
           fontWeight: "800",
-          color: good ? c.success : "#805400",
+          color: rejected ? c.error : good ? c.success : "#805400",
         }}
       >
         {status}

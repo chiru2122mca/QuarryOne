@@ -59,5 +59,5 @@ export function createMockOperationsStore(
   });
 }
 
-/** One shared demo inventory. No existing route imports or mounts this foundation yet. */
+/** One shared session inventory, supplied by the root OperationsProvider. */
 export const mockOperationsStore = createMockOperationsStore();

@@ -1,4 +1,1 @@
-import Lists from "../../screens/Lists";
-export default function Page() {
-  return <Lists kind="production" />;
-}
+export { default } from "../../screens/ProductionList";

@@ -1,11 +1,12 @@
-import { useSyncExternalStore } from "react";
+import { useContext, useSyncExternalStore } from "react";
 import { mockOperationsStore } from "./mockOperationsStore";
 import type { BlockOperationsStore } from "./mockOperationsStore";
+import { OperationsContext } from "./OperationsProvider";
 
-/** Opt-in React adapter; deliberately not connected to existing screens. */
-export function useMockOperations(
-  store: BlockOperationsStore = mockOperationsStore,
-) {
+/** All Production routes subscribe to the same root-provided session store. */
+export function useMockOperations(override?: BlockOperationsStore) {
+  const provided = useContext(OperationsContext);
+  const store = override ?? provided ?? mockOperationsStore;
   const inventory = useSyncExternalStore(
     store.subscribe,
     store.getInventory,
