@@ -1,0 +1,9 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "pageErrors": [],
+  "checks": "Deep Slate fixed header, 2x2 KPIs, values retained, compact quick actions, dispatch cards, fixed five-tab navigation, no overflow, touch targets, greeting boundaries, existing routes"
+}
