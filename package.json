@@ -12,7 +12,8 @@
     "format": "prettier --write src scripts app.json package.json eslint.config.js tsconfig.json README.md",
     "verify:web": "node scripts/verify-production.cjs",
     "preview": "node scripts/preview.cjs",
-    "test:domain": "node --require ./tests/register-typescript.cjs --test tests/blocks/*.test.cjs"
+    "test:domain": "node --require ./tests/register-typescript.cjs --test tests/blocks/*.test.cjs",
+    "verify:inventory": "node scripts/verify-inventory.cjs"
   },
   "dependencies": {
     "@react-navigation/bottom-tabs": "^7.15.5",

@@ -10,6 +10,18 @@ http
       res.writeHead(403);
       return res.end();
     }
+    if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
+      file = fs.existsSync(file + ".html")
+        ? file + ".html"
+        : path.join(file, "index.html");
+    }
+    if (!fs.existsSync(file) && fs.existsSync(file + ".html")) file += ".html";
+    // Static export has a generic read-only details page for unknown dynamic IDs.
+    // Serve that template instead of Welcome to avoid a mismatched SSR hydration.
+    if (!fs.existsSync(file) && /^\/more\/block\/[^/]+$/.test(url)) {
+      const template = path.join(root, "more", "block", "[id].html");
+      if (fs.existsSync(template)) file = template;
+    }
     if (!fs.existsSync(file))
       file = fs.existsSync(file + ".html")
         ? file + ".html"

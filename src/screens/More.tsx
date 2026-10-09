@@ -4,10 +4,10 @@ import { Screen, AppHeader, Brand, s } from "../components/ui";
 import { branding, workspace, colors as c } from "../config/theme";
 const items = [
   {
-    label: "Stock",
-    route: "/stock",
+    label: "Block Inventory",
+    route: "/more/stock",
     icon: "▤",
-    note: "Materials & available inventory",
+    note: "Granite blocks & available volume",
   },
   {
     label: "Expenses",
