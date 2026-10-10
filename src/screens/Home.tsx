@@ -16,6 +16,10 @@ import { DemoNote, StatusChip, s } from "../components/ui";
 import { workspace, colors as c } from "../config/theme";
 import { overview as o, lakh, money } from "../data/overview";
 import { mockDispatch } from "../data/mockDispatch";
+import { useMockOperations } from "../stores/useMockOperations";
+import { productionTotals } from "../features/production/model";
+import { inventorySummary } from "../features/inventory/model";
+import { formatVolume } from "../domain/blocks/volume";
 
 function DashboardIcon({
   kind,
@@ -140,7 +144,7 @@ const h = StyleSheet.create({
     padding: 16,
     paddingTop: 12,
     paddingBottom: 24,
-    gap: 12,
+    gap: 10,
     width: "100%",
     maxWidth: 640,
     alignSelf: "center",
@@ -153,8 +157,9 @@ const h = StyleSheet.create({
     borderColor: c.line,
     borderWidth: 1,
     borderRadius: 12,
-    padding: 12,
-    minHeight: 106,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    minHeight: 100,
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
@@ -176,6 +181,9 @@ const h = StyleSheet.create({
   section: { fontSize: 17, fontWeight: "700", color: c.text },
 });
 export default function Home() {
+  const { inventory } = useMockOperations();
+  const produced = productionTotals(inventory);
+  const stock = inventorySummary(inventory);
   const [today, setToday] = useState(() => new Date());
   useEffect(() => {
     const refresh = () => setToday(new Date());
@@ -205,26 +213,34 @@ export default function Home() {
   const kpis = [
     {
       label: "Production",
-      value: String(o.production),
-      caption: "Tons",
+      value: String(produced.blocks),
+      caption: "Blocks · Live",
+      detail: formatVolume(produced.volumeM3, "M3"),
+      live: true,
       kind: "production" as const,
     },
     {
       label: "Dispatch",
-      value: String(o.dispatch),
-      caption: "Tons",
+      value: String(mockDispatch.length),
+      caption: "Records · Demo",
+      detail: "",
+      live: false,
       kind: "dispatch" as const,
     },
     {
       label: "Sales",
       value: lakh(o.sales),
-      caption: "Today",
+      caption: "Today · Demo",
+      detail: "",
+      live: false,
       kind: "sales" as const,
     },
     {
       label: "Expenses",
       value: money(o.expenses),
-      caption: "Today",
+      caption: "Today · Demo",
+      detail: "",
+      live: false,
       kind: "expense" as const,
     },
   ];
@@ -247,7 +263,10 @@ export default function Home() {
     },
   ];
   return (
-    <View style={{ flex: 1, backgroundColor: c.background }}>
+    <View
+      testID="home-dashboard"
+      style={{ flex: 1, backgroundColor: c.background }}
+    >
       <DarkAppHeader onProfilePress={() => router.push("/profile")} />
       <SafeAreaView style={{ flex: 1 }} edges={["left", "right", "bottom"]}>
         <ScrollView
@@ -301,7 +320,11 @@ export default function Home() {
           </View>
           <View testID="home-kpis" style={h.grid}>
             {kpis.map((kpi) => (
-              <View key={kpi.label} style={h.kpi}>
+              <View
+                key={kpi.label}
+                testID={`home-kpi-${kpi.kind}`}
+                style={h.kpi}
+              >
                 <DashboardIcon kind={kpi.kind} />
                 <View style={{ flex: 1, minWidth: 0 }}>
                   <Text style={{ fontSize: 14, color: c.muted }}>
@@ -320,9 +343,27 @@ export default function Home() {
                   >
                     {kpi.value}
                   </Text>
-                  <Text style={{ fontSize: 14, color: c.muted, marginTop: 2 }}>
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: kpi.live ? c.success : c.muted,
+                      marginTop: 2,
+                    }}
+                  >
                     {kpi.caption}
                   </Text>
+                  {!!kpi.detail && (
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: c.text,
+                        marginTop: 2,
+                      }}
+                    >
+                      {kpi.detail}
+                    </Text>
+                  )}
                 </View>
               </View>
             ))}
@@ -356,7 +397,12 @@ export default function Home() {
             ))}
           </View>
           <View style={[s.between, { minHeight: 36 }]}>
-            <Text style={h.section}>Recent Dispatches</Text>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <Text style={h.section}>Recent Dispatches</Text>
+              <Text style={{ fontSize: 12, color: c.muted }}>Demo</Text>
+            </View>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="View all dispatches"
@@ -396,7 +442,7 @@ export default function Home() {
                     {d.customer}
                   </Text>
                   <Text style={{ fontSize: 13, color: c.muted, marginTop: 3 }}>
-                    {d.material} · {d.quantity} Tons
+                    {d.material}
                   </Text>
                 </View>
                 <View style={{ gap: 8, alignItems: "flex-end" }}>
@@ -424,7 +470,7 @@ export default function Home() {
                 onPress={() => router.push("/customers")}
                 style={{ flex: 1, minHeight: 48, justifyContent: "center" }}
               >
-                <Text style={s.muted}>Outstanding</Text>
+                <Text style={s.muted}>Outstanding · Demo</Text>
                 <Text style={s.heading}>{lakh(o.outstanding)}</Text>
               </Pressable>
               <Pressable
@@ -433,9 +479,12 @@ export default function Home() {
                 onPress={() => router.push("/stock")}
                 style={{ flex: 1, minHeight: 48, justifyContent: "center" }}
               >
-                <Text style={s.muted}>Stock</Text>
+                <Text style={s.muted}>Stock · Live</Text>
                 <Text style={s.heading}>
-                  {o.stock.toLocaleString("en-IN")} Tons
+                  {stock.counts.AVAILABLE} available
+                </Text>
+                <Text style={s.muted}>
+                  {formatVolume(stock.availableVolumeM3, "M3")}
                 </Text>
               </Pressable>
             </View>

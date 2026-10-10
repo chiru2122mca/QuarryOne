@@ -5,7 +5,7 @@ const fs = require("node:fs");
 (async () => {
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
-  fs.mkdirSync("verification/home-stage1", { recursive: true });
+  fs.mkdirSync("verification/dashboard-corrections", { recursive: true });
   try {
     for (const width of [360, 390, 412]) {
       const page = await browser.newPage({
@@ -29,6 +29,7 @@ const fs = require("node:fs");
       assert.equal(headerBox.height, 56);
       const avatar = await page
         .getByRole("button", { name: "Open profile", exact: true })
+        .filter({ visible: true })
         .boundingBox();
       assert.ok(avatar.height >= 48);
       const grid = page.getByTestId("home-kpis");
@@ -42,7 +43,7 @@ const fs = require("node:fs");
           boxes[2].y > boxes[0].y,
       );
       assert.ok(boxes[0].x + boxes[0].width <= boxes[1].x);
-      for (const value of ["125", "92", "₹4.25 L", "₹68,400"]) {
+      for (const value of ["18", "4", "₹4.25 L", "₹68,400"]) {
         const figure = grid.getByText(value, { exact: true });
         await figure.waitFor();
         assert.ok(
@@ -52,6 +53,22 @@ const fs = require("node:fs");
           `${width}: ${value} fits without ellipsis`,
         );
       }
+      const production = page
+        .getByTestId("home-kpi-production")
+        .filter({ visible: true });
+      await production.getByText("78.729 m³", { exact: true }).waitFor();
+      await production.getByText("Blocks · Live", { exact: true }).waitFor();
+      assert.equal(
+        await page
+          .getByTestId("home-dashboard")
+          .getByText(/\bTons?\b/i)
+          .count(),
+        0,
+      );
+      await page
+        .getByTestId("home-kpi-dispatch")
+        .getByText("Records · Demo", { exact: true })
+        .waitFor();
       const quick = page.getByTestId("home-quick-actions");
       assert.equal(await quick.getByRole("button").count(), 4);
       for (const button of await quick.getByRole("button").all())
@@ -70,7 +87,7 @@ const fs = require("node:fs");
         false,
       );
       await page.screenshot({
-        path: `verification/home-stage1/home-${width}.png`,
+        path: `verification/dashboard-corrections/home-${width}.png`,
       });
       const note = page
         .getByText("Demo workspace · Local mock data", { exact: true })
@@ -90,16 +107,56 @@ const fs = require("node:fs");
       await page.getByText("Good Afternoon,", { exact: true }).waitFor();
       await page.clock.setSystemTime(new Date("2026-10-10T17:00:00+05:30"));
       await page.clock.fastForward(60000);
-      await page.getByText("Good Evening,", { exact: true }).waitFor();
+      await page
+        .getByText("Good Evening,", { exact: true })
+        .filter({ visible: true })
+        .waitFor();
       await quick
         .getByRole("button", { name: "Production", exact: true })
         .click();
       await page
         .getByRole("textbox", { name: "Length (FT)", exact: true })
         .waitFor();
-      await page.getByRole("button", { name: "Go back", exact: true }).click();
+      for (const [label, value] of [
+        ["Length (FT)", "10"],
+        ["Width (FT)", "5"],
+        ["Height (FT)", "4"],
+      ])
+        await page
+          .getByRole("textbox", { name: label, exact: true })
+          .fill(value);
+      await page
+        .getByRole("textbox", { name: "Stockyard Location", exact: true })
+        .fill("Yard 1");
+      await page
+        .getByRole("button", { name: "Save Production", exact: true })
+        .click();
+      await page
+        .getByText("Production saved", { exact: true })
+        .filter({ visible: true })
+        .waitFor();
+      await page.waitForTimeout(400);
+      await page
+        .getByRole("button", { name: "View Production", exact: true })
+        .click();
+      await page.getByRole("tab", { name: /Home/ }).click();
+      await production.getByText("19", { exact: true }).waitFor();
+      await production.getByText("84.392 m³", { exact: true }).waitFor();
+      await page
+        .getByRole("button", { name: "Open Block Inventory", exact: true })
+        .filter({ visible: true })
+        .getByText("16 available", { exact: true })
+        .waitFor();
+      await page
+        .getByText("Good Evening,", { exact: true })
+        .filter({ visible: true })
+        .scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: `verification/dashboard-corrections/home-updated-${width}.png`,
+      });
       await page
         .getByRole("button", { name: "View all dispatches", exact: true })
+        .filter({ visible: true })
         .click();
       await page
         .getByText("DC-2026-00124", { exact: true })
@@ -108,19 +165,20 @@ const fs = require("node:fs");
       await page.getByRole("tab", { name: /Home/ }).click();
       await page
         .getByRole("button", { name: "Open profile", exact: true })
+        .filter({ visible: true })
         .click();
       await page.getByText("Profile", { exact: true }).waitFor();
       await page.close();
     }
     assert.deepEqual(errors, []);
     fs.writeFileSync(
-      "verification/home-stage1/results.json",
+      "verification/dashboard-corrections/results.json",
       JSON.stringify(
         {
           widths: [360, 390, 412],
           pageErrors: errors,
           checks:
-            "Deep Slate fixed header, 2x2 KPIs, values retained, compact quick actions, dispatch cards, fixed five-tab navigation, no overflow, touch targets, greeting boundaries, existing routes",
+            "Deep Slate fixed header, 2x2 KPIs, live block count/volume 18→19, available stock 15→16, demo labels, no Home tonnage, no clipping/overflow, compact actions, dispatch cards, fixed navigation, greeting rules, existing routes",
         },
         null,
         2,
