@@ -1,0 +1,9 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "pageErrors": [],
+  "checks": "Deep Slate fixed header, 2x2 KPIs, live block count/volume 18→19, available stock 15→16, demo labels, no Home tonnage, no clipping/overflow, compact actions, dispatch cards, fixed navigation, greeting rules, existing routes"
+}

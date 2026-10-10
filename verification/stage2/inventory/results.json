@@ -1,0 +1,9 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "pageErrors": [],
+  "checks": "KPI totals, combined search/filters, clear/empty results, CFT/m³, read-only details, missing/invalid IDs, Production→Inventory shared state, tab retention, bottom clearance, stock alias"
+}

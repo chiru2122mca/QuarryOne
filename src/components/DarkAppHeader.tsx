@@ -4,19 +4,23 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { QuarryOneLogo } from "./QuarryOneLogo";
 import { branding, colors as c } from "../config/theme";
 
-/** Opt-in Deep Slate header. Existing operational headers remain unchanged. */
+/** Shared Deep Slate title bar; Home retains its original branding defaults. */
 export function DarkAppHeader({
   title,
   onBack,
   onProfilePress,
   actions,
   initials = "RK",
+  showProfile = true,
+  testID = "home-header",
 }: {
   title?: string;
   onBack?: () => void;
   onProfilePress?: () => void;
   actions?: ReactNode;
   initials?: string;
+  showProfile?: boolean;
+  testID?: string;
 }) {
   return (
     <SafeAreaView
@@ -24,7 +28,7 @@ export function DarkAppHeader({
       style={{ backgroundColor: c.primary }}
     >
       <View
-        testID="home-header"
+        testID={testID}
         style={{
           height: 56,
           paddingHorizontal: 16,
@@ -48,7 +52,31 @@ export function DarkAppHeader({
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: c.card, fontSize: 28 }}>‹</Text>
+            <View style={{ width: 18, height: 18 }}>
+              <View
+                style={{
+                  position: "absolute",
+                  left: 1,
+                  top: 8,
+                  width: 16,
+                  height: 2,
+                  backgroundColor: c.card,
+                }}
+              />
+              <View
+                style={{
+                  position: "absolute",
+                  left: 1,
+                  top: 4,
+                  width: 10,
+                  height: 10,
+                  borderLeftWidth: 2,
+                  borderBottomWidth: 2,
+                  borderColor: c.card,
+                  transform: [{ rotate: "45deg" }],
+                }}
+              />
+            </View>
           </Pressable>
         )}
         <View style={{ flex: 1, minWidth: 0 }}>
@@ -124,35 +152,37 @@ export function DarkAppHeader({
             />
           </View>
         )}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Open profile"
-          disabled={!onProfilePress}
-          onPress={onProfilePress}
-          style={{
-            width: 48,
-            height: 48,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View
+        {showProfile && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Open profile"
+            disabled={!onProfilePress}
+            onPress={onProfilePress}
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              borderWidth: 1.5,
-              borderColor: c.card,
-              backgroundColor: c.dark,
+              width: 48,
+              height: 48,
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Text style={{ color: c.card, fontWeight: "700", fontSize: 12 }}>
-              {initials}
-            </Text>
-          </View>
-        </Pressable>
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                borderWidth: 1.5,
+                borderColor: c.card,
+                backgroundColor: c.dark,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: c.card, fontWeight: "700", fontSize: 12 }}>
+                {initials}
+              </Text>
+            </View>
+          </Pressable>
+        )}
       </View>
     </SafeAreaView>
   );

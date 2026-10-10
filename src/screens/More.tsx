@@ -1,6 +1,7 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { View, Text, Pressable } from "react-native";
 import { router } from "expo-router";
-import { Screen, AppHeader, Brand, s } from "../components/ui";
+import { Screen, Brand, s } from "../components/ui";
 import { branding, workspace, colors as c } from "../config/theme";
 const items = [
   {
@@ -42,8 +43,11 @@ const items = [
 ] as const;
 export default function More() {
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader title="More" subtitle="Everything else, in one place." />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={<OperationalHeader title="More" />}
+    >
+      <Text style={s.muted}>Everything else, in one place.</Text>
       <View style={[s.card, { backgroundColor: c.primary }]}>
         <Text style={{ color: "white", fontSize: 22, fontWeight: "700" }}>
           {workspace.user}

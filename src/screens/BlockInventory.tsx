@@ -1,8 +1,8 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
-  AppHeader,
   DemoNote,
   EmptyState,
   FormField,
@@ -47,12 +47,11 @@ export default function BlockInventory() {
     filters.status,
   ].filter((value) => value !== "ALL").length;
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader
-        title="Block Inventory"
-        subtitle="Historical records & saleable stock"
-        back
-      />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={<OperationalHeader title="Block Inventory" back />}
+    >
+      <Text style={s.muted}>Historical records & saleable stock</Text>
       <View testID="inventory-kpis" style={s.grid}>
         <KpiCard
           compact

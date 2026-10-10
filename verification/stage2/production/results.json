@@ -1,0 +1,9 @@
+{
+  "widths": [
+    360,
+    390,
+    412
+  ],
+  "pageErrors": [],
+  "checks": "FT/M live preview, mandatory validation, rapid double save, generated numbers, count/volume updates, filter reset, tab/session stability, reduced-height scrolling, bottom tab clearance, reload restores seed"
+}

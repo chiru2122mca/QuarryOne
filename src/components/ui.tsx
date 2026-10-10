@@ -77,25 +77,42 @@ export const s = StyleSheet.create({
 export function Screen({
   children,
   contentStyle,
+  header,
 }: {
   children: React.ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
+  header?: React.ReactNode;
 }) {
   return (
-    <SafeAreaView style={s.screen} edges={["top", "left", "right", "bottom"]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <View style={s.screen}>
+      {header}
+      <SafeAreaView
+        style={s.screen}
+        edges={
+          header
+            ? ["left", "right", "bottom"]
+            : ["top", "left", "right", "bottom"]
+        }
       >
-        <ScrollView
-          contentContainerStyle={[s.content, contentStyle]}
-          keyboardShouldPersistTaps="handled"
-          keyboardDismissMode="on-drag"
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          {children}
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <ScrollView
+            contentContainerStyle={[
+              s.content,
+              !!header && { paddingHorizontal: 16, paddingTop: 12, gap: 12 },
+              contentStyle,
+            ]}
+            testID={header ? "operational-content" : undefined}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
+          >
+            {children}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   );
 }
 export function Brand({ large = false }: { large?: boolean }) {
@@ -200,8 +217,11 @@ export function KpiCard({
         <Text style={s.icon}>{icon}</Text>
       </View>
       <Text
+        numberOfLines={compact ? 1 : undefined}
+        adjustsFontSizeToFit={compact}
+        minimumFontScale={0.8}
         style={{
-          fontSize: 25,
+          fontSize: compact ? 22 : 25,
           fontWeight: "800",
           color: dark ? "white" : c.text,
         }}

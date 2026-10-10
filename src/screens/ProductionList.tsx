@@ -1,13 +1,12 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import {
-  AppHeader,
   DemoNote,
   EmptyState,
   KpiCard,
   ListCard,
-  PrimaryButton,
   Screen,
   SelectField,
   StatusChip,
@@ -59,20 +58,26 @@ export default function ProductionList() {
     ),
   ];
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader
-        title="Production"
-        subtitle="Individual granite blocks · Session data"
-        action={
-          <PrimaryButton
-            title="+"
-            onPress={() => router.push("/add-production")}
-          />
-        }
-      />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={
+        <OperationalHeader
+          title="Production"
+          onAdd={() => router.push("/add-production")}
+          addLabel="Add Production"
+        />
+      }
+    >
+      <Text style={s.muted}>Individual granite blocks · Session data</Text>
       <View testID="production-totals" style={s.grid}>
-        <KpiCard dark label="Produced blocks" value={String(totals.blocks)} />
         <KpiCard
+          compact
+          dark
+          label="Produced blocks"
+          value={String(totals.blocks)}
+        />
+        <KpiCard
+          compact
           label="Produced volume"
           value={formatVolume(totals.volumeM3, unit)}
         />

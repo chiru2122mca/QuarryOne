@@ -1,15 +1,12 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { View, Text } from "react-native";
-import { Screen, AppHeader, ListCard, DemoNote, s } from "../components/ui";
+import { Screen, ListCard, DemoNote, s } from "../components/ui";
 import { mockCustomers } from "../data/mockCustomers";
 import { money, lakh } from "../data/overview";
 export default function Customers() {
   return (
-    <Screen>
-      <AppHeader
-        title="Customers"
-        subtitle="04 customers · Demo accounts"
-        back
-      />
+    <Screen header={<OperationalHeader title="Customers" back />}>
+      <Text style={s.muted}>04 customers · Demo accounts</Text>
       <ListCard>
         <Text style={s.muted}>Total outstanding</Text>
         <Text style={s.title}>

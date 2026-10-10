@@ -1,9 +1,9 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { useState } from "react";
 import { View, Text, Modal } from "react-native";
 import { router } from "expo-router";
 import {
   Screen,
-  AppHeader,
   FormField,
   SelectField,
   PrimaryButton,
@@ -56,12 +56,25 @@ export default function EntryForm({
     );
   }
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader
-        title={config.title}
-        subtitle="Keep your day's operations on track."
-        back
-      />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={
+        <OperationalHeader
+          title={config.title}
+          back
+          fallback={
+            kind === "sale"
+              ? "/sales"
+              : kind === "dispatch"
+                ? "/dispatch"
+                : kind === "expense"
+                  ? "/expenses"
+                  : "/production"
+          }
+        />
+      }
+    >
+      <Text style={s.muted}>{"Keep your day's operations on track."}</Text>
       <View style={[s.card, { gap: 14, padding: 16 }]}>
         {config.fields.map((f) => (
           <View key={f.key}>

@@ -1,8 +1,8 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { useState } from "react";
 import { Modal, Text, View } from "react-native";
 import { router } from "expo-router";
 import {
-  AppHeader,
   DemoNote,
   FormField,
   PrimaryButton,
@@ -74,12 +74,13 @@ export default function AddBlockProduction() {
     }
   }
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader
-        title="Add Production"
-        subtitle="Measure and record one granite block."
-        back
-      />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={
+        <OperationalHeader title="Add Production" back fallback="/production" />
+      }
+    >
+      <Text style={s.muted}>Measure and record one granite block.</Text>
       <View style={[s.card, { padding: 16, gap: 14 }]}>
         <FormField
           label="Production Date (YYYY-MM-DD)"

@@ -1,7 +1,7 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { Text, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import {
-  AppHeader,
   DemoNote,
   ListCard,
   PrimaryButton,
@@ -20,8 +20,15 @@ export default function BlockDetails() {
   const block = findInventoryBlock(inventory, id);
   if (!block)
     return (
-      <Screen>
-        <AppHeader title="Block Details" back />
+      <Screen
+        header={
+          <OperationalHeader
+            title="Block Details"
+            back
+            fallback="/more/stock"
+          />
+        }
+      >
         <ListCard>
           <Text style={s.heading}>Block not found</Text>
           <Text style={s.muted}>
@@ -55,8 +62,13 @@ export default function BlockDetails() {
     ["Remarks", block.remarks || "No remarks"],
   ];
   return (
-    <Screen contentStyle={{ gap: 12 }}>
-      <AppHeader title="Block Details" subtitle={block.blockNumber} back />
+    <Screen
+      contentStyle={{ gap: 12 }}
+      header={
+        <OperationalHeader title="Block Details" back fallback="/more/stock" />
+      }
+    >
+      <Text style={s.muted}>{block.blockNumber}</Text>
       <ListCard>
         <Text style={s.label}>Current Block Status</Text>
         <StatusChip status={block.status} />

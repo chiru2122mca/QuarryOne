@@ -1,0 +1,279 @@
+{
+  "results": [
+    {
+      "width": 360,
+      "route": "production",
+      "title": "Production",
+      "scroll": 4703,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "add-production",
+      "title": "Add Production",
+      "scroll": 740,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "more/stock",
+      "title": "Block Inventory",
+      "scroll": 4117,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "more/block/block-2026-0001",
+      "title": "Block Details",
+      "scroll": 484,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "sales",
+      "title": "Sales",
+      "scroll": 314,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "new-sale",
+      "title": "New Sale",
+      "scroll": 277,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "dispatch",
+      "title": "Dispatch",
+      "scroll": 428,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "new-dispatch",
+      "title": "New Dispatch",
+      "scroll": 224,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "expenses",
+      "title": "Expenses",
+      "scroll": 74,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "add-expense",
+      "title": "Add Expense",
+      "scroll": 258,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "customers",
+      "title": "Customers",
+      "scroll": 122,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "reports",
+      "title": "Reports",
+      "scroll": 0,
+      "passed": true
+    },
+    {
+      "width": 360,
+      "route": "more",
+      "title": "More",
+      "scroll": 98,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "production",
+      "title": "Production",
+      "scroll": 4703,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "add-production",
+      "title": "Add Production",
+      "scroll": 740,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "more/stock",
+      "title": "Block Inventory",
+      "scroll": 4096,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "more/block/block-2026-0001",
+      "title": "Block Details",
+      "scroll": 463,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "sales",
+      "title": "Sales",
+      "scroll": 304,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "new-sale",
+      "title": "New Sale",
+      "scroll": 277,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "dispatch",
+      "title": "Dispatch",
+      "scroll": 428,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "new-dispatch",
+      "title": "New Dispatch",
+      "scroll": 224,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "expenses",
+      "title": "Expenses",
+      "scroll": 64,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "add-expense",
+      "title": "Add Expense",
+      "scroll": 237,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "customers",
+      "title": "Customers",
+      "scroll": 122,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "reports",
+      "title": "Reports",
+      "scroll": 0,
+      "passed": true
+    },
+    {
+      "width": 390,
+      "route": "more",
+      "title": "More",
+      "scroll": 98,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "production",
+      "title": "Production",
+      "scroll": 4672,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "add-production",
+      "title": "Add Production",
+      "scroll": 740,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "more/stock",
+      "title": "Block Inventory",
+      "scroll": 4096,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "more/block/block-2026-0001",
+      "title": "Block Details",
+      "scroll": 463,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "sales",
+      "title": "Sales",
+      "scroll": 304,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "new-sale",
+      "title": "New Sale",
+      "scroll": 277,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "dispatch",
+      "title": "Dispatch",
+      "scroll": 428,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "new-dispatch",
+      "title": "New Dispatch",
+      "scroll": 224,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "expenses",
+      "title": "Expenses",
+      "scroll": 64,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "add-expense",
+      "title": "Add Expense",
+      "scroll": 237,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "customers",
+      "title": "Customers",
+      "scroll": 122,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "reports",
+      "title": "Reports",
+      "scroll": 0,
+      "passed": true
+    },
+    {
+      "width": 412,
+      "route": "more",
+      "title": "More",
+      "scroll": 98,
+      "passed": true
+    }
+  ],
+  "pageErrors": [],
+  "physicalAndroid": "pending manual Expo Go verification"
+}

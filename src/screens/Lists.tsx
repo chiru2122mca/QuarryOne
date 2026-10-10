@@ -1,14 +1,13 @@
+import { OperationalHeader } from "../components/OperationalHeader";
 import { useState } from "react";
 import { View, Text } from "react-native";
 import { router } from "expo-router";
 import {
   Screen,
-  AppHeader,
   KpiCard,
   ListCard,
   StatusChip,
   SelectField,
-  PrimaryButton,
   EmptyState,
   DemoNote,
   s,
@@ -41,15 +40,20 @@ export default function Lists({
     (e) => filter === "All" || e.category === filter,
   );
   return (
-    <Screen>
-      <AppHeader
-        title={title}
-        subtitle="September 2026 · Demo records"
-        back={kind === "expenses"}
-        action={<PrimaryButton title="+" onPress={() => router.push(route)} />}
-      />
+    <Screen
+      header={
+        <OperationalHeader
+          title={title}
+          back={kind === "expenses"}
+          onAdd={() => router.push(route)}
+          addLabel={"Add " + title}
+        />
+      }
+    >
+      <Text style={s.muted}>September 2026 · Demo records</Text>
       <View style={s.grid}>
         <KpiCard
+          compact
           dark
           label={
             kind === "sales"
@@ -71,6 +75,7 @@ export default function Lists({
           }
         />
         <KpiCard
+          compact
           label={
             kind === "production"
               ? "Active pits"
