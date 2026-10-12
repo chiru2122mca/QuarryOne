@@ -1,5 +1,13 @@
 -- REVIEW DRAFT ONLY. Fail-closed read policies; no client table mutation grants.
 BEGIN;
+-- Dedicated table/function owner: not a login, superuser, or global RLS-bypass role.
+-- Ownership bypass is restricted to these tables; clients cannot inherit/SET ROLE to it.
+CREATE ROLE quarryone_executor NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
+GRANT quarryone_executor TO CURRENT_USER;
+GRANT USAGE,CREATE ON SCHEMA public,quarry_private TO quarryone_executor;
+GRANT USAGE ON SCHEMA auth TO quarryone_executor;
+GRANT SELECT(id,email_confirmed_at,phone_confirmed_at,is_anonymous) ON auth.users TO quarryone_executor;
+GRANT EXECUTE ON FUNCTION auth.uid() TO quarryone_executor;
 CREATE FUNCTION quarry_private.is_member(p_org uuid) RETURNS boolean
 LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
   SELECT EXISTS (SELECT 1 FROM public.organization_memberships m
@@ -35,8 +43,8 @@ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = '' AS $$
       AND m.role IN ('OWNER','ADMIN','QUARRY_MANAGER','SALES_ACCOUNTANT'))
 $$;
 -- Functions inspect authoritative membership rows, avoiding recursive membership RLS.
--- Their migration owner must be trusted and able to bypass RLS; never a client role.
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated;
+-- Owned by the non-login table owner, never by a client or superuser role.
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA public, quarry_private TO authenticated;
 GRANT EXECUTE ON FUNCTION quarry_private.is_member(uuid), quarry_private.is_admin(uuid),
   quarry_private.can_access_site(uuid,uuid), quarry_private.can_view_profile(uuid),
@@ -67,6 +75,20 @@ BEGIN
   FOREACH t IN ARRAY ARRAY['profiles','organizations','organization_settings','quarry_sites','quarry_pits','stockyards',
     'organization_memberships','site_memberships','materials','granite_grades','granite_blocks','production_entries','customers'] LOOP
     EXECUTE format('GRANT SELECT ON public.%I TO authenticated', t);
+  END LOOP;
+END $$;
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN SELECT c.relname,n.nspname FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace
+    WHERE (n.nspname='public' AND c.relname IN ('profiles','organizations','organization_settings','quarry_sites','quarry_pits','stockyards',
+      'organization_memberships','site_memberships','materials','granite_grades','granite_blocks','production_entries','customers'))
+      OR (n.nspname='quarry_private' AND c.relkind='r') LOOP
+    EXECUTE format('ALTER TABLE %I.%I OWNER TO quarryone_executor',r.nspname,r.relname);
+  END LOOP;
+  FOR r IN SELECT p.oid::regprocedure AS signature FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='quarry_private' LOOP
+    EXECUTE format('ALTER FUNCTION %s OWNER TO quarryone_executor',r.signature);
   END LOOP;
 END $$;
 -- No anon policies; no INSERT/UPDATE/DELETE policies or grants, including for admins.

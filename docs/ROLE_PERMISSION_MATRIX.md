@@ -1,4 +1,4 @@
-# QuarryOne V0.4.1 — Authentication and permissions
+# QuarryOne V0.4.1.1 — Authentication and permissions
 
 Proposed Supabase Auth integration only. Current static Login and app navigation remain unchanged. No Auth project/client, invitations, live memberships or policies are configured.
 
@@ -30,7 +30,7 @@ Future rows are intended capabilities, not implemented grants or modules. This d
 - Authenticated SELECT policies require active membership from database rows. Site tables additionally require ALL_SITES or an active matching site assignment. Suspended organization membership disables all tenant/site reads regardless of lingering grants.
 - `multi_site_enabled` is never read by authorization predicates. Single-site mode does not authorize an unassigned user or deny authorized archived history.
 - Composite FKs enforce tenant/site ownership of references even inside trusted operations.
-- Private SECURITY DEFINER predicate helpers prevent recursive membership policies. Empty search_path and fully qualified relations reduce object-shadowing risk. The trusted migration owner must have RLS-bypass capability and must never be a client role.
+- Private SECURITY DEFINER predicate helpers prevent recursive membership policies. Empty search_path and fully qualified relations reduce object-shadowing risk. All QuarryOne helpers/controlled functions and tables are explicitly owned by quarryone_executor, a NOLOGIN/NOSUPERUSER/NOBYPASSRLS role. Its ownership bypass is limited to these tables, not every database table. Trusted migration operators alone may assume it; authenticated/anon cannot inherit it or SET ROLE to it. Existing RLS remains enabled with no client write grants. Do not add FORCE RLS without redesigning nonrecursive owner helpers.
 - Private tables are not in exposed API schemas and have no client table grants. Predicate functions are executable solely to evaluate policies; audit, counters and admin helpers remain non-client-executable.
 - No write policies or client DML grants exist. Later operational RPCs must independently check active role, tenant/site, organization lifecycle, record state, idempotency and audit before writing.
 - Avoid owner-bypassing views. Any future reporting view must use `security_invoker` and tested underlying RLS; security-definer reporting endpoints need explicit capability checks.
@@ -41,15 +41,19 @@ Profiles are readable by self, or an active Owner/Admin sharing an organization 
 
 The future gateway verifies a Supabase access token. PostgreSQL receives the trusted signed identity through `auth.uid()`. `bootstrap_organization` checks a verified email or phone and rejects anonymous identities; a caller cannot supply the user ID/role. A request-key lock and transaction create the organization, default settings, fixed OWNER/ALL_SITES membership and audit atomically. Deferred ownership checks ensure no committed organization is ownerless. A retried same key does not create a second tenant; payload mismatch fails.
 
-The local test stub lets a test superuser synthesize identities via a session setting. That is solely a test harness; clients must never be allowed arbitrary database sessions or unsigned claim injection. Supabase's gateway/real JWT behavior remains untested until a separately approved staging rollout.
+The local test stub synthesizes identities through a session setting. Constraint fixtures use a test superuser; V0.4.1.1 also uses a separate non-superuser authenticator that may assume only anon/authenticated. This tests real PostgreSQL grants/RLS and inability to assume the executor role without relying on a superuser session's SET ROLE privileges. These identities are solely a test harness; clients must never receive arbitrary database sessions or unsigned claim injection. Supabase's gateway/real JWT behavior remains untested until a separately approved staging rollout.
 
 ## Sensitive changes
 
-Existing membership changes use `set_organization_member`; only Owner may alter Owner/Admin rows, and the last active Owner cannot be deactivated/demoted. New memberships cannot be created through this RPC: future verified invitation acceptance is the sole path after bootstrap. `set_site_member` validates same-org site and active parent membership; scope is never inferred from UI mode. Every controlled write locks the organization first, serializing concurrent ownership/site-mode changes and auditing the verified actor.
+Existing membership changes use `set_organization_member`; only Owner may alter Owner/Admin rows, and the last active Owner cannot be deactivated/demoted. New memberships cannot be created through this RPC: future verified invitation acceptance is the sole path after bootstrap. `set_site_member` validates same-org site and active parent membership when granting; revocation also works after the parent is suspended. Scope is never inferred from UI mode. Every controlled write locks the organization first and rechecks current membership after waiting, serializing ownership/site-mode changes. Tenant-row triggers also serialize underlying integrity writes, including yard reassignment against block creation. Sensitive changes record before/after state, advance revision and invalidate a stale reviewed snapshot. Audit history cannot be rewritten/deleted.
 
 Invitation acceptance will validate hashed single-use token, expiry, recipient identity, inviter's continuing permission and immutable org/role/site payload, then create membership/grants atomically. Token replay, changing the invite role/site, and Admin inviting Owner/Admin must fail. Owner transfer adds a verified second owner before removing the original. Server-only administrative keys are never embedded in mobile code; using one bypasses RLS and therefore still requires gateway authorization.
 
 Lifecycle/mode RPCs validate Owner/Admin membership and expected revision. Successful transactions include audit entries; failed operations roll back data and audit. ACTIVE→DRAFT and DRAFT→ACTIVE are forbidden. Direct writes remain denied even with fabricated `role=OWNER` metadata.
+
+Execution is an explicit allowlist: authenticated can execute six controlled public RPCs and five private read-policy predicates; no private audit, authorization-control, numbering or trigger helper is client-executable. Function privileges are revoked before regranting that list. Client CREATE in public/private schemas is denied, and all SECURITY DEFINER functions use an empty search_path with qualified tables. The restricted executor owns the QuarryOne tables to avoid recursive helper policies without granting global BYPASSRLS. Audit/counter/issued-number tables remain private and inaccessible to clients. Deployment must verify executor ownership, role memberships, minimal Auth column access and default privilege drift on the actual Supabase target.
+
+The drafts also explicitly remove service_role defaults on QuarryOne tables and functions. It is not an onboarding authorization shortcut; controlled calls use the verified user's authenticated context. Future server jobs need separately reviewed least-privilege grants and their own authorization/audit contract. Actual Supabase role inheritance and service credential behavior must be inspected in staging; global privileged administrators remain outside the client RLS threat model.
 
 ## Review questions
 

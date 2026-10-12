@@ -1,4 +1,4 @@
-# QuarryOne V0.4.1 — PostgreSQL foundation
+# QuarryOne V0.4.1.1 — PostgreSQL foundation
 
 Review draft, PostgreSQL 17-compatible. Files are in `database/drafts/`, outside automatic Supabase migration discovery. No live project, schema or policy has been deployed. The existing application remains backed by the shared in-memory store.
 
@@ -22,23 +22,23 @@ All 13 requested public tables have primary keys, audit timestamps, enabled RLS 
 | production_entries       | block_id PK; org/site; fixed PRODUCTION origin; recorded_by; source_request_id                                                                         | 1:1 production capture; composite block FK; org/request UUID unique; no duplicate dimensions/volume/date            |
 | customers                | UUID id; org, uppercase customer_code, name, optional phone/address/GSTIN, is_active                                                                   | Unique org/code; names may repeat; tenant-level customer catalog, restricted-role read access                       |
 
-Three internal `quarry_private` tables support bootstrap idempotency, organization/year block number counters, and append-only controlled-operation audit events. Clients have no table access to them. Bootstrap and audit rows are append-only and have created_at; mutable counters have updated_at. Audit events record actor, action and minimal change details without tokens or credentials.
+Four internal `quarry_private` tables support bootstrap idempotency, organization/year block number counters, retained issued-number/UUID reservations and append-only controlled-operation audit events. Clients have no table access to them. Bootstrap and audit rows are append-only and have created_at; mutable counters have updated_at. Audit events record actor, action and minimal change details without tokens or credentials.
 
 ## Existing domain mapping
 
 Reviewed `src/domain/blocks/types.ts`, `block.ts`, `volume.ts`, `operationsReducer.ts`, fixtures and the shared store. No source was changed.
 
-| Existing field                      | Proposed database mapping                                                                             |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| id / blockNumber                    | UUID id / organization-unique block_number; mock opaque IDs require an explicit future import mapping |
-| productionDate                      | Calendar `date`; required and matched to four-digit block-number year                                 |
-| quarryId / pitId                    | site_id / pit_id, plus organization_id as tenant context                                              |
-| material / grade                    | Catalog IDs resolved back to current supported names and A/B/C                                        |
-| dimensions.length/width/height/unit | Untyped-precision `numeric` columns and FT/M; no unit conversion overwrites entries                   |
-| volumeM3                            | Generated, unrounded numeric volume_m3; cannot accept caller-supplied volume                          |
-| stockyardLocation                   | stockyard_id plus entered location text (e.g. bay/row); do not infer master data by raw string alone  |
-| supervisor                          | supervisor_name snapshot; optional same-org supervisor_user_id for future staff linkage               |
-| status / remarks                    | Same four statuses and remarks text                                                                   |
+| Existing field                      | Proposed database mapping                                                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| id / blockNumber                    | UUID id / organization-unique block_number; mock opaque IDs require an explicit future import mapping                                |
+| productionDate                      | Calendar `date`; required for PRODUCTION, nullable for OPENING_STOCK; generated numbering_year uses the appropriate origin reference |
+| quarryId / pitId                    | site_id / pit_id, plus organization_id as tenant context                                                                             |
+| material / grade                    | Catalog IDs resolved back to current supported names and A/B/C                                                                       |
+| dimensions.length/width/height/unit | Untyped-precision `numeric` columns and FT/M; no unit conversion overwrites entries                                                  |
+| volumeM3                            | Generated, unrounded numeric volume_m3; cannot accept caller-supplied volume                                                         |
+| stockyardLocation                   | stockyard_id plus entered location text (e.g. bay/row); do not infer master data by raw string alone                                 |
+| supervisor                          | supervisor_name snapshot; optional same-org supervisor_user_id for future staff linkage                                              |
+| status / remarks                    | Same four statuses and remarks text                                                                                                  |
 
 Database decimals use exact numeric arithmetic without a scale typemod. The conversion constant is the existing `0.028316846592` m³/CFT. FT volume is length×width×height×constant; M volume is the dimension product. Display CFT is volume_m3/constant. Round only for presentation, normally CFT 2 and m³ 3 decimals. Reject zero/negative/NaN/infinite dimensions and unsupported units; examples: 10×5×4 FT → 200 CFT / 5.6633693184 m³, 1.25×0.5×0.25 M → 0.15625 m³.
 
@@ -48,15 +48,19 @@ Preferences resolve site override → organization default. Preferences change d
 
 ## Block identity and provenance
 
-Use `BLK-YYYY-NNNN`, sequence 0001–9999, year matching production_date. UUID identity is globally unique; human block numbers are unique across the entire organization, including all sites and opening stock. No reuse on deletion/archive/reset is proposed. Allocation locks the organization, advances an org/year counter and also considers imported numbers already present; exhaustion fails safely. Future block-save/import operations must invoke allocation and inserts atomically, authorize first, and use an idempotency request ID. Client-executable allocation or operational save functions are deliberately absent.
+Use `BLK-YYYY-NNNNNN`, sequence 000001–999999, unique across an organization for each numbering year and across all its sites. PRODUCTION uses the real production date year. Every OPENING_STOCK record uses its required opening_stock_as_of reference year, even if an older production date is known. The prefix is an identification namespace, not a claim that opening stock was produced that year. UUID identity is globally unique.
 
-The existing mock allocator advances one session sequence across production years. The proposed durable allocator partitions counters by organization/year; this is an explicit future numbering decision for review, with unchanged formatting and uniqueness rules. It does not alter the current mock generator or its reset/identity behavior.
+The mobile mock allocator and four-digit validation remain unchanged. A future database adapter must support six-digit parsing and origin-aware nullable dates; it cannot plug directly into the current GraniteBlock type. Future import needs an explicit source-ID/legacy-label mapping, never an automatic import of demo fixtures. Once real migrations are deployed, preserve applied versions and use a separately reviewed upgrade/data reconciliation migration. These un-deployed drafts are revised in place only.
 
-`origin=PRODUCTION`: exactly one production_entries record, enforced at transaction end; dimensions/date/volume live only on granite_blocks. `origin=OPENING_STOCK`: opening_stock_as_of required, no production_entries row permitted by its fixed-origin FK. Original production date is required for this draft; unknown dates are held for manual review rather than fabricated. Opening imports initially use AVAILABLE/REJECTED only. Future import jobs need source-row idempotency, validation and an audit record, not a fake production event. No import UI/job is implemented.
+`origin=PRODUCTION`: production_date is mandatory and exactly one production_entries record is required at commit. `origin=OPENING_STOCK`: opening_stock_as_of is mandatory; production_date can be null (unknown) or a known date no later than the reference. No production entry can reference opening stock. Dates and origin are immutable under the current guard; later documentary corrections need a separately approved auditable workflow. Inventory includes opening stock; newly produced count/volume must join production_entries or filter origin=PRODUCTION. No fake date or production event is created. Opening imports initially use AVAILABLE/REJECTED only, with source-row idempotency and provenance/audit required in a future import operation.
 
 Inventory totals include all statuses; saleable available count/volume include AVAILABLE only; RESERVED is held; DISPATCHED is historical and excluded from on-hand; REJECTED is traceable and excluded from saleable/usable stock. Currently new records are AVAILABLE or REJECTED and status transitions are blocked by the draft guard. Future controlled reservation/dispatch operations must replace that guard intentionally. Opening stock counts in inventory but not newly produced reporting. Current mock fixtures are all production-origin in the proposed mapping, so existing app totals are unchanged.
 
 ## Future module relationships — no module tables implemented
+
+The issued-number ledger binds each reserved label to a server-generated block UUID, whether or not the block is committed yet. A different import cannot consume that reservation. `reserve_block_number(org,year,block_uuid)` serializes on the organization and reserves the next six-digit label; the future save inserts the matching UUID and consumes it atomically. The internal two-argument allocator is a convenience for abandoned-reservation tests, not a mobile save endpoint. A committed reservation is never recycled; allocation/insert failures roll back together and must not be exposed as an issued label before commit. Gaps are acceptable. Counter rewind/deletion, ledger deletion/rebinding and block deletion are blocked. Capacity 999,999 per organization/year raises SQLSTATE 2200H rather than truncating or wrapping. No direct number/import/production-write API is added.
+
+Generated numeric volume must also remain finite and strictly positive. PostgreSQL arithmetic limits must reject an unrepresentable result rather than commit a zero volume; ordinary fractional measurements remain unrounded. The future JS adapter additionally checks binary-number representability.
 
 | Module       | Relationship and authorization contract to retain                                                                                                                                   |
 | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -70,7 +74,7 @@ Extend every tenant FK, policy, mode-disable guard and history retention test wh
 
 ## Draft migrations and indexes
 
-1. `202610100001_foundation.draft.sql`: 13 tables, 3 private support tables, keys, checks, indexes, timestamps, RLS enabled and client privileges revoked.
+1. `202610100001_foundation.draft.sql`: 13 tables, 4 private support tables, keys, checks, indexes, timestamps, RLS enabled and client privileges revoked.
 2. `202610100002_access.draft.sql`: membership-derived read RLS and private predicate helpers. No anonymous access or direct client writes.
 3. `202610100003_controlled_onboarding.draft.sql`: bootstrap/site/config/lifecycle/existing-member/site-grant prototypes, audit, mode guards, ownership invariants and numbering helper.
 

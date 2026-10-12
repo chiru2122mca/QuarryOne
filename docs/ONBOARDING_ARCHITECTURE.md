@@ -1,4 +1,4 @@
-# QuarryOne V0.4.1 — Configurable onboarding
+# QuarryOne V0.4.1.1 — Configurable onboarding
 
 Status: proposed architecture, local SQL drafts only. No onboarding screen, authentication client or Supabase project is implemented or connected. The approved app, shared mock store and operational behavior remain unchanged.
 
@@ -40,11 +40,36 @@ Proposed UI save contract: save an explicit field whitelist for the current stag
 
 The SQL prototypes include idempotent bootstrap, site creation, mode switching, lifecycle transitions and existing-member/site-grant changes. Stage-field save, profile editing, invitation delivery/acceptance and new-site activation contracts are specified here for later implementation; they are deliberately not exposed as generic JSON-to-row update functions. SQL fixtures simulate trusted stage saves for validation. No app persistence or server integration is added now.
 
-Bootstrap uses a caller-generated request UUID plus the verified `auth.uid()`. The same user/key/business name returns the same organization; mismatched business-name reuse fails. It atomically creates the profile if missing, organization, settings, fixed OWNER/ALL_SITES membership and audit event. There is no caller-supplied owner ID or role. Existing profile display names are retained. Rate limits and abandoned-draft cleanup belong in the later server rollout.
+Bootstrap uses a caller-generated request UUID plus the verified `auth.uid()`. The same user/key/business name/owner display name returns the same organization; mismatched semantic-payload reuse fails. It atomically creates the profile if missing, organization, settings, fixed OWNER/ALL_SITES membership and audit event. There is no caller-supplied owner ID or role. Existing profile display names are retained. Rate limits and abandoned-draft cleanup belong in the later server rollout.
 
-Review and activation each lock the organization, check admin membership and revision, and inspect actual configuration. Activation creates no blocks, customers, balances or fabricated operating history; it marks configured SETUP sites OPERATIONAL. Activation timestamps and audit events are written in the same transaction.
+Review and activation each lock the organization, recheck current admin membership after lock acquisition, check the expected revision and inspect actual configuration. READY_FOR_REVIEW records reviewed_revision. Activation rejects a changed snapshot even when a caller refreshes to the latest revision. Role/site-grant changes remain possible for security, but invalidate that review until DRAFT → READY_FOR_REVIEW is completed again. Additional-site creation and permission changes advance revision. Activation creates no blocks, customers, balances or fabricated operating history; it marks configured SETUP sites OPERATIONAL. Activation timestamps and audit events are written in the same transaction.
 
-## Single-site to multi-site upgrade
+## Future stage-save contract (specified, not implemented)
+
+Proposed request: `save_onboarding_stage(organization_id, stage, expected_revision, request_id, payload)` under a verified user JWT. No owner ID, lifecycle, computed volume, audit actor or SQL/table names are accepted. Stages 1–4 are draft-save operations; stage 5 calls the existing review/activation prototypes instead. Unknown payload keys fail rather than being silently discarded.
+
+| Stage | Explicit payload whitelist                                                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1     | business_name, legal_name, contact_phone, state_name, optional gstin; owner profile edit is a separate self-only contract                                                      |
+| 2     | same-tenant existing site IDs or new request-local identifiers, site code/name/location, pit name/kind; primary-site changes and mode changes use dedicated guarded operations |
+| 3     | supported material selections, A/B/C descriptions, yard name/dedicated pit, organization/site dimension and display preferences/decimals/timezone                              |
+| 4     | draft invitation intents (recipient, role, allowed sites), not effective memberships; existing role/site permissions continue through the controlled operations                |
+
+Server order: resolve auth.uid → authorize Owner/Admin → lock organization → recheck membership → look up caller/org/request idempotency receipt → validate the stored payload fingerprint and return an existing committed receipt → for a new command, check DRAFT and expected revision → validate supplied fields/references → apply all changes → increment revision exactly once → audit before/after identifiers and supplied fields → persist the receipt/result → commit. Receipt lookup precedes revision validation so successful-save retries do not fail against their own older revision. New request-local entity identifiers are resolved in the same transaction, never trusted as another tenant's UUID. Missing future-stage fields are allowed while required supplied values and numeric/unit fields remain validated. Partial success is forbidden. Changed payload with the same key fails; stale new commands return conflict. A duplicate receipt does not repeat writes or audit, and a now-revoked administrator cannot replay it.
+
+The future receipt, draft-invitation and outbox tables are not present yet and require their own reviewed migration/retention rules. The contract is not an executable generic JSON update escape hatch. Master-data identity/site/tenant columns and all block dates/numbering remain protected by the existing constraints/guards. Decide deletion/archive/correction semantics explicitly before exposing stage edits against referenced records.
+
+## Future invitation-acceptance contract (specified, not implemented)
+
+Proposed request: `accept_organization_invitation(token, request_id)` with a verified non-anonymous JWT. Tenant, recipient ID, role and site grants come only from the persisted invitation and signed identity, never from caller fields or user_metadata. A future trusted service stores a cryptographically random token hash, normalized verified recipient/channel, immutable organization/role/scope/site IDs, issuer, expiry, revoked/accepted state and acceptance receipt. Raw tokens are never returned in directory queries or audits.
+
+Transaction order: resolve candidate token without disclosing a tenant directory → lock organization, then invitation (consistent lock order) → recheck invite state/expiry/verified recipient and current inviter permission → reject Owner/Admin invites from non-Owners → check all site references and mode configuration → create/update only the recipient's own profile → create one membership and approved same-org grants → bump revision/invalidate review snapshot → mark accepted with recipient and request receipt → audit → commit. Concurrent redemption has one winner; a same-recipient/same-request retry returns that committed acceptance, while changed payload or another identity fails. Existing membership must not be silently escalated/reactivated by an invitation: reject and require an explicit Owner/Admin membership action. Suspended inviters, revoked/expired tokens and site-scope drift fail without partial membership. The later implementation must preserve last-owner rules and canonical role/scope constraints.
+
+For an already accepted invitation, match the verified recipient and request receipt before treating the token as expired/used. Return only that committed acceptance receipt if the recipient's membership is still active; do not regrant roles/sites or reactivate a suspended user. A different request/identity receives an already-used denial. Refetch current membership for access decisions instead of using role data from the historical receipt. These replay semantics are proposed for review alongside token expiry/retention policy.
+
+Delivery happens separately after commit through a future outbox with retry deduplication. Phone/email channel choice, normalization, expiry duration, draft activation policy and retention are review decisions. No invitations are sent and no acceptance/delivery endpoint is implemented here.
+
+## Single-site to multi-site upgrade workflow
 
 1. Owner/Admin opens Settings → Quarry Management and reviews the implications.
 2. The controlled operation checks authoritative membership and an expected revision, locks the organization, enables multi-site and audits the change.
@@ -81,4 +106,4 @@ Invitation design: a later trusted service stores an expiring, single-use hashed
 - Cross-tenant IDs cannot be linked by foreign keys; non-admins cannot change memberships or lifecycle.
 - The current app stays unchanged until a separately reviewed integration milestone.
 
-Open decisions for architectural review: one pit per yard versus shared yards (shared proposed); acceptable block-number annual capacity; future verified phone invitation UX; whether activation also needs a second approver; cleanup/retention rules for abandoned drafts.
+V0.4.1.1 resolves numbering as BLK-YYYY-NNNNNN with 999,999 per organization/reference-year and permits unknown original dates for opening stock only. Open decisions remain shared/dedicated yard policy, future verified phone invitation UX, independent activation approval, documentary correction of previously unknown dates, future-reference-date acceptance and draft/invitation retention.

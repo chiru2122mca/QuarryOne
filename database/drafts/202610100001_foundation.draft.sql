@@ -2,7 +2,8 @@
 -- PostgreSQL 17+. auth.users is supplied by Supabase (stubbed only in local tests).
 BEGIN;
 CREATE SCHEMA quarry_private;
-REVOKE ALL ON SCHEMA quarry_private FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
+REVOKE CREATE ON SCHEMA public FROM PUBLIC, anon, authenticated;
 
 CREATE TABLE public.profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE RESTRICT,
@@ -36,6 +37,7 @@ CREATE TABLE public.organization_settings (
   timezone_name text NOT NULL DEFAULT 'Asia/Kolkata' CHECK (btrim(timezone_name) <> ''),
   onboarding_stage smallint NOT NULL DEFAULT 1 CHECK (onboarding_stage BETWEEN 1 AND 5),
   revision bigint NOT NULL DEFAULT 0 CHECK (revision >= 0),
+  reviewed_revision bigint CHECK (reviewed_revision >= 0),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -127,6 +129,21 @@ CREATE TABLE public.granite_grades (
   updated_at timestamptz NOT NULL DEFAULT now(),
   UNIQUE (organization_id, id), UNIQUE (organization_id, code)
 );
+-- Reservations and tombstones survive inventory changes; not exposed through the API.
+CREATE TABLE quarry_private.block_number_ledger (
+  organization_id uuid NOT NULL REFERENCES public.organizations(id),
+  block_number text NOT NULL,
+  numbering_year integer NOT NULL CHECK (numbering_year BETWEEN 1000 AND 9999),
+  sequence integer NOT NULL CHECK (sequence BETWEEN 1 AND 999999),
+  block_id uuid NOT NULL UNIQUE,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  bound_at timestamptz,
+  PRIMARY KEY (organization_id, block_number),
+  UNIQUE (organization_id, numbering_year, sequence),
+  UNIQUE (organization_id, block_number, block_id),
+  CHECK (block_number = 'BLK-' || numbering_year::text || '-' || lpad(sequence::text,6,'0')),
+  CHECK (block_number ~ '^BLK-[1-9][0-9]{3}-[0-9]{6}$')
+);
 CREATE TABLE public.granite_blocks (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id uuid NOT NULL,
@@ -135,18 +152,20 @@ CREATE TABLE public.granite_blocks (
   material_id uuid NOT NULL,
   grade_id uuid NOT NULL,
   stockyard_id uuid NOT NULL,
-  block_number text NOT NULL CHECK (block_number ~ '^BLK-[1-9][0-9]{3}-[0-9]{4}$' AND right(block_number,4) <> '0000'),
-  production_date date NOT NULL CHECK (extract(year FROM production_date) BETWEEN 1000 AND 9999),
+  block_number text NOT NULL CHECK (block_number ~ '^BLK-[1-9][0-9]{3}-[0-9]{6}$' AND right(block_number,6) <> '000000'),
+  production_date date CHECK (isfinite(production_date) AND extract(year FROM production_date) BETWEEN 1000 AND 9999),
   length numeric NOT NULL CHECK (length > 0 AND length::text NOT IN ('NaN','Infinity','-Infinity')),
   width numeric NOT NULL CHECK (width > 0 AND width::text NOT IN ('NaN','Infinity','-Infinity')),
   height numeric NOT NULL CHECK (height > 0 AND height::text NOT IN ('NaN','Infinity','-Infinity')),
   dimension_unit text NOT NULL CHECK (dimension_unit IN ('FT','M')),
   volume_m3 numeric GENERATED ALWAYS AS
     (length * width * height * CASE dimension_unit WHEN 'FT' THEN 0.028316846592::numeric ELSE 1::numeric END) STORED,
+  CONSTRAINT representable_positive_volume CHECK (volume_m3 > 0 AND volume_m3::text NOT IN ('NaN','Infinity','-Infinity')),
   stockyard_location text NOT NULL CHECK (btrim(stockyard_location) <> ''),
   status text NOT NULL DEFAULT 'AVAILABLE' CHECK (status IN ('AVAILABLE','RESERVED','DISPATCHED','REJECTED')),
   origin text NOT NULL DEFAULT 'PRODUCTION' CHECK (origin IN ('PRODUCTION','OPENING_STOCK')),
-  opening_stock_as_of date,
+  opening_stock_as_of date CHECK (isfinite(opening_stock_as_of) AND extract(year FROM opening_stock_as_of) BETWEEN 1000 AND 9999),
+  numbering_year integer GENERATED ALWAYS AS (extract(year FROM CASE WHEN origin='PRODUCTION' THEN production_date ELSE opening_stock_as_of END)::integer) STORED,
   supervisor_user_id uuid,
   supervisor_name text NOT NULL CHECK (btrim(supervisor_name) <> ''),
   remarks text NOT NULL DEFAULT '',
@@ -160,10 +179,12 @@ CREATE TABLE public.granite_blocks (
   FOREIGN KEY (organization_id, grade_id) REFERENCES public.granite_grades(organization_id, id),
   FOREIGN KEY (organization_id, supervisor_user_id) REFERENCES public.organization_memberships(organization_id, user_id),
   FOREIGN KEY (organization_id, created_by) REFERENCES public.organization_memberships(organization_id, user_id),
+  FOREIGN KEY (organization_id, block_number, id) REFERENCES quarry_private.block_number_ledger(organization_id, block_number, block_id),
   UNIQUE (organization_id, id),
   UNIQUE (organization_id, site_id, id, origin),
   UNIQUE (organization_id, block_number),
-  CHECK (substring(block_number FROM 5 FOR 4)::integer = extract(year FROM production_date)),
+  CHECK (substring(block_number FROM 5 FOR 4)::integer = numbering_year),
+  CHECK (origin <> 'PRODUCTION' OR production_date IS NOT NULL),
   CHECK ((origin = 'OPENING_STOCK') = (opening_stock_as_of IS NOT NULL)),
   CHECK (opening_stock_as_of IS NULL OR opening_stock_as_of >= production_date)
 );
@@ -200,15 +221,16 @@ CREATE TABLE quarry_private.bootstrap_requests (
   request_id uuid NOT NULL,
   organization_id uuid NOT NULL REFERENCES public.organizations(id),
   business_name text NOT NULL,
+  owner_display_name text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (user_id, request_id)
 );
 CREATE TABLE quarry_private.block_number_counters (
   organization_id uuid NOT NULL REFERENCES public.organizations(id),
-  production_year integer NOT NULL CHECK (production_year BETWEEN 1000 AND 9999),
-  last_sequence integer NOT NULL CHECK (last_sequence BETWEEN 1 AND 9999),
+  numbering_year integer NOT NULL CHECK (numbering_year BETWEEN 1000 AND 9999),
+  last_sequence integer NOT NULL CHECK (last_sequence BETWEEN 1 AND 999999),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (organization_id, production_year)
+  PRIMARY KEY (organization_id, numbering_year)
 );
 CREATE TABLE quarry_private.audit_events (
   id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -220,7 +242,7 @@ CREATE TABLE quarry_private.audit_events (
 );
 CREATE INDEX memberships_by_user ON public.organization_memberships(user_id, organization_id) WHERE is_active;
 CREATE INDEX site_memberships_by_user ON public.site_memberships(user_id, organization_id, site_id) WHERE is_active;
-CREATE INDEX blocks_newest ON public.granite_blocks(organization_id, site_id, production_date DESC, block_number DESC, id);
+CREATE INDEX blocks_newest ON public.granite_blocks(organization_id, site_id, (coalesce(production_date, opening_stock_as_of)) DESC, block_number DESC, id);
 CREATE INDEX blocks_available ON public.granite_blocks(organization_id, site_id, status) INCLUDE (volume_m3) WHERE status = 'AVAILABLE';
 CREATE INDEX blocks_filter ON public.granite_blocks(organization_id, site_id, material_id, grade_id, pit_id, status);
 CREATE INDEX production_by_site ON public.production_entries(organization_id, site_id, created_at DESC);
@@ -235,10 +257,10 @@ BEGIN
     'organization_memberships','site_memberships','materials','granite_grades','granite_blocks','production_entries','customers'] LOOP
     EXECUTE format('CREATE TRIGGER touch_updated_at BEFORE UPDATE ON public.%I FOR EACH ROW EXECUTE FUNCTION quarry_private.touch_updated_at()', t);
     EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
-    EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC, anon, authenticated', t);
+    EXECUTE format('REVOKE ALL ON TABLE public.%I FROM PUBLIC, anon, authenticated, service_role', t);
   END LOOP;
 END $$;
-REVOKE ALL ON ALL TABLES IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON ALL SEQUENCES IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON ALL TABLES IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
 COMMIT;

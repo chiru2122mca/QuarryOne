@@ -2,6 +2,8 @@
 CREATE ROLE anon NOLOGIN;
 CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE service_role NOLOGIN BYPASSRLS;
+CREATE ROLE quarry_test_authenticator LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+GRANT anon,authenticated TO quarry_test_authenticator;
 CREATE SCHEMA auth;
 CREATE TABLE auth.users (
   id uuid PRIMARY KEY,
@@ -41,3 +43,6 @@ END $$;
 GRANT USAGE ON SCHEMA quarry_test TO anon, authenticated;
 GRANT INSERT,SELECT ON quarry_test.results TO anon,authenticated;
 GRANT EXECUTE ON FUNCTION quarry_test.ok(boolean,text),quarry_test.expect_error(text,text,text) TO anon,authenticated;
+-- Simulate permissive provider defaults; migrations must revoke, not assume safe defaults.
+ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO anon,authenticated,service_role;
+ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO anon,authenticated,service_role;

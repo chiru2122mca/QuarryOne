@@ -5,7 +5,10 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
   IF NOT quarry_private.is_admin(p_org) THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
   PERFORM 1 FROM public.organizations WHERE id=p_org FOR UPDATE;
-  IF NOT FOUND OR NOT quarry_private.is_admin(p_org) THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
+  IF NOT FOUND THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
+  -- Fresh READ COMMITTED membership lookup after waiting for the organization lock.
+  IF NOT EXISTS (SELECT 1 FROM public.organization_memberships WHERE organization_id=p_org AND user_id=auth.uid()
+    AND is_active AND role IN ('OWNER','ADMIN')) THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
 END $$;
 CREATE FUNCTION quarry_private.audit(p_org uuid, p_action text, p_details jsonb DEFAULT '{}') RETURNS void
 LANGUAGE plpgsql SET search_path = '' AS $$
@@ -17,6 +20,68 @@ CREATE FUNCTION quarry_private.settings_revision() RETURNS trigger LANGUAGE plpg
 BEGIN NEW.revision := OLD.revision + 1; RETURN NEW; END $$;
 CREATE TRIGGER settings_revision BEFORE UPDATE ON public.organization_settings
 FOR EACH ROW EXECUTE FUNCTION quarry_private.settings_revision();
+
+CREATE FUNCTION quarry_private.lock_tenant_identity() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
+DECLARE v_org uuid;
+BEGIN
+  IF TG_OP='DELETE' THEN v_org:=OLD.organization_id; ELSE v_org:=NEW.organization_id; END IF;
+  PERFORM 1 FROM public.organizations WHERE id=v_org FOR UPDATE;
+  IF TG_OP='UPDATE' THEN
+    IF NEW.organization_id IS DISTINCT FROM OLD.organization_id OR
+      (to_jsonb(NEW)->'id') IS DISTINCT FROM (to_jsonb(OLD)->'id') OR
+      (to_jsonb(NEW)->'site_id') IS DISTINCT FROM (to_jsonb(OLD)->'site_id') OR
+      (to_jsonb(NEW)->'user_id') IS DISTINCT FROM (to_jsonb(OLD)->'user_id') THEN
+      RAISE EXCEPTION 'Tenant, site and row identity are immutable' USING ERRCODE='23514';
+    END IF;
+  END IF;
+  IF TG_OP='DELETE' THEN RETURN OLD; END IF;
+  RETURN NEW;
+END $$;
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['organization_settings','quarry_sites','quarry_pits','stockyards','organization_memberships',
+    'site_memberships','materials','granite_grades','granite_blocks','production_entries','customers'] LOOP
+    EXECUTE format('CREATE TRIGGER a_lock_tenant BEFORE INSERT OR UPDATE OR DELETE ON public.%I FOR EACH ROW EXECUTE FUNCTION quarry_private.lock_tenant_identity()',t);
+  END LOOP;
+END $$;
+
+CREATE FUNCTION quarry_private.claim_block_number() RETURNS trigger
+LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_bound uuid; v_bound_at timestamptz; v_year integer; v_sequence integer;
+BEGIN
+  PERFORM 1 FROM public.organizations WHERE id=NEW.organization_id FOR UPDATE;
+  IF NEW.block_number !~ '^BLK-[1-9][0-9]{3}-[0-9]{6}$' OR right(NEW.block_number,6)='000000' THEN
+    RAISE EXCEPTION 'Block number must be BLK-YYYY-NNNNNN with positive sequence' USING ERRCODE='23514'; END IF;
+  v_year:=substring(NEW.block_number FROM 5 FOR 4)::integer; v_sequence:=right(NEW.block_number,6)::integer;
+  SELECT block_id,bound_at INTO v_bound,v_bound_at FROM quarry_private.block_number_ledger WHERE organization_id=NEW.organization_id AND block_number=NEW.block_number;
+  IF FOUND THEN
+    IF v_bound_at IS NOT NULL OR v_bound<>NEW.id THEN RAISE EXCEPTION 'Block number issued or reserved for another identity; cannot reuse' USING ERRCODE='23505'; END IF;
+    UPDATE quarry_private.block_number_ledger SET bound_at=now()
+      WHERE organization_id=NEW.organization_id AND block_number=NEW.block_number;
+  ELSE
+    INSERT INTO quarry_private.block_number_ledger(organization_id,block_number,numbering_year,sequence,block_id,bound_at)
+      VALUES(NEW.organization_id,NEW.block_number,v_year,v_sequence,NEW.id,now());
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER block_number_claim BEFORE INSERT ON public.granite_blocks FOR EACH ROW EXECUTE FUNCTION quarry_private.claim_block_number();
+CREATE FUNCTION quarry_private.guard_number_retention() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
+BEGIN
+  IF TG_OP='DELETE' THEN RAISE EXCEPTION 'Issued number history cannot be deleted' USING ERRCODE='23514'; END IF;
+  IF NEW.organization_id<>OLD.organization_id OR NEW.numbering_year<>OLD.numbering_year THEN
+    RAISE EXCEPTION 'Number scope is immutable' USING ERRCODE='23514'; END IF;
+  IF TG_TABLE_NAME='block_number_counters' THEN
+    IF NEW.last_sequence<OLD.last_sequence THEN RAISE EXCEPTION 'Number counter cannot rewind' USING ERRCODE='23514'; END IF;
+  ELSE
+    IF NEW.block_number<>OLD.block_number OR NEW.sequence<>OLD.sequence OR NEW.created_at<>OLD.created_at
+      OR NEW.block_id IS DISTINCT FROM OLD.block_id OR (OLD.bound_at IS NOT NULL AND NEW.bound_at IS DISTINCT FROM OLD.bound_at) THEN
+      RAISE EXCEPTION 'Issued number identity is immutable' USING ERRCODE='23514'; END IF;
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER guard_number_retention BEFORE UPDATE OR DELETE ON quarry_private.block_number_ledger FOR EACH ROW EXECUTE FUNCTION quarry_private.guard_number_retention();
+CREATE TRIGGER guard_number_retention BEFORE UPDATE OR DELETE ON quarry_private.block_number_counters FOR EACH ROW EXECUTE FUNCTION quarry_private.guard_number_retention();
 
 CREATE FUNCTION quarry_private.guard_site_mode() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
 DECLARE v_multi boolean;
@@ -94,6 +159,8 @@ BEGIN
       OR (OLD.lifecycle='READY_FOR_REVIEW' AND NEW.lifecycle IN ('DRAFT','ACTIVE'))) THEN
       RAISE EXCEPTION 'Invalid lifecycle transition' USING ERRCODE='23514'; END IF;
     IF NEW.lifecycle IN ('READY_FOR_REVIEW','ACTIVE') THEN PERFORM quarry_private.assert_ready(NEW.id); END IF;
+    IF NEW.lifecycle='ACTIVE' AND NOT EXISTS (SELECT 1 FROM public.organization_settings WHERE organization_id=NEW.id
+      AND reviewed_revision=revision) THEN RAISE EXCEPTION 'Reviewed configuration changed; return to DRAFT and review again' USING ERRCODE='23514'; END IF;
   END IF;
   RETURN NEW;
 END $$;
@@ -126,7 +193,8 @@ BEGIN
   IF TG_OP='INSERT' AND NEW.status NOT IN ('AVAILABLE','REJECTED') THEN
     RAISE EXCEPTION 'Initial status must be AVAILABLE or REJECTED' USING ERRCODE='23514'; END IF;
   IF TG_OP='UPDATE' AND (NEW.status<>OLD.status OR NEW.organization_id<>OLD.organization_id OR NEW.site_id<>OLD.site_id
-    OR NEW.id<>OLD.id OR NEW.block_number<>OLD.block_number OR NEW.origin<>OLD.origin) THEN
+    OR NEW.id<>OLD.id OR NEW.block_number<>OLD.block_number OR NEW.origin<>OLD.origin
+    OR NEW.production_date IS DISTINCT FROM OLD.production_date OR NEW.opening_stock_as_of IS DISTINCT FROM OLD.opening_stock_as_of) THEN
     RAISE EXCEPTION 'Identity and status transitions require a future controlled module' USING ERRCODE='23514'; END IF;
   SELECT pit_id INTO yard_pit FROM public.stockyards WHERE organization_id=NEW.organization_id AND site_id=NEW.site_id AND id=NEW.stockyard_id;
   IF yard_pit IS NOT NULL AND yard_pit<>NEW.pit_id AND EXISTS (SELECT 1 FROM public.quarry_pits
@@ -167,7 +235,7 @@ DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION quarry_private.ensur
 
 CREATE FUNCTION public.bootstrap_organization(p_request uuid, p_business_name text, p_display_name text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v_user uuid:=auth.uid(); v_org uuid; v_name text:=btrim(p_business_name); v_existing text;
+DECLARE v_user uuid:=auth.uid(); v_org uuid; v_name text:=btrim(p_business_name); v_existing text; v_display text;
 BEGIN
   IF v_user IS NULL OR NOT EXISTS (SELECT 1 FROM auth.users WHERE id=v_user AND NOT coalesce(is_anonymous,false)
     AND (email_confirmed_at IS NOT NULL OR phone_confirmed_at IS NOT NULL)) THEN
@@ -175,9 +243,9 @@ BEGIN
   IF p_request IS NULL OR nullif(v_name,'') IS NULL OR nullif(btrim(p_display_name),'') IS NULL THEN
     RAISE EXCEPTION 'Request ID, business name and owner display name are required' USING ERRCODE='22023'; END IF;
   PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_user::text || p_request::text,0));
-  SELECT organization_id,business_name INTO v_org,v_existing FROM quarry_private.bootstrap_requests WHERE user_id=v_user AND request_id=p_request;
+  SELECT organization_id,business_name,owner_display_name INTO v_org,v_existing,v_display FROM quarry_private.bootstrap_requests WHERE user_id=v_user AND request_id=p_request;
   IF FOUND THEN
-    IF v_existing<>v_name THEN RAISE EXCEPTION 'Idempotency key payload mismatch' USING ERRCODE='22023'; END IF;
+    IF v_existing<>v_name OR v_display<>btrim(p_display_name) THEN RAISE EXCEPTION 'Idempotency key payload mismatch' USING ERRCODE='22023'; END IF;
     IF NOT quarry_private.is_member(v_org) THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
     RETURN v_org;
   END IF;
@@ -186,41 +254,42 @@ BEGIN
   INSERT INTO public.organization_settings(organization_id) VALUES (v_org);
   -- Role and scope are fixed server-side; no role/owner ID input exists.
   INSERT INTO public.organization_memberships(organization_id,user_id,role,access_scope) VALUES (v_org,v_user,'OWNER','ALL_SITES');
-  INSERT INTO quarry_private.bootstrap_requests(user_id,request_id,organization_id,business_name) VALUES (v_user,p_request,v_org,v_name);
-  PERFORM quarry_private.audit(v_org,'ORGANIZATION_BOOTSTRAPPED');
+  INSERT INTO quarry_private.bootstrap_requests(user_id,request_id,organization_id,business_name,owner_display_name) VALUES (v_user,p_request,v_org,v_name,btrim(p_display_name));
+  PERFORM quarry_private.audit(v_org,'ORGANIZATION_BOOTSTRAPPED',jsonb_build_object('owner_id',v_user,'role','OWNER','scope','ALL_SITES'));
   RETURN v_org;
 END $$;
 
 CREATE FUNCTION public.create_quarry_site(p_org uuid, p_code text, p_name text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v_site uuid; v_name text; v_state text;
+DECLARE v_site uuid; v_name text; v_state text; v_site_status text;
 BEGIN
   PERFORM quarry_private.require_admin(p_org);
   SELECT lifecycle INTO v_state FROM public.organizations WHERE id=p_org;
   IF v_state='READY_FOR_REVIEW' THEN RAISE EXCEPTION 'Return to DRAFT before editing reviewed configuration' USING ERRCODE='23514'; END IF;
   IF nullif(btrim(p_code),'') IS NULL OR nullif(btrim(p_name),'') IS NULL THEN RAISE EXCEPTION 'Site code and name required' USING ERRCODE='22023'; END IF;
-  SELECT id,name INTO v_site,v_name FROM public.quarry_sites WHERE organization_id=p_org AND code=upper(btrim(p_code));
+  SELECT id,name,status INTO v_site,v_name,v_site_status FROM public.quarry_sites WHERE organization_id=p_org AND code=upper(btrim(p_code));
   IF FOUND THEN
     IF v_name<>btrim(p_name) THEN RAISE EXCEPTION 'Site code already exists with different data' USING ERRCODE='22023'; END IF;
+    IF v_site_status='ARCHIVED' THEN RAISE EXCEPTION 'Archived site requires a future explicit restore operation' USING ERRCODE='23514'; END IF;
     RETURN v_site;
   END IF;
   INSERT INTO public.quarry_sites(organization_id,code,name) VALUES (p_org,upper(btrim(p_code)),btrim(p_name)) RETURNING id INTO v_site;
-  UPDATE public.organization_settings SET primary_site_id=v_site WHERE organization_id=p_org AND primary_site_id IS NULL;
+  UPDATE public.organization_settings SET primary_site_id=coalesce(primary_site_id,v_site) WHERE organization_id=p_org;
   PERFORM quarry_private.audit(p_org,'SITE_CREATED',jsonb_build_object('site_id',v_site));
   RETURN v_site;
 END $$;
 CREATE FUNCTION public.set_multi_site(p_org uuid, p_enabled boolean, p_expected_revision bigint) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v_revision bigint;
+DECLARE v_revision bigint; v_previous boolean;
 BEGIN
   PERFORM quarry_private.require_admin(p_org);
   IF p_enabled IS NULL OR p_expected_revision IS NULL THEN RAISE EXCEPTION 'Mode and revision required' USING ERRCODE='22023'; END IF;
   IF (SELECT lifecycle FROM public.organizations WHERE id=p_org)='READY_FOR_REVIEW' THEN
     RAISE EXCEPTION 'Return to DRAFT before editing reviewed configuration' USING ERRCODE='23514'; END IF;
-  SELECT revision INTO v_revision FROM public.organization_settings WHERE organization_id=p_org;
+  SELECT revision,multi_site_enabled INTO v_revision,v_previous FROM public.organization_settings WHERE organization_id=p_org;
   IF v_revision<>p_expected_revision THEN RAISE EXCEPTION 'Configuration changed; refresh before saving' USING ERRCODE='40001'; END IF;
   UPDATE public.organization_settings SET multi_site_enabled=p_enabled WHERE organization_id=p_org;
-  PERFORM quarry_private.audit(p_org,'MULTI_SITE_CHANGED',jsonb_build_object('enabled',p_enabled));
+  PERFORM quarry_private.audit(p_org,'MULTI_SITE_CHANGED',jsonb_build_object('before',v_previous,'after',p_enabled,'revision_before',v_revision,'revision_after',v_revision+1));
 END $$;
 CREATE FUNCTION public.transition_onboarding(p_org uuid, p_target text, p_expected_revision bigint) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
@@ -234,21 +303,25 @@ BEGIN
   IF v_revision<>p_expected_revision THEN RAISE EXCEPTION 'Configuration changed; refresh before saving' USING ERRCODE='40001'; END IF;
   IF v_current=p_target THEN RETURN; END IF;
   IF p_target='ACTIVE' AND v_current='READY_FOR_REVIEW' THEN
+    IF NOT EXISTS (SELECT 1 FROM public.organization_settings WHERE organization_id=p_org AND reviewed_revision=v_revision) THEN
+      RAISE EXCEPTION 'Reviewed configuration changed; return to DRAFT and review again' USING ERRCODE='23514'; END IF;
     PERFORM quarry_private.assert_ready(p_org);
     UPDATE public.quarry_sites SET status='OPERATIONAL' WHERE organization_id=p_org AND status='SETUP';
   END IF;
   UPDATE public.organizations SET lifecycle=p_target, activated_at=CASE WHEN p_target='ACTIVE' THEN now() ELSE NULL END WHERE id=p_org;
-  UPDATE public.organization_settings SET onboarding_stage=CASE WHEN p_target='DRAFT' THEN onboarding_stage ELSE 5 END WHERE organization_id=p_org;
-  PERFORM quarry_private.audit(p_org,'ONBOARDING_TRANSITION',jsonb_build_object('from',v_current,'to',p_target));
+  UPDATE public.organization_settings SET onboarding_stage=CASE WHEN p_target='DRAFT' THEN onboarding_stage ELSE 5 END,
+    reviewed_revision=CASE WHEN p_target='READY_FOR_REVIEW' THEN v_revision+1 WHEN p_target='DRAFT' THEN NULL ELSE reviewed_revision END WHERE organization_id=p_org;
+  PERFORM quarry_private.audit(p_org,'ONBOARDING_TRANSITION',jsonb_build_object('from',v_current,'to',p_target,'revision_before',v_revision,'revision_after',v_revision+1));
 END $$;
 CREATE FUNCTION public.set_organization_member(p_org uuid,p_user uuid,p_role text,p_scope text,p_active boolean) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v_actor_role text; v_previous_role text;
+DECLARE v_actor_role text; v_previous_role text; v_before jsonb;
 BEGIN
   PERFORM quarry_private.require_admin(p_org);
   SELECT role INTO v_actor_role FROM public.organization_memberships WHERE organization_id=p_org AND user_id=auth.uid();
   SELECT role INTO v_previous_role FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user;
   IF NOT FOUND THEN RAISE EXCEPTION 'New memberships require the future verified invitation acceptance operation' USING ERRCODE='42501'; END IF;
+  SELECT jsonb_build_object('role',role,'scope',access_scope,'active',is_active) INTO v_before FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user;
   IF p_user IS NULL OR p_role IS NULL OR p_scope IS NULL OR p_active IS NULL
     OR p_role NOT IN ('OWNER','ADMIN','QUARRY_MANAGER','PRODUCTION_SUPERVISOR','SALES_ACCOUNTANT','DISPATCH_GATE_OPERATOR')
     OR p_scope NOT IN ('ALL_SITES','ASSIGNED_SITES') THEN RAISE EXCEPTION 'Invalid member input' USING ERRCODE='22023'; END IF;
@@ -260,45 +333,72 @@ BEGIN
   INSERT INTO public.organization_memberships(organization_id,user_id,role,access_scope,is_active)
   VALUES (p_org,p_user,p_role,p_scope,p_active) ON CONFLICT (organization_id,user_id)
   DO UPDATE SET role=excluded.role,access_scope=excluded.access_scope,is_active=excluded.is_active;
-  PERFORM quarry_private.audit(p_org,'MEMBERSHIP_CHANGED',jsonb_build_object('user_id',p_user,'role',p_role,'scope',p_scope,'active',p_active));
+  UPDATE public.organization_settings SET revision=revision WHERE organization_id=p_org;
+  PERFORM quarry_private.audit(p_org,'MEMBERSHIP_CHANGED',jsonb_build_object('user_id',p_user,'before',v_before,'after',jsonb_build_object('role',p_role,'scope',p_scope,'active',p_active)));
 END $$;
 
 CREATE FUNCTION public.set_site_member(p_org uuid,p_site uuid,p_user uuid,p_active boolean) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
+DECLARE v_before boolean;
 BEGIN
   PERFORM quarry_private.require_admin(p_org);
-  IF p_active IS NULL OR NOT EXISTS (SELECT 1 FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user AND is_active)
+  IF p_active IS NULL OR NOT EXISTS (SELECT 1 FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user AND (is_active OR NOT p_active))
     OR NOT EXISTS (SELECT 1 FROM public.quarry_sites WHERE organization_id=p_org AND id=p_site) THEN
     RAISE EXCEPTION 'Active organization member and same-organization site required' USING ERRCODE='23514'; END IF;
   IF p_active AND EXISTS (SELECT 1 FROM public.organization_settings WHERE organization_id=p_org
     AND NOT multi_site_enabled AND primary_site_id IS DISTINCT FROM p_site) THEN
     RAISE EXCEPTION 'Enable multi-site before granting another site' USING ERRCODE='23514'; END IF;
+  SELECT is_active INTO v_before FROM public.site_memberships WHERE organization_id=p_org AND site_id=p_site AND user_id=p_user;
   INSERT INTO public.site_memberships(organization_id,site_id,user_id,is_active) VALUES (p_org,p_site,p_user,p_active)
   ON CONFLICT (organization_id,site_id,user_id) DO UPDATE SET is_active=excluded.is_active;
-  PERFORM quarry_private.audit(p_org,'SITE_MEMBERSHIP_CHANGED',jsonb_build_object('site_id',p_site,'user_id',p_user,'active',p_active));
+  UPDATE public.organization_settings SET revision=revision WHERE organization_id=p_org;
+  PERFORM quarry_private.audit(p_org,'SITE_MEMBERSHIP_CHANGED',jsonb_build_object('site_id',p_site,'user_id',p_user,'before',v_before,'after',p_active));
 END $$;
 
+CREATE FUNCTION quarry_private.reject_history_mutation() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
+BEGIN RAISE EXCEPTION 'Historical records cannot be deleted or rewritten' USING ERRCODE='23514'; END $$;
+CREATE TRIGGER retain_block_history BEFORE DELETE ON public.granite_blocks FOR EACH ROW EXECUTE FUNCTION quarry_private.reject_history_mutation();
+CREATE TRIGGER retain_audit_history BEFORE UPDATE OR DELETE ON quarry_private.audit_events FOR EACH ROW EXECUTE FUNCTION quarry_private.reject_history_mutation();
+
 -- Called only by a future authorized block-save/import operation, not client-executable.
-CREATE FUNCTION quarry_private.allocate_block_number(p_org uuid,p_year integer) RETURNS text
+CREATE FUNCTION quarry_private.reserve_block_number(p_org uuid,p_year integer,p_block_id uuid) RETURNS text
 LANGUAGE plpgsql SET search_path = '' AS $$
 DECLARE v_sequence integer; v_existing integer;
 BEGIN
   IF p_year IS NULL OR p_year NOT BETWEEN 1000 AND 9999 THEN RAISE EXCEPTION 'Invalid block year' USING ERRCODE='22023'; END IF;
+  IF p_block_id IS NULL THEN RAISE EXCEPTION 'Server-generated block ID required' USING ERRCODE='22023'; END IF;
   PERFORM 1 FROM public.organizations WHERE id=p_org FOR UPDATE;
-  SELECT coalesce(max(right(block_number,4)::integer),0) INTO v_existing FROM public.granite_blocks
-    WHERE organization_id=p_org AND extract(year FROM production_date)=p_year;
-  INSERT INTO quarry_private.block_number_counters(organization_id,production_year,last_sequence)
-  VALUES (p_org,p_year,v_existing+1) ON CONFLICT (organization_id,production_year)
-  DO UPDATE SET last_sequence=greatest(quarry_private.block_number_counters.last_sequence+1,v_existing+1),updated_at=now()
+  SELECT greatest(coalesce((SELECT max(sequence) FROM quarry_private.block_number_ledger WHERE organization_id=p_org AND numbering_year=p_year),0),
+    coalesce((SELECT last_sequence FROM quarry_private.block_number_counters WHERE organization_id=p_org AND numbering_year=p_year),0)) INTO v_existing;
+  IF v_existing>=999999 THEN RAISE EXCEPTION 'Block-number capacity exhausted for organization/year' USING ERRCODE='2200H'; END IF;
+  INSERT INTO quarry_private.block_number_counters(organization_id,numbering_year,last_sequence)
+  VALUES (p_org,p_year,v_existing+1) ON CONFLICT (organization_id,numbering_year)
+  DO UPDATE SET last_sequence=v_existing+1,updated_at=now()
   RETURNING last_sequence INTO v_sequence;
-  RETURN 'BLK-' || p_year::text || '-' || lpad(v_sequence::text,4,'0');
+  INSERT INTO quarry_private.block_number_ledger(organization_id,block_number,numbering_year,sequence,block_id)
+    VALUES(p_org,'BLK-' || p_year::text || '-' || lpad(v_sequence::text,6,'0'),p_year,v_sequence,p_block_id);
+  RETURN 'BLK-' || p_year::text || '-' || lpad(v_sequence::text,6,'0');
 END $$;
+-- Internal convenience for abandoned-reservation tests; production save must supply its block UUID.
+CREATE FUNCTION quarry_private.allocate_block_number(p_org uuid,p_year integer) RETURNS text
+LANGUAGE sql VOLATILE SET search_path = '' AS $$
+  SELECT quarry_private.reserve_block_number(p_org,p_year,pg_catalog.gen_random_uuid())
+$$;
 
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon;
--- Newly created private functions have no authenticated execute grant.
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN SELECT p.oid::regprocedure AS signature FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='quarry_private' OR (n.nspname='public' AND p.proname IN ('bootstrap_organization','create_quarry_site','set_multi_site','transition_onboarding','set_organization_member','set_site_member')) LOOP
+    EXECUTE format('ALTER FUNCTION %s OWNER TO quarryone_executor',r.signature);
+  END LOOP;
+END $$;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION quarry_private.is_member(uuid),quarry_private.is_admin(uuid),quarry_private.can_access_site(uuid,uuid),
+  quarry_private.can_view_profile(uuid),quarry_private.can_read_customers(uuid) TO authenticated;
 REVOKE ALL ON FUNCTION public.bootstrap_organization(uuid,text,text), public.create_quarry_site(uuid,text,text),
   public.set_multi_site(uuid,boolean,bigint), public.transition_onboarding(uuid,text,bigint),
-  public.set_organization_member(uuid,uuid,text,text,boolean), public.set_site_member(uuid,uuid,uuid,boolean) FROM PUBLIC, anon, authenticated;
+  public.set_organization_member(uuid,uuid,text,text,boolean), public.set_site_member(uuid,uuid,uuid,boolean) FROM PUBLIC, anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION public.bootstrap_organization(uuid,text,text), public.create_quarry_site(uuid,text,text),
   public.set_multi_site(uuid,boolean,bigint), public.transition_onboarding(uuid,text,bigint),
   public.set_organization_member(uuid,uuid,text,text,boolean), public.set_site_member(uuid,uuid,uuid,boolean) TO authenticated;

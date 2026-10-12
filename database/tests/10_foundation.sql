@@ -70,12 +70,12 @@ BEGIN
   RETURN v_id;
 END $$;
 REVOKE ALL ON FUNCTION quarry_test.make_block(uuid,uuid,uuid,uuid,uuid,uuid,uuid,text,numeric,numeric,numeric,text,text,text,boolean) FROM PUBLIC;
-SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-0001') AS block_a \gset
-SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-0002',10,5,4,'FT','AVAILABLE','OPENING_STOCK') AS opening_a \gset
-SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-0003',1.25,0.5,0.25,'M') AS decimal_a \gset
-SELECT quarry_test.make_block(:'org_a',:'site_a2',:'pit_a2',:'mat_a',:'grade_a',:'yard_a2','00000000-0000-0000-0000-000000000001','BLK-2026-0004') AS block_a2 \gset
-SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-0005',10,5,4,'FT','REJECTED');
-SELECT quarry_test.make_block(:'org_b',:'site_b',:'pit_b',:'mat_b',:'grade_b',:'yard_b','00000000-0000-0000-0000-000000000002','BLK-2026-0001') AS block_b \gset
+SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-000001') AS block_a \gset
+SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-000002',10,5,4,'FT','AVAILABLE','OPENING_STOCK') AS opening_a \gset
+SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-000003',1.25,0.5,0.25,'M') AS decimal_a \gset
+SELECT quarry_test.make_block(:'org_a',:'site_a2',:'pit_a2',:'mat_a',:'grade_a',:'yard_a2','00000000-0000-0000-0000-000000000001','BLK-2026-000004') AS block_a2 \gset
+SELECT quarry_test.make_block(:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001','BLK-2026-000005',10,5,4,'FT','REJECTED');
+SELECT quarry_test.make_block(:'org_b',:'site_b',:'pit_b',:'mat_b',:'grade_b',:'yard_b','00000000-0000-0000-0000-000000000002','BLK-2026-000001') AS block_b \gset
 SELECT quarry_test.ok((SELECT volume_m3=5.6633693184 AND length=10 AND dimension_unit='FT' FROM public.granite_blocks WHERE id=:'block_a'),'exact FT calculation retains measurements');
 SELECT quarry_test.ok((SELECT volume_m3/0.028316846592=200 FROM public.granite_blocks WHERE id=:'block_a'),'exact CFT conversion');
 SELECT quarry_test.ok((SELECT volume_m3=0.15625 FROM public.granite_blocks WHERE id=:'decimal_a'),'unrounded metric decimal volume');
@@ -83,10 +83,10 @@ SELECT quarry_test.ok((SELECT round(volume_m3,2)=5.66 FROM public.granite_blocks
 SELECT quarry_test.ok((SELECT count(*) FROM public.granite_blocks WHERE organization_id=:'org_a')=5,'historical inventory includes opening and rejected');
 SELECT quarry_test.ok((SELECT sum(volume_m3) FROM public.granite_blocks WHERE organization_id=:'org_a' AND status='AVAILABLE')=3*5.6633693184+0.15625,'available volume excludes rejected');
 SELECT quarry_test.ok((SELECT count(*) FROM public.production_entries WHERE organization_id=:'org_a')=4,'opening stock excluded from production capture');
-SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-0001'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23505','duplicate block number prevented across organization');
-SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2025-0098'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','block number year must match original production date');
-SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-0098'',10,5,4,''FT'',''AVAILABLE'',''PRODUCTION'',false)',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','new produced block cannot omit capture entry');
-SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-0098'',10,5,4,''FT'',''RESERVED'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','new blocks cannot fabricate reservations');
+SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-000001'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23505','duplicate block number prevented across organization');
+SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2025-000098'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','block number year must match original production date');
+SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-000098'',10,5,4,''FT'',''AVAILABLE'',''PRODUCTION'',false)',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','new produced block cannot omit capture entry');
+SELECT quarry_test.expect_error(format('SELECT quarry_test.make_block(%L,%L,%L,%L,%L,%L,%L,''BLK-2026-000098'',10,5,4,''FT'',''RESERVED'')',:'org_a',:'site_a',:'pit_a',:'mat_a',:'grade_a',:'yard_a','00000000-0000-0000-0000-000000000001'),'23514','new blocks cannot fabricate reservations');
 SELECT quarry_test.expect_error(format('UPDATE public.stockyards SET pit_id=%L WHERE id=%L',:'pit_a_other',:'yard_a'),'23514','stockyard reassignment cannot contradict existing block pit');
 SELECT quarry_test.expect_error(format('UPDATE public.granite_blocks SET opening_stock_as_of=NULL WHERE id=%L',:'opening_a'),'23514','opening stock retains explicit as-of provenance');
 SELECT quarry_test.expect_error(format('UPDATE public.granite_blocks SET volume_m3=1 WHERE id=%L',:'block_a'),'428C9','caller cannot replace generated volume');
@@ -98,9 +98,9 @@ SELECT quarry_test.expect_error(format('UPDATE public.granite_blocks SET status=
 CREATE FUNCTION quarry_test.invalid_block(p_block uuid,p_column text,p_literal text) RETURNS void LANGUAGE plpgsql AS $$
 DECLARE v_sql text;
 BEGIN
-  v_sql := 'INSERT INTO public.granite_blocks(organization_id,site_id,pit_id,material_id,grade_id,stockyard_id,created_by,block_number,production_date,length,width,height,dimension_unit,stockyard_location,supervisor_name,origin,opening_stock_as_of,status) SELECT organization_id,site_id,pit_id,material_id,grade_id,stockyard_id,created_by,''BLK-2026-0099'',production_date,length,width,height,dimension_unit,stockyard_location,supervisor_name,''OPENING_STOCK'',''2026-10-10''::date,status FROM public.granite_blocks WHERE id=$1';
+  v_sql := 'INSERT INTO public.granite_blocks(organization_id,site_id,pit_id,material_id,grade_id,stockyard_id,created_by,block_number,production_date,length,width,height,dimension_unit,stockyard_location,supervisor_name,origin,opening_stock_as_of,status) SELECT organization_id,site_id,pit_id,material_id,grade_id,stockyard_id,created_by,''BLK-2026-000099'',production_date,length,width,height,dimension_unit,stockyard_location,supervisor_name,''OPENING_STOCK'',''2026-10-10''::date,status FROM public.granite_blocks WHERE id=$1';
   EXECUTE v_sql USING p_block;
-  EXECUTE format('UPDATE public.granite_blocks SET %I=%s WHERE block_number=''BLK-2026-0099'' AND organization_id=(SELECT organization_id FROM public.granite_blocks WHERE id=$1)',p_column,p_literal) USING p_block;
+  EXECUTE format('UPDATE public.granite_blocks SET %I=%s WHERE block_number=''BLK-2026-000099'' AND organization_id=(SELECT organization_id FROM public.granite_blocks WHERE id=$1)',p_column,p_literal) USING p_block;
 END $$;
 REVOKE ALL ON FUNCTION quarry_test.invalid_block(uuid,text,text) FROM PUBLIC;
 SELECT quarry_test.expect_error(format('SELECT quarry_test.invalid_block(%L,''length'',''0'')',:'block_a'),'23514','zero dimensions rejected');
@@ -112,7 +112,7 @@ SELECT quarry_test.expect_error(format('SELECT quarry_test.invalid_block(%L,''ma
 SELECT quarry_test.expect_error(format('SELECT quarry_test.invalid_block(%L,''pit_id'',%L)',:'block_a',quote_literal(:'pit_a2')),'23503','cross-site pit rejected');
 SELECT quarry_test.expect_error(format('SELECT quarry_test.invalid_block(%L,''pit_id'',%L)',:'block_a',quote_literal(:'pit_a_other')),'23514','dedicated stockyard pit mismatch rejected');
 SELECT quarry_test.expect_error(format('SELECT quarry_test.invalid_block(%L,''stockyard_id'',%L)',:'block_a',quote_literal(:'yard_b')),'23503','cross-tenant stockyard rejected');
-SELECT quarry_test.expect_error(format('UPDATE public.granite_blocks SET block_number=''BLK-2026-0000'' WHERE id=%L',:'block_a'),'23514','block number zero or identity rewrite rejected');
+SELECT quarry_test.expect_error(format('UPDATE public.granite_blocks SET block_number=''BLK-2026-000000'' WHERE id=%L',:'block_a'),'23514','block number zero or identity rewrite rejected');
 SELECT quarry_test.expect_error(format('INSERT INTO public.quarry_pits(organization_id,site_id,name) VALUES(%L,%L,''Wrong tenant'')',:'org_a',:'site_b'),'23503','site FK carries tenant');
 SELECT quarry_test.expect_error(format('INSERT INTO public.quarry_pits(organization_id,site_id,name) VALUES(%L,%L,'' pit a '')',:'org_a',:'site_a'),'23505','pit names unique ignoring case and whitespace');
 SELECT quarry_test.expect_error(format('DELETE FROM public.quarry_sites WHERE id=%L',:'site_a'),'23503','site deletion preserves historical references');
@@ -122,11 +122,11 @@ SELECT quarry_test.ok((SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.
 SELECT quarry_test.ok(NOT EXISTS (SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
   WHERE n.nspname='public' AND c.relkind='r' AND has_table_privilege('authenticated',c.oid,'INSERT,UPDATE,DELETE')),'no direct authenticated DML grants on any core table');
 SELECT quarry_test.ok(NOT has_function_privilege('authenticated','quarry_private.allocate_block_number(uuid,integer)','EXECUTE'),'number allocator is private');
-SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2026)='BLK-2026-0006','number allocation follows imported identities');
-SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2026)='BLK-2026-0007','number allocator advances unique sequence');
-SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2027)='BLK-2027-0001','year counter has independent sequence');
-UPDATE quarry_private.block_number_counters SET last_sequence=9999 WHERE organization_id=:'org_a' AND production_year=2027;
-SELECT quarry_test.expect_error(format('SELECT quarry_private.allocate_block_number(%L,2027)',:'org_a'),'23514','four-digit capacity fails safely');
+SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2026)='BLK-2026-000006','number allocation follows imported identities');
+SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2026)='BLK-2026-000007','number allocator advances unique sequence');
+SELECT quarry_test.ok(quarry_private.allocate_block_number(:'org_a',2027)='BLK-2027-000001','year counter has independent sequence');
+UPDATE quarry_private.block_number_counters SET last_sequence=999999 WHERE organization_id=:'org_a' AND numbering_year=2027;
+SELECT quarry_test.expect_error(format('SELECT quarry_private.allocate_block_number(%L,2027)',:'org_a'),'2200H','six-digit capacity fails explicitly');
 
 SET ROLE authenticated;
 SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);

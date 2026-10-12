@@ -7,7 +7,7 @@ const net = require("node:net");
 const { randomUUID } = require("node:crypto");
 const { spawn, spawnSync } = require("node:child_process");
 const root = path.resolve(__dirname, "..");
-const output = path.join(root, "verification", "v041");
+const output = path.join(root, "verification", "v0411");
 const scratch = path.join(os.tmpdir(), `quarryone-sql-${randomUUID()}`);
 const bin =
   process.env.QUARRYONE_PG_BIN ??
@@ -89,6 +89,15 @@ const concurrent = (sql) =>
 const actor = (id) =>
   `SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-${String(id).padStart(12, "0")}',false);`;
 const quote = (value) => `'${value.replaceAll("'", "''")}'`;
+const apiQuery = (sql, id, allowFailure = false) => {
+  const args = connection();
+  args[args.indexOf("-U") + 1] = "quarry_test_authenticator";
+  return run(
+    "psql",
+    [...args, "-v", "VERBOSITY=verbose", "-At", "-c", `${actor(id)} ${sql}`],
+    allowFailure,
+  );
+};
 (async () => {
   fs.mkdirSync(output, { recursive: true });
   fs.mkdirSync(scratch, { recursive: true });
@@ -133,6 +142,7 @@ const quote = (value) => `'${value.replaceAll("'", "''")}'`;
       check(true, `transactional migration parses and applies: ${file}`);
     }
     run("psql", [...connection(), "-f", "database/tests/10_foundation.sql"]);
+    run("psql", [...connection(), "-f", "database/tests/20_hardening.sql"]);
     const sqlAssertions = Number(
       query("SELECT count(*) FROM quarry_test.results WHERE passed"),
     );
@@ -173,6 +183,37 @@ const quote = (value) => `'${value.replaceAll("'", "''")}'`;
 
     const org = query(
       "SELECT id FROM public.organizations WHERE business_name='Deccan Stone Business'",
+    );
+    const cannotAssume = apiQuery("SET ROLE quarryone_executor", 6, true);
+    check(
+      cannotAssume.status !== 0 && cannotAssume.stderr.includes("42501"),
+      "non-superuser API session cannot assume executor role",
+    );
+    const apiTenant = apiQuery(
+      `SELECT count(*)=0 FROM public.granite_blocks WHERE organization_id=${quote(org)}`,
+      3,
+    );
+    check(
+      apiTenant.stdout.trim().endsWith("t"),
+      "non-superuser API session enforces revoked organization access",
+    );
+    const apiMutation = apiQuery(
+      `UPDATE public.organization_settings SET multi_site_enabled=false WHERE organization_id=${quote(org)}`,
+      1,
+      true,
+    );
+    check(
+      apiMutation.status !== 0 && apiMutation.stderr.includes("42501"),
+      "non-superuser owner API session has no direct mutation rights",
+    );
+    const apiPrivate = apiQuery(
+      `SELECT quarry_private.reserve_block_number(${quote(org)},2026,gen_random_uuid())`,
+      1,
+      true,
+    );
+    check(
+      apiPrivate.status !== 0 && apiPrivate.stderr.includes("42501"),
+      "non-superuser API session cannot execute private numbering function",
     );
     const numbers = await Promise.all([
       concurrent(
@@ -255,6 +296,94 @@ const quote = (value) => `'${value.replaceAll("'", "''")}'`;
           `SELECT revision FROM public.organization_settings WHERE organization_id=${quote(orgC)}`,
         ) === String(Number(revision) + 1),
       "concurrent settings changes enforce expected revision",
+    );
+    query(
+      `INSERT INTO quarry_private.block_number_counters(organization_id,numbering_year,last_sequence) VALUES(${quote(org)},2050,999998)`,
+    );
+    const capacity = await Promise.all([
+      concurrent(
+        `SELECT quarry_private.allocate_block_number(${quote(org)},2050)`,
+      ),
+      concurrent(
+        `SELECT quarry_private.allocate_block_number(${quote(org)},2050)`,
+      ),
+    ]);
+    check(
+      capacity.filter((r) => r.code === 0).length === 1 &&
+        capacity.filter((r) => r.code === 0)[0].stdout.trim() ===
+          "BLK-2050-999999",
+      "concurrent final-slot allocation has one winner and explicit exhaustion",
+    );
+
+    const primary = query(
+      `SELECT primary_site_id FROM public.organization_settings WHERE organization_id=${quote(org)}`,
+    );
+    const pit = query(
+      `SELECT id FROM public.quarry_pits WHERE organization_id=${quote(org)} AND site_id=${quote(primary)} AND name='Pit A'`,
+    );
+    const otherPit = query(
+      `SELECT id FROM public.quarry_pits WHERE organization_id=${quote(org)} AND site_id=${quote(primary)} AND name='Pit B'`,
+    );
+    const yard = query(
+      `INSERT INTO public.stockyards(organization_id,site_id,name) VALUES(${quote(org)},${quote(primary)},'Race Yard') RETURNING id`,
+    )
+      .split("\n")[0]
+      .trim();
+    const material = query(
+      `SELECT material_id FROM public.granite_blocks WHERE organization_id=${quote(org)} LIMIT 1`,
+    );
+    const grade = query(
+      `SELECT grade_id FROM public.granite_blocks WHERE organization_id=${quote(org)} LIMIT 1`,
+    );
+    const yardRace = await Promise.all([
+      concurrent(
+        `UPDATE public.stockyards SET pit_id=${quote(otherPit)} WHERE id=${quote(yard)}`,
+      ),
+      concurrent(
+        `SELECT quarry_test.make_block(${quote(org)},${quote(primary)},${quote(pit)},${quote(material)},${quote(grade)},${quote(yard)},'00000000-0000-0000-0000-000000000001','BLK-2026-000040')`,
+      ),
+    ]);
+    check(
+      yardRace.filter((r) => r.code === 0).length === 1 &&
+        query(
+          `SELECT NOT EXISTS(SELECT 1 FROM public.granite_blocks b JOIN public.stockyards y ON y.id=b.stockyard_id WHERE y.pit_id IS NOT NULL AND y.pit_id<>b.pit_id)`,
+        ) === "t",
+      "concurrent yard reassignment and block creation preserve pit consistency",
+    );
+
+    const revoked = concurrent(
+      `${actor(1)} SET application_name='quarry_hardening_revoker'; BEGIN; SELECT public.set_organization_member(${quote(org)},'00000000-0000-0000-0000-000000000006','ADMIN','ALL_SITES',false); SELECT pg_sleep(3); COMMIT;`,
+    );
+    let revokerReady = false;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (
+        query(
+          "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name='quarry_hardening_revoker' AND wait_event='PgSleep')",
+        ) === "t"
+      ) {
+        revokerReady = true;
+        break;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    check(
+      revokerReady,
+      "revocation race holds the organization lock before competing request",
+    );
+    const staleAdmin = concurrent(
+      `${actor(6)} SELECT public.create_quarry_site(${quote(org)},'REVOKED_RACE','Forbidden Site')`,
+    );
+    const [revokeResult, adminResult] = await Promise.all([
+      revoked,
+      staleAdmin,
+    ]);
+    check(
+      revokeResult.code === 0 &&
+        adminResult.code !== 0 &&
+        query(
+          `SELECT count(*) FROM public.quarry_sites WHERE organization_id=${quote(org)} AND code='REVOKED_RACE'`,
+        ) === "0",
+      "waiting admin mutation rechecks membership after concurrent revocation",
     );
   } catch (error) {
     failure = error.message;
