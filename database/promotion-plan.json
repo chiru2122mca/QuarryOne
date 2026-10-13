@@ -1,0 +1,32 @@
+{
+  "stage": "V0.4.2A",
+  "status": "proposal_only_not_promoted",
+  "baseline_commit": "a0c0b76",
+  "intended_project_name": "quarryone-dev",
+  "hosted_project_ref": null,
+  "checksum_method": "UTF-8 SQL with CRLF normalized to LF; no other transformation",
+  "version_status": "Locally valid unique YYYYMMDDHHMMSS candidates; recheck against future target history before creating files",
+  "migrations": [
+    {
+      "order": 1,
+      "source": "database/drafts/202610100001_foundation.draft.sql",
+      "sha256_normalized_lf": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
+      "proposed_target": "supabase/migrations/20261013000000_foundation.sql",
+      "proposed_version": "20261013000000"
+    },
+    {
+      "order": 2,
+      "source": "database/drafts/202610100002_access.draft.sql",
+      "sha256_normalized_lf": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
+      "proposed_target": "supabase/migrations/20261013000001_access.sql",
+      "proposed_version": "20261013000001"
+    },
+    {
+      "order": 3,
+      "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
+      "sha256_normalized_lf": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
+      "proposed_target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
+      "proposed_version": "20261013000002"
+    }
+  ]
+}

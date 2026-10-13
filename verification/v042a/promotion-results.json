@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "candidates_checked": 3,
+  "unique_increasing_timestamps": true,
+  "transaction_wrappers_present": true,
+  "source_checksums_recorded": true,
+  "hosted_history": "not queried; uniqueness against target history pending",
+  "drafts_promoted": false
+}

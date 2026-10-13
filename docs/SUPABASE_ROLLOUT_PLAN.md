@@ -1,6 +1,122 @@
-# QuarryOne V0.4.1.1 — Supabase rollout plan
+# QuarryOne V0.4.2 — Stage A Supabase development preparation
 
-Current gate: architectural review. No Supabase project has been created, connected or deployed. No Auth client, production dependency, persistent store or application integration is included. Never run `supabase db push` for these drafts.
+Current gate: review Stage A before authorizing Stage B. Baseline main HEAD was a0c0b76, with a clean tree and three commits ahead of origin/main. Existing history is preserved. The intended hosted development project name is quarryone-dev; no project reference is known or linked, and no Supabase project, hosted user or migration has been created, modified or deployed. No Auth client, dependency, persistent store or mobile integration is added. The reviewed SQL drafts remain unchanged and are not executable CLI migrations.
+
+## Stage A compatibility assessment
+
+Local PostgreSQL success validates SQL on the tested engine and synthetic roles, not the Supabase-managed environment. Supabase's [hosted postgres role is not a superuser](https://supabase.com/docs/guides/database/postgres/roles-superuser); this is a material difference from the scratch-cluster migration executor. No hosted compatibility is claimed.
+
+| Area                          | Reviewed/local evidence                                                                                                               | Pending Supabase verification                                                                                                                                                                                               |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PostgreSQL version            | Drafts apply on 17.11; local config requests major 17; stored generated columns and current SQL syntax parse                          | Inspect actual approved development target version and align config; do not assume every hosted project uses 17                                                                                                             |
+| auth.users                    | profiles references its UUID id; executor needs SELECT on id/email_confirmed_at/phone_confirmed_at/is_anonymous                       | Confirm real columns, FK/reference privileges, Auth owner/RLS and permission to grant the exact four columns; synthetic stub is not a production substitute                                                                 |
+| auth.uid()/JWT                | Policies/controllers use identity plus authoritative memberships, not user-supplied role claims                                       | Real signed access token, gateway role mapping, null/expired/forged token behavior, verified versus anonymous Auth accounts; do not simulate security by allowing client-set session claims                                 |
+| RLS                           | 13 public tables enabled; active organization/site membership and role predicates; four non-superuser local checks                    | Exercise real REST/RPC requests for two tenants/sites; verify effective grants, revocation with old valid JWT and schema exposure                                                                                           |
+| SECURITY DEFINER owner        | Explicit NOLOGIN/NOSUPERUSER/NOBYPASSRLS quarryone_executor; empty search_path; owner-based nonrecursive predicates                   | Prove hosted migration principal can create/grant/assume role and transfer ownership without broader bypass; inspect FORCE RLS and effective role membership graph                                                          |
+| Function execution            | Six authenticated public controllers and five policy predicates; internal functions denied; permissive-default regression tests       | Check pg_proc ownership/proconfig/ACLs and provider default ACLs after promotion; no unreviewed overload/execution path                                                                                                     |
+| Schemas/exposure              | Local config requests public only and excludes quarry_private from exposure and request search path; private tables/grants restricted | Dashboard/effective PostgREST exposed schemas and extra_search_path are independent settings; local file does not configure a hosted project                                                                                |
+| Numeric generated volume      | Exact numeric FT conversion, original dimensions, generated finite positive unrounded m³; decimal and underflow tests                 | Target generated-expression behavior, numeric string serialization and client representability; Android adapter is not ready for durable types                                                                              |
+| Composite FKs                 | Organization/site keys in parent references; dedicated yard/pit consistency and retained number/UUID registry                         | Verify resulting constraints/unique indexes and same-tenant/site violation cases on target                                                                                                                                  |
+| Triggers/deferred constraints | Commit-time owner/production-entry invariants, tenant locks, immutable numbers/dates/audit and concurrent yard tests                  | Target trigger availability, deferred enforcement, READ COMMITTED lock/recheck behavior and migration-owner execution context                                                                                               |
+| Transactions/history          | Explicit BEGIN/COMMIT per draft; local duplicate application and failed-DDL rollback tests pass                                       | Pinned CLI's parsing/transaction/history recording with these wrappers must be tested on a disposable Supabase stack before hosted deployment; do not assume its history and SQL commit atomically merely from psql success |
+
+Potential blockers are hosted privilege/ownership capability, real Auth access rules, API exposure/default grants, unknown target version, existing target migration/role history and missing onboarding/write contracts. None is proven to be a defect in the SQL drafts during Stage A, so all three drafts stay untouched. Never weaken RLS/Auth grants or give the executor global BYPASSRLS/superuser to bypass a preflight failure.
+
+An additional migration-principal risk is GRANT quarryone_executor TO CURRENT_USER: the actual CLI principal may differ from the stable postgres role. Inspect current_user/session_user and provider-managed login roles in Stage B before executing DDL. Supabase documents [provider-managed CLI login roles](https://supabase.com/docs/guides/troubleshooting/permission-denied-when-deleting-the-cli_login_postgres-role-808bae). Establish an approved stable migration principal and durable reviewed membership; never grant the executor to authenticator/anon/authenticated/service_role or remove provider-managed roles to force compatibility.
+
+## Local CLI/configuration status
+
+CLI was absent from PATH, project dependencies and the offline npm cache. Pinned CLI 2.120.0 was subsequently executed from an ephemeral npm cache installation, with no package.json/lockfile changes. Version/help and local init in a separate temporary directory were executed; no Supabase stack was started. Telemetry was disabled for inspection/init. The generated template supplied the keys/types checked against supabase/config.toml.
+
+The local identifier quarryone-dev is not a hosted project reference. Config explicitly disables migration execution/seeding/self-signup/anonymous sign-ins and optional services, requests PostgreSQL 17, public-only exposure and explicit object grants. No executable migration directory, seed SQL, roles.sql, linking metadata, mobile environment/client or credentials is created. TOML syntax and template key/type checks pass; actual CLI stack startup, engine availability and hosted config remain untested. The Docker executable is installed, but engine health was not queried or started. The pinned configuration is defensive preparation, not authorization to run deployment commands.
+
+CLI prerequisites and documented commands use an ephemeral pinned runner to avoid application dependency changes. [Official CLI installation/configuration guidance](https://supabase.com/docs/guides/local-development/cli/getting-started) requires an appropriate Node/runtime setup; Node 24.21.0 is available here. The [2.120.0 release](https://github.com/supabase/cli/releases/tag/v2.120.0) is the reviewed baseline; re-review upgrades deliberately.
+
+```powershell
+# Local-only inspection; these do not log in, link or deploy.
+$env:SUPABASE_TELEMETRY_DISABLED = '1'
+npm exec --yes --package=supabase@2.120.0 -- supabase --version
+npm exec --yes --package=supabase@2.120.0 -- supabase --help
+```
+
+Do not re-run init --force over the tracked config. Future local stack commands require a healthy container runtime, port availability and separate Stage B approval. Local config must first be reviewed for actual Auth tests, service needs and migration enablement. Credentials printed by future stack/status/Auth tools must not be committed or placed in mobile public variables. Git ignores .env files, linking/runtime state and signing-key files; no secret values are provided.
+
+## Deliberate migration promotion plan — not performed
+
+database/promotion-plan.json records ordered sources, normalized-LF SHA-256 fingerprints and **proposed** targets. Draft labels use 12 digits; future executable CLI versions use full 14-digit UTC YYYYMMDDHHMMSS names rather than blindly copying draft filenames. The candidates below are valid dates, unique and increasing locally, but are not reserved or confirmed against any hosted history.
+
+| Order | Reviewed source                                              | Proposed future target (absent in Stage A)                   |
+| ----- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 1     | database/drafts/202610100001_foundation.draft.sql            | supabase/migrations/20261013000000_foundation.sql            |
+| 2     | database/drafts/202610100002_access.draft.sql                | supabase/migrations/20261013000001_access.sql                |
+| 3     | database/drafts/202610100003_controlled_onboarding.draft.sql | supabase/migrations/20261013000002_controlled_onboarding.sql |
+
+Dependencies: platform Auth schema/functions and built-in roles must already exist → foundation tables/private bookkeeping/timestamp guards and fail-closed RLS/grants → executor role/ownership and read policies → onboarding controllers/number claiming/invariant triggers and final execution allowlist. These are one-time transactional CREATE scripts, not repeat-safe schema merges. A partially completed group must not be opened to business use until all three versions and verification complete.
+
+Promotion procedure after approval: compare fingerprints and review any differences → verify no conflicting local or authorized target versions/objects/roles → choose fresh approved versions greater than existing history if candidates conflict → review the exact three-file promotion diff without replacing originals → enable migrations in config explicitly → apply first on a disposable real Supabase local/staging environment and inspect CLI history/transaction behavior → test privileges, SQL/REST/JWT scenarios and recovery → approve the hosted development application separately. The [migration workflow](https://supabase.com/docs/guides/deployment/database-migrations) and [CLI reference](https://supabase.com/docs/reference/cli/supabase-init) describe history/version behavior. No drafts, Auth stubs or fixtures are copied into supabase/migrations during Stage A.
+
+Never promote database/tests/00_auth_stub.sql, privileged test helpers or synthetic identities: hosted/local Supabase already has platform Auth roles and functions. Port the assertions to reviewed real-stack test fixtures; do not recreate auth.users or replace auth.uid(). Do not use migration repair/squash/reset to conceal divergence or overwrite applied versions. Existing history is unknown until an approved target inspection, so remote uniqueness remains a gate.
+
+## Future Stage B commands — documented only, not executed
+
+The following are examples for a separately approved session **after** the operator creates/confirms the intended isolated development project, chooses the region/version and supplies credentials through approved secret storage. They are not Stage A instructions to execute. A dry run is still a remote operation, and linking/configuration may create provider-managed state.
+
+```powershell
+# Future authorization required. Never put tokens/passwords in this file or Git.
+if ([string]::IsNullOrWhiteSpace($approvedDevProjectRef)) {
+  throw 'Reviewer-confirmed development project reference required before remote commands.'
+}
+npm exec --yes --package=supabase@2.120.0 -- supabase login
+# Populate this variable from reviewer-confirmed development metadata, never a production target.
+# An empty/unreviewed value must stop the session before link/deployment.
+npm exec --yes --package=supabase@2.120.0 -- supabase link --project-ref $approvedDevProjectRef
+npm exec --yes --package=supabase@2.120.0 -- supabase migration list --linked
+# Only after deliberate promotion, compatible role/Auth preflight and local rehearsal:
+npm exec --yes --package=supabase@2.120.0 -- supabase db push --dry-run
+# Requires a distinct approval of the reviewed target and migration set:
+npm exec --yes --package=supabase@2.120.0 -- supabase db push
+```
+
+For a future disposable **local** rehearsal, reviewed commands are supabase start, supabase db reset --local --no-seed, supabase db lint --local and supabase test db, through the same pinned runner. None was executed here. Reset is destructive to that local database; identify its ownership and backup first, and never substitute --linked/--db-url. No migration deployment follows automatically from CLI setup or a successful local test.
+
+## Five-stage database/mobile contract readiness
+
+| Capability                  | Existing SQL/model support                                                                | Missing operation before mobile onboarding                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Business/owner registration | bootstrap_organization; verified-identity checks, fixed Owner, full-payload idempotency   | Approved Auth session flow and whitelisted stage-1/save/profile-edit persistence                                        |
+| Primary/single/multi quarry | create_quarry_site, set_multi_site; primary FK and safe-mode guards                       | Stage-2 site/pit edit/create persistence, optimistic saves and later site activation/archive/restore                    |
+| Pits/benches/yards/catalog  | Scoped tables, supported material names, A/B/C, shared/dedicated yard checks              | Stage-2/3 atomic whitelisted persistence; no generic client table writes                                                |
+| Measurements                | FT/M dimensions, unrounded generated m³, CFT/m³ preferences                               | Preference-save and decimal/origin-aware adapter; current mobile uses four-digit mock IDs and required production dates |
+| Roles/sites                 | set_organization_member edits existing members; set_site_member manages grants/revocation | Draft invitation/receipt/outbox persistence and verified acceptance; these controllers do not enroll a new user         |
+| Review/activation           | transition_onboarding, completeness checks and reviewed_revision                          | Stage-save/review UI and receipt persistence; later additional SETUP sites have no activation operation yet             |
+| Opening/numbering           | Unknown opening production_date with required reference; six-digit UUID-bound ledger      | Authorized production-save/opening-import RPCs, source idempotency/provenance/audit and mobile adapter migration        |
+
+The six public SQL controllers are implemented in the drafts; private policy predicates, reserve/allocate helpers and triggers support them but are not client write APIs. The [onboarding architecture](ONBOARDING_ARCHITECTURE.md) defines five stages, whitelists and acceptance contracts; the [schema](DATABASE_SCHEMA.md) and [permission matrix](ROLE_PERMISSION_MATRIX.md) define hierarchy, preferences, lineage and permissions. Stage-save/invitation/site-activation contracts remain future work, with no delivery, UI or backend integration in Stage A.
+
+## Live Auth/JWT/RLS verification matrix — no users created
+
+Use disposable synthetic business data in the approved development target and real verified Auth identities. Planned identities: A Owner, B Owner, A Site-1 Production Supervisor, revoked A member, unauthenticated anon role; also two Owners for a last-owner race and an authenticated anonymous Auth account to distinguish it from anon. Never reuse real customers/blocks or log access tokens.
+
+| Scenario                        | Planned identity/action                                                                               | Required result/evidence                                                                                                                                     |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Owner bootstrap                 | Verified A/B Owners call same-key retries and concurrent bootstrap                                    | One tenant/key, fixed Owner/ALL_SITES, payload mismatch denied, no caller role/owner override, audit retained                                                |
+| Cross-tenant isolation          | A/B token REST reads and guessed foreign IDs/RPC tenant parameters                                    | Own rows only; other-org rows absent/mutations denied; tenant FKs reject cross-org references through controlled paths                                       |
+| Site restriction                | Supervisor assigned A Site-1 queries Site-2 blocks/pits/yards/production                              | Only authorized site data; mode flag never grants permission                                                                                                 |
+| Role escalation                 | Supervisor/Admin tries self Owner or other-tenant membership change                                   | Denied; current DB role governs, forged user metadata does not elevate; no changed revision/audit on failure                                                 |
+| Membership revocation           | Retain an unexpired signed token, revoke org/site assignment, retry requests                          | Revoked access denied; lingering site grants do not override inactive parent; suspended-parent cleanup remains possible                                      |
+| Anonymous/invalid JWT           | No token, expired/forged token, authenticated anonymous or unverified user bootstrap                  | Gateway/role/verification denials; no tenant created; anonymous Auth is tested separately from anon role                                                     |
+| Single/multi mode               | A Owner creates primary, races a second site, enables later and attempts unsafe disable               | One primary by default; additional sites need enablement; secondary history/grants prevent hiding access; existing blocks/financial history remain unchanged |
+| Last active owner               | Two Owners attempt removal/demotion concurrently                                                      | At least one active Owner remains; Admin cannot manage Owner/Admin memberships                                                                               |
+| Review activation               | Incomplete draft, stage/revision conflicts, direct skip, edited review snapshot                       | DRAFT→READY_FOR_REVIEW→ACTIVE only; completeness and reviewed_revision enforced; no partial activation after failure                                         |
+| Direct writes/execute           | Authenticated Owner/Supervisor, anon and service credential attempt table/internal writes             | No direct-table or internal-function shortcut; intended RPC/predicate allowlist only; schema CREATE/SET ROLE executor denied                                 |
+| Number/opening inventory        | Controlled reserved UUID save/import, unknown historical date, concurrent final slot                  | No duplicate/reuse/stealing; unknown date remains null; opening included in inventory and excluded from new production; 2200H exhaustion                     |
+| Concurrent revocation/integrity | Admin waits while revoked; block save races dedicated-yard reassignment                               | Recheck current membership after lock; consistent pit/site constraints; no partial number/block/audit commits                                                |
+| Exposure/ownership              | Inspect PostgREST schema/ACLs/role graph and real migration principal                                 | No private API endpoint; restricted executor and fixed search_path; no unexpected default grants/owner bypass exposed to users                               |
+| Failure/recovery                | Force controlled-operation failures and rehearse failed promotion/backup restore on disposable target | Transaction/audit consistency, known migration history, preserved IDs/volumes, documented recovery rather than history repair                                |
+
+REST/RPC tests must use real signed-JWT gateway requests, not server admin keys or SET ROLE alone. Local PostgreSQL tests remain valuable for FK/math/concurrency cases but do not validate Auth issuance, token expiry, JWKS/gateway handling, email/phone verification or effective hosted API settings. User creation, token issuance and all matrix actions are pending Stage B approval.
+
+Number/import/production concurrency can initially be rehearsed only through isolated privileged fixtures to test internal invariants. Signed-JWT write tests for those operations are gated on implementing separately reviewed public write RPCs; never grant clients the private number allocator merely to make the matrix executable. The same distinction applies to invitation acceptance and later site activation: their contracts exist, but their live endpoints do not.
 
 ## Local artifacts and verification
 

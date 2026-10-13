@@ -31,7 +31,16 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
 .env*.local
+
+# Supabase local state and credentials; config.toml is intentionally tracked.
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+supabase/.env.*
+supabase/signing_keys.json
 
 # typescript
 *.tsbuildinfo

@@ -1,0 +1,53 @@
+# V0.4.2 Stage A: local, unlinked preparation only. No service is started by this file.
+# Reviewed against Supabase CLI 2.120.0's generated template.
+# This local identifier is not a hosted project reference and creates no remote project.
+project_id = "quarryone-dev"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+auto_expose_new_tables = false
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+
+[db.migrations]
+# Defensive opt-out only; never treat configuration as permission to deploy.
+# Stage B must explicitly review promotion and enable migrations before applying them.
+enabled = false
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []
+
+[auth]
+enabled = true
+# Placeholder for future isolated local Auth testing; not a mobile redirect configuration.
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = []
+enable_signup = false
+enable_anonymous_sign_ins = false
+
+[studio]
+enabled = false
+
+[local_smtp]
+enabled = false
+
+[realtime]
+enabled = false
+
+[storage]
+enabled = false
+
+[analytics]
+enabled = false
+
+[edge_runtime]
+enabled = false

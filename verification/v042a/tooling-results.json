@@ -1,0 +1,36 @@
+{
+  "stage": "V0.4.2A",
+  "supabase_cli_version": "2.120.0",
+  "execution": "ephemeral npm cache; no package/lockfile modification",
+  "commands_executed": [
+    "supabase --version",
+    "supabase --help",
+    "supabase init --help",
+    "supabase config --help",
+    "supabase init --workdir <isolated temporary directory>"
+  ],
+  "node_version": "24.21.0",
+  "python_version": "3.14.7",
+  "docker_executable_version": "29.8.2",
+  "docker_engine_verified": false,
+  "supabase_stack_started": false,
+  "config_runtime_validated": false,
+  "local_config_template_keys_and_types_validated": true,
+  "remote_supabase_resources_created_or_modified": false,
+  "hosted_project_ref": null,
+  "remote_sql_or_migration_commands_executed": false,
+  "app_checks": {
+    "typecheck": "passed",
+    "eslint": "passed",
+    "application_tests": {
+      "passed": 53,
+      "failed": 0
+    }
+  },
+  "pending": [
+    "Hosted PostgreSQL/Auth/role/exposure compatibility",
+    "Signed JWT gateway and live RLS verification",
+    "CLI stack startup and CLI transaction/history rehearsal",
+    "Future target migration history and deliberate promotion"
+  ]
+}
