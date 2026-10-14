@@ -1,0 +1,97 @@
+{
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "date": "2026-10-14",
+  "counts": {
+    "update": 3,
+    "remote_only": 10,
+    "local_only": 0,
+    "total": 13
+  },
+  "scope": {
+    "present": [
+      "api",
+      "auth",
+      "database",
+      "pooler",
+      "realtime",
+      "storage"
+    ],
+    "missing": []
+  },
+  "changes": [
+    {
+      "path": "api.schemas",
+      "class": "update",
+      "declared": true,
+      "local": [
+        "public"
+      ],
+      "remote": [
+        "public",
+        "graphql_public"
+      ]
+    },
+    {
+      "path": "auth.email.enable_confirmations",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "auth.email.max_frequency",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "auth.email.otp_length",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "auth.enable_signup",
+      "class": "update",
+      "declared": true
+    },
+    {
+      "path": "auth.mfa.totp.enroll_enabled",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "auth.mfa.totp.verify_enabled",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "auth.site_url",
+      "class": "update",
+      "declared": true
+    },
+    {
+      "path": "db.pooler.default_pool_size",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "db.pooler.max_client_conn",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "storage.analytics.enabled",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "storage.analytics.max_namespaces",
+      "class": "remote_only",
+      "declared": false
+    },
+    {
+      "path": "storage.image_transformation.enabled",
+      "class": "remote_only",
+      "declared": false
+    }
+  ],
+  "masked_paths": [],
+  "unmanaged_paths": []
+}

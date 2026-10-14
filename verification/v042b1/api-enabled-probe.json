@@ -1,0 +1,29 @@
+{
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "method": "API-enabled temporary config comparison; no hosted writes",
+  "changes": [
+    {
+      "path": "api.extra_search_path",
+      "local": [
+        "quarry_private"
+      ],
+      "remote": [
+        "public",
+        "extensions"
+      ]
+    },
+    {
+      "path": "api.schemas",
+      "local": [
+        "public"
+      ],
+      "remote": [
+        "public",
+        "graphql_public"
+      ]
+    }
+  ],
+  "unreported_probe_fields": [
+    "api.auto_expose_new_tables"
+  ]
+}

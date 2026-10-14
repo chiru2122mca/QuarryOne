@@ -1,0 +1,49 @@
+{
+  "date": "2026-10-14",
+  "baseline": "4580d62",
+  "branch": "main",
+  "initial_worktree": "clean",
+  "cli_version": "2.120.0",
+  "operator_confirmed_target": {
+    "name": "quarryone-dev",
+    "ref": "vfwdcrptpawfsiaqumjb",
+    "region": "ap-south-1"
+  },
+  "link_success": true,
+  "typecheck": "passed",
+  "eslint": "passed",
+  "application_tests": {
+    "passed": 53,
+    "failed": 0
+  },
+  "config_toml": "parsed",
+  "linked_config_diff": "passed with hosted drift",
+  "migrations_enabled": false,
+  "seed_enabled": false,
+  "executable_migration_files": 0,
+  "fingerprints": [
+    {
+      "source": "database/drafts/202610100001_foundation.draft.sql",
+      "expected": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
+      "actual": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b"
+    },
+    {
+      "source": "database/drafts/202610100002_access.draft.sql",
+      "expected": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
+      "actual": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459"
+    },
+    {
+      "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
+      "expected": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
+      "actual": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52"
+    }
+  ],
+  "hosted_tests": "catalog/config read-only checks only; no real JWT/RLS tests",
+  "sql_regression_rerun": "not run in B1; Stage A results retained as historical evidence",
+  "notes": [
+    "Sandbox offline npm cache unavailable; elevated pinned CLI succeeded without dependency changes.",
+    "Initial config diff used unsupported --output json; corrected to --output-format json.",
+    "First composite SELECT failed due shell argument handling; retried using executable directly and passed.",
+    "No remote SQL file was executed; metadata SELECT statements only."
+  ]
+}

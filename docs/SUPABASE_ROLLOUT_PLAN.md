@@ -1,4 +1,14 @@
-# QuarryOne V0.4.2 — Stage A Supabase development preparation
+# QuarryOne V0.4.2 — Supabase development rollout
+
+## V0.4.2B1 current gate — Mumbai linked, deployment pending
+
+On 2026-10-14 the operator explicitly confirmed `quarryone-dev`, project `vfwdcrptpawfsiaqumjb`, region `ap-south-1`. CLI 2.120.0 independently verified the identity/region and linked this checkout. PostgreSQL reports 17.11; public/quarry_private application tables and migration history are absent. Read-only metadata confirms the required Auth columns, null auth.uid() without JWT, postgres query principal and enabled automatic-RLS trigger. Data API is enabled; exposed schemas are public/graphql_public and extra search path public/extensions. The operator verified automatic new-table exposure is disabled; that toggle is not independently reported by CLI diff. No hosted settings were changed.
+
+The complete [B1 preflight handoff](../verification/v042b1/README.md) separates actual metadata, operator evidence and pending DDL/security tests. CLI-managed login-role initialization was reported by the transport; no explicit role DDL was executed and its prior existence was not established. Metadata-query postgres identity does not prove the future migration principal. Residual default privileges still require explicit revokes and post-application checks. The three SQL hashes are unchanged; the promotion plan now records the approved target, while files remain proposal-only.
+
+Current approval boundary: review B1 before approving any B2 rehearsal, promotion, hosted migration or configuration change. No real JWT/RLS tests, migration-engine transaction/history rehearsal or mobile backend integration have occurred. No pushing is authorized. The Stage A discussion below is retained as historical preparation evidence; its statements that no reference was known describe Stage A only.
+
+## Stage A baseline (historical)
 
 Current gate: review Stage A before authorizing Stage B. Baseline main HEAD was a0c0b76, with a clean tree and three commits ahead of origin/main. Existing history is preserved. The intended hosted development project name is quarryone-dev; no project reference is known or linked, and no Supabase project, hosted user or migration has been created, modified or deployed. No Auth client, dependency, persistent store or mobile integration is added. The reviewed SQL drafts remain unchanged and are not executable CLI migrations.
 

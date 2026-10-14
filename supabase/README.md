@@ -1,4 +1,8 @@
-# QuarryOne V0.4.2 — Stage A local preparation
+# QuarryOne V0.4.2 — Local configuration and Mumbai preflight
+
+V0.4.2B1 update (2026-10-14): the operator confirmed `quarryone-dev`, `vfwdcrptpawfsiaqumjb`, `ap-south-1` (Mumbai). Pinned CLI 2.120.0 verified the hosted identity and linked this checkout successfully using existing secure authentication. The ignored local link is not committed. Hosted PostgreSQL is 17.11; no QuarryOne tables or migration-history table are present. Data API is enabled; hosted exposed schemas are public/graphql_public, private schema excluded. Automatic RLS is installed/enabled; automatic new-table exposure is disabled according to the operator's dashboard inspection. Full evidence, limitations and B2 gates are in [verification/v042b1](../verification/v042b1/README.md). No migrations or remote configuration were deployed, and the Android prototype is still independent.
+
+The original Stage A notes below describe preparation at that milestone, not current linking status. The tracked config remains unchanged; no reinitialization or mobile integration occurred.
 
 This directory contains an unlinked local configuration only. `project_id = "quarryone-dev"` is a local CLI identifier, not a cloud project reference or evidence that a hosted project exists. No Supabase services, hosted resources, users or credentials have been created for this milestone. The Android prototype continues using its existing mock store.
 

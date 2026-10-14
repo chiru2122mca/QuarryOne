@@ -1,0 +1,176 @@
+{
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "date": "2026-10-14",
+  "method": "Pinned CLI linked catalog SELECT only",
+  "result": [
+    {
+      "preflight": {
+        "app_tables": [],
+        "auth_columns": [
+          {
+            "name": "id",
+            "references": true,
+            "select": true,
+            "type": "uuid"
+          },
+          {
+            "name": "email_confirmed_at",
+            "references": true,
+            "select": true,
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "phone_confirmed_at",
+            "references": true,
+            "select": true,
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "is_anonymous",
+            "references": true,
+            "select": true,
+            "type": "boolean"
+          }
+        ],
+        "auth_uid": [
+          {
+            "definition": "CREATE OR REPLACE FUNCTION auth.uid()\n RETURNS uuid\n LANGUAGE sql\n STABLE\nAS $function$\n  select \n  coalesce(\n    nullif(current_setting('request.jwt.claim.sub', true), ''),\n    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')\n  )::uuid\n$function$\n",
+            "execute": true,
+            "owner": "supabase_auth_admin",
+            "security_definer": false
+          }
+        ],
+        "event_triggers": [
+          {
+            "enabled": "O",
+            "event": "sql_drop",
+            "function": "set_graphql_placeholder",
+            "name": "issue_graphql_placeholder"
+          },
+          {
+            "enabled": "O",
+            "event": "ddl_command_end",
+            "function": "pgrst_ddl_watch",
+            "name": "pgrst_ddl_watch"
+          },
+          {
+            "enabled": "O",
+            "event": "sql_drop",
+            "function": "pgrst_drop_watch",
+            "name": "pgrst_drop_watch"
+          },
+          {
+            "enabled": "O",
+            "event": "ddl_command_end",
+            "function": "grant_pg_cron_access",
+            "name": "issue_pg_cron_access"
+          },
+          {
+            "enabled": "O",
+            "event": "ddl_command_end",
+            "function": "grant_pg_net_access",
+            "name": "issue_pg_net_access"
+          },
+          {
+            "enabled": "O",
+            "event": "ddl_command_end",
+            "function": "grant_pg_graphql_access",
+            "name": "issue_pg_graphql_access"
+          },
+          {
+            "enabled": "O",
+            "event": "ddl_command_end",
+            "function": "rls_auto_enable",
+            "name": "ensure_rls"
+          }
+        ],
+        "history_exists": false,
+        "pgrst_settings": [],
+        "principal": "postgres",
+        "public_acl": [
+          {
+            "grantable": false,
+            "grantee": "pg_database_owner",
+            "privilege": "USAGE"
+          },
+          {
+            "grantable": false,
+            "grantee": "pg_database_owner",
+            "privilege": "CREATE"
+          },
+          {
+            "grantable": false,
+            "grantee": "PUBLIC",
+            "privilege": "USAGE"
+          },
+          {
+            "grantable": false,
+            "grantee": "postgres",
+            "privilege": "USAGE"
+          },
+          {
+            "grantable": false,
+            "grantee": "anon",
+            "privilege": "USAGE"
+          },
+          {
+            "grantable": false,
+            "grantee": "authenticated",
+            "privilege": "USAGE"
+          },
+          {
+            "grantable": false,
+            "grantee": "service_role",
+            "privilege": "USAGE"
+          }
+        ],
+        "roles": [
+          {
+            "bypass_rls": true,
+            "create_role": true,
+            "inherit": true,
+            "login": true,
+            "name": "postgres",
+            "superuser": false
+          },
+          {
+            "bypass_rls": false,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "authenticated",
+            "superuser": false
+          },
+          {
+            "bypass_rls": false,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "anon",
+            "superuser": false
+          },
+          {
+            "bypass_rls": true,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "service_role",
+            "superuser": false
+          }
+        ],
+        "schemas": [
+          "auth",
+          "extensions",
+          "graphql",
+          "graphql_public",
+          "public",
+          "realtime",
+          "storage",
+          "vault"
+        ],
+        "session_user": "postgres",
+        "version": "17.11"
+      }
+    }
+  ]
+}

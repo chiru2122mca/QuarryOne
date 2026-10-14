@@ -1,0 +1,15 @@
+{
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "method": "Temporary local config comparison probe; no original config or hosted changes",
+  "changes": [
+    {
+      "path": "api.enabled",
+      "local": false,
+      "remote": true
+    }
+  ],
+  "unreported_probe_fields": [
+    "api.auto_expose_new_tables",
+    "api.extra_search_path"
+  ]
+}

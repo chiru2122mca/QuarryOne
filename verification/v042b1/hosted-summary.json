@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-14",
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "region": "ap-south-1",
+  "name": "quarryone-dev",
+  "status": "ACTIVE_HEALTHY",
+  "cli": "2.120.0",
+  "link": "successful",
+  "data_api_enabled": {
+    "value": true,
+    "source": "read-only CLI alternate local config comparison"
+  },
+  "auto_expose_new_tables": {
+    "value": false,
+    "source": "operator dashboard confirmation during this task; not independently CLI verified"
+  },
+  "automatic_rls": {
+    "value": "enabled provider ensure_rls event trigger",
+    "source": "catalog metadata and function definition; no creation test"
+  },
+  "migration_history": "schema/table absent; no recorded versions",
+  "deployment": "not performed",
+  "no_explicit_application_role_ddl": true,
+  "provider_login_role_lifecycle": "CLI printed Initialising login role; role present afterwards; no pre-link snapshot",
+  "remote_commands": [
+    "projects list (only matching project identity retained)",
+    "link --project-ref vfwdcrptpawfsiaqumjb",
+    "config diff --output-format json (including disposable local alternate config comparisons)",
+    "db query --linked (single read-only catalog SELECT statements, no files)"
+  ],
+  "prohibited_commands_executed": []
+}

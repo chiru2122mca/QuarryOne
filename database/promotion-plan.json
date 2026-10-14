@@ -3,7 +3,7 @@
   "status": "proposal_only_not_promoted",
   "baseline_commit": "a0c0b76",
   "intended_project_name": "quarryone-dev",
-  "hosted_project_ref": null,
+  "hosted_project_ref": "vfwdcrptpawfsiaqumjb",
   "checksum_method": "UTF-8 SQL with CRLF normalized to LF; no other transformation",
   "version_status": "Locally valid unique YYYYMMDDHHMMSS candidates; recheck against future target history before creating files",
   "migrations": [
@@ -28,5 +28,15 @@
       "proposed_target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
       "proposed_version": "20261013000002"
     }
-  ]
+  ],
+  "target_preflight": {
+    "stage": "V0.4.2B1",
+    "date": "2026-10-14",
+    "operator_confirmed": true,
+    "region": "ap-south-1",
+    "postgres_version": "17.11",
+    "history_table_exists": false,
+    "application_tables": 0,
+    "deployment_authorized": false
+  }
 }
