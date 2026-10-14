@@ -1,0 +1,78 @@
+[
+  {
+    "auth_grant_prerequisites": {
+      "auth_schema_acl": [
+        {
+          "grantable": false,
+          "grantee": "supabase_admin",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "supabase_admin",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "anon",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "authenticated",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "service_role",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "supabase_auth_admin",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "supabase_auth_admin",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "dashboard_user",
+          "privilege": "USAGE"
+        },
+        {
+          "grantable": false,
+          "grantee": "dashboard_user",
+          "privilege": "CREATE"
+        },
+        {
+          "grantable": false,
+          "grantee": "postgres",
+          "privilege": "USAGE"
+        }
+      ],
+      "auth_schema_owner": "supabase_admin",
+      "auth_uid_acl": [
+        {
+          "grantable": false,
+          "grantee": "PUBLIC",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "supabase_auth_admin",
+          "privilege": "EXECUTE"
+        },
+        {
+          "grantable": false,
+          "grantee": "dashboard_user",
+          "privilege": "EXECUTE"
+        }
+      ],
+      "postgres_auth_usage_grant_option": false,
+      "postgres_can_assume_auth_owner": false
+    }
+  }
+]

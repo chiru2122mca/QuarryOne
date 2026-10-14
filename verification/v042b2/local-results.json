@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-14",
+  "base_commit": "be52f88",
+  "initial_worktree": "clean",
+  "branch": "main",
+  "cli_version": "2.120.0",
+  "linked_project": "vfwdcrptpawfsiaqumjb",
+  "typecheck": {
+    "command": "npm run typecheck",
+    "result": "passed"
+  },
+  "eslint": {
+    "command": "npm run lint",
+    "result": "passed"
+  },
+  "application_tests": {
+    "command": "npm run test:domain",
+    "passed": 53,
+    "failed": 0
+  },
+  "native_postgresql_harness": {
+    "result": "passed",
+    "assertions": 144,
+    "non_superuser_checks": 4,
+    "concurrency_scenarios": 8,
+    "rollback_checks": 2,
+    "scratch_stopped": true,
+    "script_changed": false,
+    "output_redirect_only": "verification/v042b2"
+  },
+  "config_parsed": true,
+  "migration_execution_enabled": false,
+  "seed_enabled": false,
+  "promotion": "three byte-identical files; hashes match",
+  "docker_used": false,
+  "hosted_ddl_executed": false,
+  "real_jwt_rls_tests": "not performed",
+  "hosted_dry_run": "not performed: stopped on incompatible Auth schema grant prerequisite"
+}

@@ -1,5 +1,13 @@
 # QuarryOne V0.4.2 — Supabase development rollout
 
+## V0.4.2B2 current gate — locally promoted, Auth grant blocker
+
+The operator chose native PostgreSQL tests plus the isolated hosted development environment, explicitly skipping Docker/Supabase-stack rehearsal. On 2026-10-14, fresh checks verified the exact Mumbai link/project and PostgreSQL 17.11. No application objects/history were found. Three versioned migration files were promoted locally as byte-identical copies, with reviewed hashes/order preserved; no test stubs were included. Existing local checks passed again: TypeScript, ESLint, 53 application tests, 144 SQL assertions, four non-superuser checks, eight concurrency scenarios and rollback checks.
+
+**Stop before dry run/deployment:** postgres lacks `USAGE WITH GRANT OPTION` on provider-owned auth, required by the access draft's `GRANT USAGE ON SCHEMA auth TO quarryone_executor`. Its Auth-column SELECT grant options exist, but auth.uid() EXECUTE grant option is also absent (PUBLIC execution currently exists). Do not infer grant authority from CREATEROLE/BYPASSRLS or weaken executor/RLS restrictions. No grant, role change or hosted DDL was attempted. A provider-supported minimal grantor strategy requires architectural review. Local migration execution remains disabled.
+
+The [B2 handoff](../verification/v042b2/README.md) records the metadata-based blocker, promoted files, fresh evidence and conditional exact deployment commands. No hosted dry run was executed under the explicit stop-on-incompatibility rule; expected pending files are not a CLI-confirmed pending list. Resolve/review the blocker, revalidate any approved SQL changes and enable local migrations deliberately before a new dry run. Actual deployment still requires separate approval. B1 and Stage A notes below are historical evidence.
+
 ## V0.4.2B1 current gate — Mumbai linked, deployment pending
 
 On 2026-10-14 the operator explicitly confirmed `quarryone-dev`, project `vfwdcrptpawfsiaqumjb`, region `ap-south-1`. CLI 2.120.0 independently verified the identity/region and linked this checkout. PostgreSQL reports 17.11; public/quarry_private application tables and migration history are absent. Read-only metadata confirms the required Auth columns, null auth.uid() without JWT, postgres query principal and enabled automatic-RLS trigger. Data API is enabled; exposed schemas are public/graphql_public and extra search path public/extensions. The operator verified automatic new-table exposure is disabled; that toggle is not independently reported by CLI diff. No hosted settings were changed.

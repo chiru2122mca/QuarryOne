@@ -1,0 +1,14 @@
+{
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "executed": false,
+  "reason": "User requires stop if hosted privileges are incompatible; postgres lacks auth USAGE WITH GRANT OPTION for executor delegation",
+  "expected_pending_from_catalog_not_cli": [
+    "supabase/migrations/20261013000000_foundation.sql",
+    "supabase/migrations/20261013000001_access.sql",
+    "supabase/migrations/20261013000002_controlled_onboarding.sql"
+  ],
+  "recorded_history_conflicts_observed": false,
+  "history_table_exists": false,
+  "actual_push_executed": false,
+  "migration_principal_exercised": false
+}

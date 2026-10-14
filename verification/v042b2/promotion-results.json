@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-14",
+  "files": [
+    {
+      "source": "database/drafts/202610100001_foundation.draft.sql",
+      "target": "supabase/migrations/20261013000000_foundation.sql",
+      "version": "20261013000000",
+      "sha256_normalized_lf": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
+      "byte_identical": true,
+      "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+    },
+    {
+      "source": "database/drafts/202610100002_access.draft.sql",
+      "target": "supabase/migrations/20261013000001_access.sql",
+      "version": "20261013000001",
+      "sha256_normalized_lf": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
+      "byte_identical": true,
+      "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+    },
+    {
+      "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
+      "target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
+      "version": "20261013000002",
+      "sha256_normalized_lf": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
+      "byte_identical": true,
+      "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+    }
+  ],
+  "test_only_files_promoted": false,
+  "migration_execution_enabled": false,
+  "deployment": "not performed"
+}

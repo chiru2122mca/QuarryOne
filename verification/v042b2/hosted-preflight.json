@@ -1,0 +1,209 @@
+{
+  "date": "2026-10-14",
+  "project": {
+    "id": "vfwdcrptpawfsiaqumjb",
+    "name": "quarryone-dev",
+    "region": "ap-south-1",
+    "status": "ACTIVE_HEALTHY"
+  },
+  "cli_version": "2.120.0",
+  "result": [
+    {
+      "preflight": {
+        "auth_columns": [
+          {
+            "name": "id",
+            "references": true,
+            "select": true,
+            "select_grant": true,
+            "type": "uuid"
+          },
+          {
+            "name": "email_confirmed_at",
+            "references": true,
+            "select": true,
+            "select_grant": true,
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "phone_confirmed_at",
+            "references": true,
+            "select": true,
+            "select_grant": true,
+            "type": "timestamp with time zone"
+          },
+          {
+            "name": "is_anonymous",
+            "references": true,
+            "select": true,
+            "select_grant": true,
+            "type": "boolean"
+          }
+        ],
+        "auth_uid": [
+          {
+            "definition": "CREATE OR REPLACE FUNCTION auth.uid()\n RETURNS uuid\n LANGUAGE sql\n STABLE\nAS $function$\n  select \n  coalesce(\n    nullif(current_setting('request.jwt.claim.sub', true), ''),\n    (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')\n  )::uuid\n$function$\n",
+            "execute": true,
+            "execute_grant": false,
+            "owner": "supabase_auth_admin",
+            "security_definer": false
+          }
+        ],
+        "auto_rls": [
+          {
+            "enabled": "O",
+            "function": "rls_auto_enable",
+            "name": "ensure_rls"
+          }
+        ],
+        "current_user": "postgres",
+        "history_exists": false,
+        "public_objects": [],
+        "public_types": [],
+        "role_memberships": [
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "anon",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "authenticated",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "service_role",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "authenticator",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "pg_monitor",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "pg_read_all_data",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "pg_signal_backend",
+            "set": true
+          },
+          {
+            "admin": true,
+            "inherit": true,
+            "member": "postgres",
+            "role": "pg_create_subscription",
+            "set": true
+          },
+          {
+            "admin": false,
+            "inherit": true,
+            "member": "postgres",
+            "role": "supabase_privileged_role",
+            "set": true
+          },
+          {
+            "admin": false,
+            "inherit": false,
+            "member": "cli_login_postgres",
+            "role": "postgres",
+            "set": true
+          }
+        ],
+        "roles": [
+          {
+            "bypass_rls": true,
+            "create_db": true,
+            "create_role": true,
+            "inherit": true,
+            "login": true,
+            "name": "postgres",
+            "superuser": false
+          },
+          {
+            "bypass_rls": false,
+            "create_db": false,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "authenticated",
+            "superuser": false
+          },
+          {
+            "bypass_rls": false,
+            "create_db": false,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "anon",
+            "superuser": false
+          },
+          {
+            "bypass_rls": true,
+            "create_db": false,
+            "create_role": false,
+            "inherit": true,
+            "login": false,
+            "name": "service_role",
+            "superuser": false
+          },
+          {
+            "bypass_rls": false,
+            "create_db": false,
+            "create_role": false,
+            "inherit": false,
+            "login": true,
+            "name": "cli_login_postgres",
+            "superuser": false
+          }
+        ],
+        "schema_access": [
+          {
+            "create": false,
+            "schema": "auth",
+            "usage": true
+          },
+          {
+            "create": true,
+            "schema": "public",
+            "usage": true
+          }
+        ],
+        "schemas": [
+          "auth",
+          "extensions",
+          "graphql",
+          "graphql_public",
+          "public",
+          "realtime",
+          "storage",
+          "vault"
+        ],
+        "session_user": "postgres",
+        "version": "17.11"
+      }
+    }
+  ]
+}
