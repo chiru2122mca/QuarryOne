@@ -1,0 +1,36 @@
+{
+  "date": "2026-10-15",
+  "baseline_commit": "3b1f2e4",
+  "typecheck": "passed",
+  "eslint": "passed",
+  "application_tests": {
+    "passed": 53,
+    "failed": 0
+  },
+  "sql_assertions": {
+    "existing": 144,
+    "new_permission": 41,
+    "total_passed": 185,
+    "failed": 0
+  },
+  "non_superuser_process_checks": {
+    "passed": 8,
+    "failed": 0
+  },
+  "concurrency_scenarios": 8,
+  "concurrency_checks": 9,
+  "rollback_checks": 2,
+  "wrong_principal_rejected": true,
+  "non_superuser_migration_applications": 3,
+  "harness_checks_passed": 24,
+  "scratch_stopped": true,
+  "fingerprint_pairs_passed": 3,
+  "source_target_byte_identical": true,
+  "migration_execution_enabled": false,
+  "seed_enabled": false,
+  "local_jwt_simulation_only": true,
+  "hosted_action": "one read-only metadata SELECT on exact approved reference; no DDL/grants/push/dry run",
+  "hosted_runtime_compatibility": "pending",
+  "mobile_changed": false,
+  "dependencies_changed": false
+}

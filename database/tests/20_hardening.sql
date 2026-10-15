@@ -53,12 +53,12 @@ SELECT quarry_test.expect_error(format('DELETE FROM quarry_private.audit_events 
 SELECT quarry_test.ok((SELECT NOT rolcanlogin AND NOT rolsuper AND NOT rolbypassrls AND NOT rolcreaterole FROM pg_roles WHERE rolname='quarryone_executor'),'executor owner has no login, superuser or global bypass privileges');
 SELECT quarry_test.ok(NOT pg_has_role('authenticated','quarryone_executor','MEMBER') AND NOT pg_has_role('anon','quarryone_executor','MEMBER'),'clients cannot inherit executor role');
 SELECT quarry_test.ok(NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
-  WHERE (n.nspname='quarry_private' OR (n.nspname='public' AND p.prosecdef)) AND p.proowner<>(SELECT oid FROM pg_roles WHERE rolname='quarryone_executor')),'all controlled/helper functions have explicit restricted ownership');
+  WHERE (n.nspname='quarry_private' OR (n.nspname='public' AND p.prosecdef)) AND p.proowner<>(SELECT oid FROM pg_roles WHERE rolname=CASE WHEN p.oid='quarry_private.require_verified_request_user()'::regprocedure THEN 'postgres' ELSE 'quarryone_executor' END)),'all controlled/helper functions have explicit restricted ownership');
 SELECT quarry_test.ok(NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE p.prosecdef AND n.nspname IN ('public','quarry_private') AND NOT p.proconfig @> ARRAY['search_path=""']),'all SECURITY DEFINER functions pin empty search path');
 SELECT quarry_test.ok(NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE n.nspname='quarry_private' AND has_function_privilege('authenticated',p.oid,'EXECUTE') AND p.proname NOT IN
-  ('is_member','is_admin','can_access_site','can_view_profile','can_read_customers')),'authenticated private execution is exactly the policy-helper allowlist');
+  ('request_user_id','is_member','is_admin','can_access_site','can_view_profile','can_read_customers')),'authenticated private execution is exactly the policy-helper allowlist');
 SELECT quarry_test.ok(NOT has_schema_privilege('authenticated','public','CREATE') AND NOT has_schema_privilege('authenticated','quarry_private','CREATE'),'client schema object creation denied');
 SELECT quarry_test.ok(NOT EXISTS (SELECT 1 FROM pg_proc p JOIN pg_namespace n ON n.oid=p.pronamespace
   WHERE n.nspname='quarry_private' AND (has_function_privilege('anon',p.oid,'EXECUTE') OR has_function_privilege('service_role',p.oid,'EXECUTE'))),'permissive function defaults do not expose private functions');

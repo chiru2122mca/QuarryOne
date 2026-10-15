@@ -1,5 +1,12 @@
 -- REVIEW DRAFT ONLY. Prototype server-side operations, not an app integration.
 BEGIN;
+DO $principal$
+BEGIN
+  IF current_user <> 'postgres' OR NOT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_roles WHERE rolname=current_user AND NOT rolsuper AND rolcreaterole
+  ) THEN RAISE EXCEPTION 'Migrations require the stable non-superuser postgres principal with CREATEROLE' USING ERRCODE='42501'; END IF;
+END $principal$;
+SET LOCAL ROLE quarryone_executor;
 CREATE FUNCTION quarry_private.require_admin(p_org uuid) RETURNS void
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 BEGIN
@@ -7,14 +14,14 @@ BEGIN
   PERFORM 1 FROM public.organizations WHERE id=p_org FOR UPDATE;
   IF NOT FOUND THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
   -- Fresh READ COMMITTED membership lookup after waiting for the organization lock.
-  IF NOT EXISTS (SELECT 1 FROM public.organization_memberships WHERE organization_id=p_org AND user_id=auth.uid()
+  IF NOT EXISTS (SELECT 1 FROM public.organization_memberships WHERE organization_id=p_org AND user_id=quarry_private.request_user_id()
     AND is_active AND role IN ('OWNER','ADMIN')) THEN RAISE EXCEPTION 'Not authorized' USING ERRCODE='42501'; END IF;
 END $$;
 CREATE FUNCTION quarry_private.audit(p_org uuid, p_action text, p_details jsonb DEFAULT '{}') RETURNS void
 LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN
   INSERT INTO quarry_private.audit_events(organization_id,actor_id,action,details)
-  VALUES (p_org,auth.uid(),p_action,p_details);
+  VALUES (p_org,quarry_private.request_user_id(),p_action,p_details);
 END $$;
 CREATE FUNCTION quarry_private.settings_revision() RETURNS trigger LANGUAGE plpgsql SET search_path = '' AS $$
 BEGIN NEW.revision := OLD.revision + 1; RETURN NEW; END $$;
@@ -235,11 +242,8 @@ DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION quarry_private.ensur
 
 CREATE FUNCTION public.bootstrap_organization(p_request uuid, p_business_name text, p_display_name text) RETURNS uuid
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
-DECLARE v_user uuid:=auth.uid(); v_org uuid; v_name text:=btrim(p_business_name); v_existing text; v_display text;
+DECLARE v_user uuid:=quarry_private.require_verified_request_user(); v_org uuid; v_name text:=btrim(p_business_name); v_existing text; v_display text;
 BEGIN
-  IF v_user IS NULL OR NOT EXISTS (SELECT 1 FROM auth.users WHERE id=v_user AND NOT coalesce(is_anonymous,false)
-    AND (email_confirmed_at IS NOT NULL OR phone_confirmed_at IS NOT NULL)) THEN
-    RAISE EXCEPTION 'A verified, non-anonymous authenticated user is required' USING ERRCODE='42501'; END IF;
   IF p_request IS NULL OR nullif(v_name,'') IS NULL OR nullif(btrim(p_display_name),'') IS NULL THEN
     RAISE EXCEPTION 'Request ID, business name and owner display name are required' USING ERRCODE='22023'; END IF;
   PERFORM pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(v_user::text || p_request::text,0));
@@ -318,7 +322,7 @@ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '' AS $$
 DECLARE v_actor_role text; v_previous_role text; v_before jsonb;
 BEGIN
   PERFORM quarry_private.require_admin(p_org);
-  SELECT role INTO v_actor_role FROM public.organization_memberships WHERE organization_id=p_org AND user_id=auth.uid();
+  SELECT role INTO v_actor_role FROM public.organization_memberships WHERE organization_id=p_org AND user_id=quarry_private.request_user_id();
   SELECT role INTO v_previous_role FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user;
   IF NOT FOUND THEN RAISE EXCEPTION 'New memberships require the future verified invitation acceptance operation' USING ERRCODE='42501'; END IF;
   SELECT jsonb_build_object('role',role,'scope',access_scope,'active',is_active) INTO v_before FROM public.organization_memberships WHERE organization_id=p_org AND user_id=p_user;
@@ -385,16 +389,69 @@ LANGUAGE sql VOLATILE SET search_path = '' AS $$
   SELECT quarry_private.reserve_block_number(p_org,p_year,pg_catalog.gen_random_uuid())
 $$;
 
-DO $$
+-- Reviewed exact signatures: fail on missing functions or unexpected private overloads.
+DO $owners$
+DECLARE r record; v_oid oid; v_expected oid[] := ARRAY[]::oid[];
+BEGIN
+  FOR r IN SELECT * FROM (VALUES
+    ('quarry_private.touch_updated_at()','quarryone_executor',false,'v'),
+    ('quarry_private.request_user_id()','quarryone_executor',false,'s'),
+    ('quarry_private.require_verified_request_user()','postgres',true,'s'),
+    ('quarry_private.is_member(uuid)','quarryone_executor',true,'s'),
+    ('quarry_private.is_admin(uuid)','quarryone_executor',true,'s'),
+    ('quarry_private.can_access_site(uuid,uuid)','quarryone_executor',true,'s'),
+    ('quarry_private.can_view_profile(uuid)','quarryone_executor',true,'s'),
+    ('quarry_private.can_read_customers(uuid)','quarryone_executor',true,'s'),
+    ('quarry_private.require_admin(uuid)','quarryone_executor',true,'v'),
+    ('quarry_private.audit(uuid,text,jsonb)','quarryone_executor',false,'v'),
+    ('quarry_private.settings_revision()','quarryone_executor',false,'v'),
+    ('quarry_private.lock_tenant_identity()','quarryone_executor',false,'v'),
+    ('quarry_private.claim_block_number()','quarryone_executor',true,'v'),
+    ('quarry_private.guard_number_retention()','quarryone_executor',false,'v'),
+    ('quarry_private.guard_site_mode()','quarryone_executor',false,'v'),
+    ('quarry_private.guard_single_site()','quarryone_executor',false,'v'),
+    ('quarry_private.assert_ready(uuid)','quarryone_executor',false,'v'),
+    ('quarry_private.guard_lifecycle()','quarryone_executor',false,'v'),
+    ('quarry_private.ensure_owner()','quarryone_executor',false,'v'),
+    ('quarry_private.guard_block()','quarryone_executor',false,'v'),
+    ('quarry_private.guard_stockyard_pit()','quarryone_executor',false,'v'),
+    ('quarry_private.ensure_production_entry()','quarryone_executor',false,'v'),
+    ('public.bootstrap_organization(uuid,text,text)','quarryone_executor',true,'v'),
+    ('public.create_quarry_site(uuid,text,text)','quarryone_executor',true,'v'),
+    ('public.set_multi_site(uuid,boolean,bigint)','quarryone_executor',true,'v'),
+    ('public.transition_onboarding(uuid,text,bigint)','quarryone_executor',true,'v'),
+    ('public.set_organization_member(uuid,uuid,text,text,boolean)','quarryone_executor',true,'v'),
+    ('public.set_site_member(uuid,uuid,uuid,boolean)','quarryone_executor',true,'v'),
+    ('quarry_private.reject_history_mutation()','quarryone_executor',false,'v'),
+    ('quarry_private.reserve_block_number(uuid,integer,uuid)','quarryone_executor',false,'v'),
+    ('quarry_private.allocate_block_number(uuid,integer)','quarryone_executor',false,'v')
+  ) AS m(signature,owner_name,is_definer,volatility) LOOP
+    v_oid := pg_catalog.to_regprocedure(r.signature);
+    IF v_oid IS NULL THEN RAISE EXCEPTION 'Missing reviewed function: %',r.signature; END IF;
+    v_expected := array_append(v_expected,v_oid);
+    IF r.owner_name='quarryone_executor' THEN
+      EXECUTE format('ALTER FUNCTION %s OWNER TO quarryone_executor',v_oid::regprocedure);
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_catalog.pg_proc p WHERE p.oid=v_oid
+      AND p.proowner=(SELECT oid FROM pg_catalog.pg_roles WHERE rolname=r.owner_name)
+      AND p.prosecdef=r.is_definer AND p.provolatile::text=r.volatility
+      AND p.proconfig=ARRAY['search_path=""']::text[]) THEN
+      RAISE EXCEPTION 'Unsafe owner/security/config for %',r.signature; END IF;
+  END LOOP;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE (n.nspname='quarry_private' OR (n.nspname='public' AND p.proname IN ('bootstrap_organization','create_quarry_site','set_multi_site','transition_onboarding','set_organization_member','set_site_member'))) AND NOT p.oid=ANY(v_expected)) THEN
+    RAISE EXCEPTION 'Unexpected private function outside reviewed ownership manifest'; END IF;
+END $owners$;
+DO $revoke$
 DECLARE r record;
 BEGIN
-  FOR r IN SELECT p.oid::regprocedure AS signature FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
-    WHERE n.nspname='quarry_private' OR (n.nspname='public' AND p.proname IN ('bootstrap_organization','create_quarry_site','set_multi_site','transition_onboarding','set_organization_member','set_site_member')) LOOP
-    EXECUTE format('ALTER FUNCTION %s OWNER TO quarryone_executor',r.signature);
+  FOR r IN SELECT p.oid::regprocedure AS signature FROM pg_catalog.pg_proc p
+    JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='quarry_private' AND p.proowner=(SELECT oid FROM pg_catalog.pg_roles WHERE rolname='quarryone_executor') LOOP
+    EXECUTE format('REVOKE ALL ON FUNCTION %s FROM PUBLIC,anon,authenticated,service_role',r.signature);
   END LOOP;
-END $$;
-REVOKE ALL ON ALL FUNCTIONS IN SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION quarry_private.is_member(uuid),quarry_private.is_admin(uuid),quarry_private.can_access_site(uuid,uuid),
+END $revoke$;
+GRANT EXECUTE ON FUNCTION quarry_private.request_user_id(),quarry_private.is_member(uuid),quarry_private.is_admin(uuid),quarry_private.can_access_site(uuid,uuid),
   quarry_private.can_view_profile(uuid),quarry_private.can_read_customers(uuid) TO authenticated;
 REVOKE ALL ON FUNCTION public.bootstrap_organization(uuid,text,text), public.create_quarry_site(uuid,text,text),
   public.set_multi_site(uuid,boolean,bigint), public.transition_onboarding(uuid,text,bigint),
@@ -402,4 +459,33 @@ REVOKE ALL ON FUNCTION public.bootstrap_organization(uuid,text,text), public.cre
 GRANT EXECUTE ON FUNCTION public.bootstrap_organization(uuid,text,text), public.create_quarry_site(uuid,text,text),
   public.set_multi_site(uuid,boolean,bigint), public.transition_onboarding(uuid,text,bigint),
   public.set_organization_member(uuid,uuid,text,text,boolean), public.set_site_member(uuid,uuid,uuid,boolean) TO authenticated;
+SET LOCAL ROLE postgres;
+DO $acl$
+DECLARE r record; v_allowed oid[] := ARRAY['quarry_private.request_user_id()'::regprocedure::oid,'quarry_private.is_member(uuid)'::regprocedure::oid,'quarry_private.is_admin(uuid)'::regprocedure::oid,'quarry_private.can_access_site(uuid,uuid)'::regprocedure::oid,'quarry_private.can_view_profile(uuid)'::regprocedure::oid,'quarry_private.can_read_customers(uuid)'::regprocedure::oid,'public.bootstrap_organization(uuid,text,text)'::regprocedure::oid,'public.create_quarry_site(uuid,text,text)'::regprocedure::oid,'public.set_multi_site(uuid,boolean,bigint)'::regprocedure::oid,'public.transition_onboarding(uuid,text,bigint)'::regprocedure::oid,'public.set_organization_member(uuid,uuid,text,text,boolean)'::regprocedure::oid,'public.set_site_member(uuid,uuid,uuid,boolean)'::regprocedure::oid];
+BEGIN
+  FOR r IN SELECT p.oid FROM pg_catalog.pg_proc p JOIN pg_catalog.pg_namespace n ON n.oid=p.pronamespace
+    WHERE n.nspname='quarry_private' OR p.oid=ANY(v_allowed) LOOP
+    IF pg_catalog.has_function_privilege('authenticated',r.oid,'EXECUTE') IS DISTINCT FROM (r.oid=ANY(v_allowed))
+      OR pg_catalog.has_function_privilege('anon',r.oid,'EXECUTE')
+      OR pg_catalog.has_function_privilege('service_role',r.oid,'EXECUTE') THEN
+      RAISE EXCEPTION 'Unexpected client function execution privilege: %',r.oid::regprocedure; END IF;
+  END LOOP;
+  IF NOT pg_catalog.has_function_privilege('quarryone_executor','quarry_private.require_verified_request_user()','EXECUTE')
+    OR pg_catalog.has_schema_privilege('quarryone_executor','auth','USAGE')
+    OR EXISTS (SELECT 1 FROM pg_catalog.pg_attribute a WHERE a.attrelid='auth.users'::regclass
+      AND a.attname IN ('id','email_confirmed_at','phone_confirmed_at','is_anonymous')
+      AND pg_catalog.has_column_privilege('quarryone_executor',a.attrelid,a.attnum,'SELECT')) THEN
+    RAISE EXCEPTION 'Executor Auth boundary invalid'; END IF;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_proc p CROSS JOIN LATERAL pg_catalog.aclexplode(coalesce(p.proacl,pg_catalog.acldefault('f',p.proowner))) a
+    WHERE p.oid='quarry_private.require_verified_request_user()'::regprocedure
+    AND a.grantee NOT IN (SELECT oid FROM pg_catalog.pg_roles WHERE rolname IN ('postgres','quarryone_executor'))) THEN
+    RAISE EXCEPTION 'Verification bridge execution exceeds owner/executor allowlist'; END IF;
+  IF pg_catalog.has_schema_privilege('authenticated','quarry_private','CREATE')
+    OR pg_catalog.has_schema_privilege('anon','quarry_private','USAGE')
+    OR pg_catalog.has_schema_privilege('service_role','quarry_private','USAGE') THEN
+    RAISE EXCEPTION 'Unsafe private schema privilege'; END IF;
+  IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname IN ('anon','authenticated','service_role')
+    AND pg_catalog.pg_has_role(oid,'quarryone_executor','MEMBER')) THEN
+    RAISE EXCEPTION 'API role may not assume executor'; END IF;
+END $acl$;
 COMMIT;

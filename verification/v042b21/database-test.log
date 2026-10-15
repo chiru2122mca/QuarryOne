@@ -1,0 +1,1487 @@
+$ psql --version
+psql (PostgreSQL) 17.11
+
+$ initdb -D C:\Users\Chiru\AppData\Local\Temp\quarryone-sql-f0f9c107-a910-4e24-b281-70bd7abbec28\cluster -U quarry_test_superuser --auth=trust --no-locale --encoding=UTF8
+The files belonging to this database system will be owned by user "Chiru".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "C".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+creating directory C:/Users/Chiru/AppData/Local/Temp/quarryone-sql-f0f9c107-a910-4e24-b281-70bd7abbec28/cluster ... ok
+creating subdirectories ... ok
+selecting dynamic shared memory implementation ... windows
+selecting default "max_connections" ... 100
+selecting default "shared_buffers" ... 128MB
+selecting default time zone ... Asia/Calcutta
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+Success. You can now start the database server using:
+
+    ^"C^:^\Program^ Files^\PostgreSQL^\17^\bin^\pg^_ctl^" -D ^"C^:^\Users^\Chiru^\AppData^\Local^\Temp^\quarryone^-sql^-f0f9c107^-a910^-4e24^-b281^-70bd7abbec28^\cluster^" -l logfile start
+
+
+$ pg_ctl -D C:\Users\Chiru\AppData\Local\Temp\quarryone-sql-f0f9c107-a910-4e24-b281-70bd7abbec28\cluster -l C:\Users\Chiru\AppData\Local\Temp\quarryone-sql-f0f9c107-a910-4e24-b281-70bd7abbec28\server.log -o -h 127.0.0.1 -p 64855 -w start
+waiting for server to start.... done
+server started
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/tests/00_auth_stub.sql
+CREATE ROLE
+CREATE ROLE
+CREATE ROLE
+CREATE ROLE
+GRANT ROLE
+CREATE SCHEMA
+CREATE TABLE
+CREATE FUNCTION
+GRANT
+GRANT
+INSERT 0 7
+INSERT 0 1
+INSERT 0 1
+CREATE SCHEMA
+CREATE TABLE
+CREATE FUNCTION
+CREATE FUNCTION
+GRANT
+GRANT
+GRANT
+ALTER DEFAULT PRIVILEGES
+ALTER DEFAULT PRIVILEGES
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/drafts/202610100001_foundation.draft.sql
+BEGIN
+CREATE SCHEMA
+REVOKE
+REVOKE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+ALTER TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE INDEX
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+DO
+REVOKE
+REVOKE
+REVOKE
+COMMIT
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/drafts/202610100002_access.draft.sql
+BEGIN
+CREATE ROLE
+GRANT ROLE
+GRANT
+GRANT
+GRANT
+GRANT
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+REVOKE
+GRANT
+GRANT
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+CREATE POLICY
+DO
+DO
+COMMIT
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/drafts/202610100003_controlled_onboarding.draft.sql
+BEGIN
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+DO
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE FUNCTION
+CREATE TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+REVOKE
+GRANT
+REVOKE
+GRANT
+COMMIT
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/tests/10_foundation.sql
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000008
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000009
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ set_config
+------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ set_multi_site
+----------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000002
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+RESET
+INSERT 0 5
+INSERT 0 5
+UPDATE 2
+UPDATE 3
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 3
+INSERT 0 3
+INSERT 0 2
+CREATE FUNCTION
+REVOKE
+              make_block
+--------------------------------------
+ 2f618baf-405c-4bfb-bc0d-0b54efa5ab71
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+CREATE FUNCTION
+REVOKE
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+UPDATE 1
+ expect_error
+--------------
+
+(1 row)
+
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+RESET
+UPDATE 1
+ expect_error
+--------------
+
+(1 row)
+
+SET
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000006
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000003
+(1 row)
+
+                    set_config
+---------------------------------------------------
+ {"role":"OWNER","user_metadata":{"role":"OWNER"}}
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000004
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000005
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000007
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+RESET
+UPDATE 1
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000003
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+RESET
+SET
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+RESET
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000002
+(1 row)
+
+ set_multi_site
+----------------
+
+(1 row)
+
+RESET
+UPDATE 1
+INSERT 0 1
+SET
+ set_multi_site
+----------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000003
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000002
+(1 row)
+
+ set_multi_site
+----------------
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+RESET
+ passing_local_sql_assertions
+------------------------------
+                           91
+(1 row)
+
+psql:database/tests/10_foundation.sql:4: NOTICE:  PASS: unverified identity cannot bootstrap [42501]
+psql:database/tests/10_foundation.sql:6: NOTICE:  PASS: anonymous Auth identity cannot bootstrap [42501]
+psql:database/tests/10_foundation.sql:8: NOTICE:  PASS: missing identity cannot bootstrap [42501]
+psql:database/tests/10_foundation.sql:11: NOTICE:  PASS: bootstrap retry returns same organization
+psql:database/tests/10_foundation.sql:12: NOTICE:  PASS: bootstrap payload mismatch rejected [22023]
+psql:database/tests/10_foundation.sql:13: NOTICE:  PASS: bootstrap fixed owner membership
+psql:database/tests/10_foundation.sql:14: NOTICE:  PASS: default draft and single-site mode
+psql:database/tests/10_foundation.sql:16: NOTICE:  PASS: site creation retry returns same site
+psql:database/tests/10_foundation.sql:17: NOTICE:  PASS: first site becomes primary
+psql:database/tests/10_foundation.sql:18: NOTICE:  PASS: single-site blocks second site [23514]
+psql:database/tests/10_foundation.sql:19: NOTICE:  PASS: cannot skip review [23514]
+psql:database/tests/10_foundation.sql:20: NOTICE:  PASS: incomplete onboarding cannot reach review [23514]
+psql:database/tests/10_foundation.sql:23: NOTICE:  PASS: cannot disable with second setup site [23514]
+psql:database/tests/10_foundation.sql:24: NOTICE:  PASS: stale settings revision rejected [40001]
+psql:database/tests/10_foundation.sql:28: NOTICE:  PASS: owner cannot read other organization
+psql:database/tests/10_foundation.sql:29: NOTICE:  PASS: cross-tenant controlled operation denied [42501]
+psql:database/tests/10_foundation.sql:79: NOTICE:  PASS: exact FT calculation retains measurements
+psql:database/tests/10_foundation.sql:80: NOTICE:  PASS: exact CFT conversion
+psql:database/tests/10_foundation.sql:81: NOTICE:  PASS: unrounded metric decimal volume
+psql:database/tests/10_foundation.sql:82: NOTICE:  PASS: rounding affects display only
+psql:database/tests/10_foundation.sql:83: NOTICE:  PASS: historical inventory includes opening and rejected
+psql:database/tests/10_foundation.sql:84: NOTICE:  PASS: available volume excludes rejected
+psql:database/tests/10_foundation.sql:85: NOTICE:  PASS: opening stock excluded from production capture
+psql:database/tests/10_foundation.sql:86: NOTICE:  PASS: duplicate block number prevented across organization [23505]
+psql:database/tests/10_foundation.sql:87: NOTICE:  PASS: block number year must match original production date [23514]
+psql:database/tests/10_foundation.sql:88: NOTICE:  PASS: new produced block cannot omit capture entry [23514]
+psql:database/tests/10_foundation.sql:89: NOTICE:  PASS: new blocks cannot fabricate reservations [23514]
+psql:database/tests/10_foundation.sql:90: NOTICE:  PASS: stockyard reassignment cannot contradict existing block pit [23514]
+psql:database/tests/10_foundation.sql:91: NOTICE:  PASS: opening stock retains explicit as-of provenance [23514]
+psql:database/tests/10_foundation.sql:92: NOTICE:  PASS: caller cannot replace generated volume [428C9]
+psql:database/tests/10_foundation.sql:93: NOTICE:  PASS: opening stock cannot get a production entry [23503]
+psql:database/tests/10_foundation.sql:94: NOTICE:  PASS: produced block cannot lose capture entry [23514]
+psql:database/tests/10_foundation.sql:95: NOTICE:  PASS: status transitions are not implemented [23514]
+psql:database/tests/10_foundation.sql:106: NOTICE:  PASS: zero dimensions rejected [23514]
+psql:database/tests/10_foundation.sql:107: NOTICE:  PASS: negative dimensions rejected [23514]
+psql:database/tests/10_foundation.sql:108: NOTICE:  PASS: NaN dimensions rejected [23514]
+psql:database/tests/10_foundation.sql:109: NOTICE:  PASS: infinite dimensions rejected [23514]
+psql:database/tests/10_foundation.sql:110: NOTICE:  PASS: unsupported dimension unit rejected [23514]
+psql:database/tests/10_foundation.sql:111: NOTICE:  PASS: cross-tenant material rejected [23503]
+psql:database/tests/10_foundation.sql:112: NOTICE:  PASS: cross-site pit rejected [23503]
+psql:database/tests/10_foundation.sql:113: NOTICE:  PASS: dedicated stockyard pit mismatch rejected [23514]
+psql:database/tests/10_foundation.sql:114: NOTICE:  PASS: cross-tenant stockyard rejected [23503]
+psql:database/tests/10_foundation.sql:115: NOTICE:  PASS: block number zero or identity rewrite rejected [23514]
+psql:database/tests/10_foundation.sql:116: NOTICE:  PASS: site FK carries tenant [23503]
+psql:database/tests/10_foundation.sql:117: NOTICE:  PASS: pit names unique ignoring case and whitespace [23505]
+psql:database/tests/10_foundation.sql:118: NOTICE:  PASS: site deletion preserves historical references [23503]
+psql:database/tests/10_foundation.sql:119: NOTICE:  PASS: invalid operations leave inventory unchanged
+psql:database/tests/10_foundation.sql:120: NOTICE:  PASS: organizations cannot be inserted already active [23514]
+psql:database/tests/10_foundation.sql:121: NOTICE:  PASS: RLS enabled on all 13 public tables
+psql:database/tests/10_foundation.sql:123: NOTICE:  PASS: no direct authenticated DML grants on any core table
+psql:database/tests/10_foundation.sql:124: NOTICE:  PASS: number allocator is private
+psql:database/tests/10_foundation.sql:125: NOTICE:  PASS: number allocation follows imported identities
+psql:database/tests/10_foundation.sql:126: NOTICE:  PASS: number allocator advances unique sequence
+psql:database/tests/10_foundation.sql:127: NOTICE:  PASS: year counter has independent sequence
+psql:database/tests/10_foundation.sql:129: NOTICE:  PASS: six-digit capacity fails explicitly [2200H]
+psql:database/tests/10_foundation.sql:136: NOTICE:  PASS: new members require invitation acceptance [42501]
+psql:database/tests/10_foundation.sql:137: NOTICE:  PASS: cross-tenant site grant rejected [23514]
+psql:database/tests/10_foundation.sql:138: NOTICE:  PASS: last active owner cannot be removed [23514]
+psql:database/tests/10_foundation.sql:140: NOTICE:  PASS: reviewed configuration locked [23514]
+psql:database/tests/10_foundation.sql:142: NOTICE:  PASS: review can return to draft
+psql:database/tests/10_foundation.sql:145: NOTICE:  PASS: activation validated and timestamped
+psql:database/tests/10_foundation.sql:146: NOTICE:  PASS: activation marks configured sites operational
+psql:database/tests/10_foundation.sql:147: NOTICE:  PASS: active organization cannot revert to draft [23514]
+psql:database/tests/10_foundation.sql:150: NOTICE:  PASS: active organization cannot lose primary site [23514]
+psql:database/tests/10_foundation.sql:152: NOTICE:  PASS: archived secondary history still blocks disabling [23514]
+psql:database/tests/10_foundation.sql:153: NOTICE:  PASS: site/mode/lifecycle changes preserve block history
+psql:database/tests/10_foundation.sql:155: NOTICE:  PASS: admin cannot promote another admin [42501]
+psql:database/tests/10_foundation.sql:156: NOTICE:  PASS: admin cannot demote owner [42501]
+psql:database/tests/10_foundation.sql:159: NOTICE:  PASS: assigned supervisor sees only own site blocks
+psql:database/tests/10_foundation.sql:160: NOTICE:  PASS: cross-tenant block reads excluded
+psql:database/tests/10_foundation.sql:161: NOTICE:  PASS: site assignment limits site list
+psql:database/tests/10_foundation.sql:162: NOTICE:  PASS: member reads only own membership
+psql:database/tests/10_foundation.sql:163: NOTICE:  PASS: operational member reads only own profile
+psql:database/tests/10_foundation.sql:164: NOTICE:  PASS: production role cannot read customer PII
+psql:database/tests/10_foundation.sql:165: NOTICE:  PASS: direct settings update denied [42501]
+psql:database/tests/10_foundation.sql:166: NOTICE:  PASS: forged role metadata does not grant admin [42501]
+psql:database/tests/10_foundation.sql:167: NOTICE:  PASS: self-granted site write denied [42501]
+psql:database/tests/10_foundation.sql:168: NOTICE:  PASS: private audit table unreadable [42501]
+psql:database/tests/10_foundation.sql:169: NOTICE:  PASS: client cannot allocate block numbers [42501]
+psql:database/tests/10_foundation.sql:171: NOTICE:  PASS: accountant reads own tenant customer master
+psql:database/tests/10_foundation.sql:173: NOTICE:  PASS: gate role does not read customer master
+psql:database/tests/10_foundation.sql:175: NOTICE:  PASS: unassigned manager has no implicit site access
+psql:database/tests/10_foundation.sql:180: NOTICE:  PASS: revoked org membership overrides lingering site grants
+psql:database/tests/10_foundation.sql:183: NOTICE:  PASS: anonymous table reads denied [42501]
+psql:database/tests/10_foundation.sql:184: NOTICE:  PASS: anonymous RPC execute denied [42501]
+psql:database/tests/10_foundation.sql:186: NOTICE:  PASS: bootstrap retry creates one audit event per organization
+psql:database/tests/10_foundation.sql:187: NOTICE:  PASS: failed operations do not create stray tenants
+psql:database/tests/10_foundation.sql:198: NOTICE:  PASS: safe disable permits empty unassigned archived setup site
+psql:database/tests/10_foundation.sql:200: NOTICE:  PASS: single-site mode does not authorize an unassigned member
+psql:database/tests/10_foundation.sql:204: NOTICE:  PASS: secondary grants alone prevent ambiguous disable [23514]
+psql:database/tests/10_foundation.sql:206: NOTICE:  PASS: inactive secondary grants are not silently discarded [23514]
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/tests/20_hardening.sql
+CREATE FUNCTION
+REVOKE
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+               opening
+--------------------------------------
+ 20410000-0000-0000-0000-000000000001
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+INSERT 0 1
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+DO
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000006
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000007
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000001
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+RESET
+ ok
+----
+
+(1 row)
+
+SET
+              set_config
+--------------------------------------
+ 00000000-0000-0000-0000-000000000002
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+ set_site_member
+-----------------
+
+(1 row)
+
+ expect_error
+--------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ transition_onboarding
+-----------------------
+
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+          create_quarry_site
+--------------------------------------
+ 557cef03-6404-433c-b919-ed3f4f7ceb0d
+(1 row)
+
+ ok
+----
+
+(1 row)
+
+RESET
+psql:database/tests/20_hardening.sql:24: NOTICE:  PASS: unknown-date opening stock preserves reference date and canonical volume
+psql:database/tests/20_hardening.sql:25: NOTICE:  PASS: known opening date retained; identifier year uses opening reference
+psql:database/tests/20_hardening.sql:26: NOTICE:  PASS: opening stock never inflates newly produced records
+psql:database/tests/20_hardening.sql:27: NOTICE:  PASS: opening stock never inflates newly produced volume
+psql:database/tests/20_hardening.sql:28: NOTICE:  PASS: inventory includes both unknown and known-date opening stock
+psql:database/tests/20_hardening.sql:29: NOTICE:  PASS: opening stock requires reference date [23514]
+psql:database/tests/20_hardening.sql:30: NOTICE:  PASS: production requires real production date [23514]
+psql:database/tests/20_hardening.sql:31: NOTICE:  PASS: opening production date cannot follow reference date [23514]
+psql:database/tests/20_hardening.sql:32: NOTICE:  PASS: number year must match opening reference [23514]
+psql:database/tests/20_hardening.sql:33: NOTICE:  PASS: five-digit number rejected [23514]
+psql:database/tests/20_hardening.sql:34: NOTICE:  PASS: six-digit zero sequence rejected [23514]
+psql:database/tests/20_hardening.sql:35: NOTICE:  PASS: issued opening block number cannot be reused [23505]
+psql:database/tests/20_hardening.sql:36: NOTICE:  PASS: unknown production date cannot be silently rewritten [23514]
+psql:database/tests/20_hardening.sql:37: NOTICE:  PASS: opening block history cannot be deleted [23514]
+psql:database/tests/20_hardening.sql:38: NOTICE:  PASS: allocator skips imported ledger identities
+psql:database/tests/20_hardening.sql:39: NOTICE:  PASS: committed unbound reservation is not reused
+psql:database/tests/20_hardening.sql:40: NOTICE:  PASS: an import cannot steal another block UUID reservation [23505]
+psql:database/tests/20_hardening.sql:41: NOTICE:  PASS: future save reserves number against server block identity
+psql:database/tests/20_hardening.sql:43: NOTICE:  PASS: matching UUID consumes exactly its reserved number
+psql:database/tests/20_hardening.sql:44: NOTICE:  PASS: reserved number tombstone cannot be deleted [23514]
+psql:database/tests/20_hardening.sql:45: NOTICE:  PASS: counter cannot rewind [23514]
+psql:database/tests/20_hardening.sql:46: NOTICE:  PASS: counter cannot be removed [23514]
+psql:database/tests/20_hardening.sql:47: NOTICE:  PASS: issued number cannot be unbound [23514]
+psql:database/tests/20_hardening.sql:49: NOTICE:  PASS: capacity exhaustion has explicit SQLSTATE [2200H]
+psql:database/tests/20_hardening.sql:50: NOTICE:  PASS: capacity failure retains counter and creates no duplicate
+psql:database/tests/20_hardening.sql:51: NOTICE:  PASS: audit entries cannot be rewritten [23514]
+psql:database/tests/20_hardening.sql:52: NOTICE:  PASS: audit entries cannot be erased [23514]
+psql:database/tests/20_hardening.sql:53: NOTICE:  PASS: executor owner has no login, superuser or global bypass privileges
+psql:database/tests/20_hardening.sql:54: NOTICE:  PASS: clients cannot inherit executor role
+psql:database/tests/20_hardening.sql:56: NOTICE:  PASS: all controlled/helper functions have explicit restricted ownership
+psql:database/tests/20_hardening.sql:58: NOTICE:  PASS: all SECURITY DEFINER functions pin empty search path
+psql:database/tests/20_hardening.sql:61: NOTICE:  PASS: authenticated private execution is exactly the policy-helper allowlist
+psql:database/tests/20_hardening.sql:62: NOTICE:  PASS: client schema object creation denied
+psql:database/tests/20_hardening.sql:64: NOTICE:  PASS: permissive function defaults do not expose private functions
+psql:database/tests/20_hardening.sql:67: NOTICE:  PASS: permissive table defaults do not expose internal bookkeeping
+psql:database/tests/20_hardening.sql:68: NOTICE:  PASS: service credential cannot bypass authenticated bootstrap contract
+psql:database/tests/20_hardening.sql:70: NOTICE:  PASS: service default grants do not create a direct-table onboarding bypass
+psql:database/tests/20_hardening.sql:71: NOTICE:  PASS: stored canonical volume must remain representable and positive
+psql:database/tests/20_hardening.sql:82: NOTICE:  PASS: numeric underflow cannot commit a zero canonical volume
+psql:database/tests/20_hardening.sql:86: NOTICE:  PASS: admin cannot self-promote to owner [42501]
+psql:database/tests/20_hardening.sql:87: NOTICE:  PASS: admin cannot change another tenant membership [42501]
+psql:database/tests/20_hardening.sql:88: NOTICE:  PASS: revoked organization member cannot receive new site grant [23514]
+psql:database/tests/20_hardening.sql:90: NOTICE:  PASS: admin can clean up site grant after parent revocation
+psql:database/tests/20_hardening.sql:92: NOTICE:  PASS: operational role cannot self-escalate [42501]
+psql:database/tests/20_hardening.sql:93: NOTICE:  PASS: operational role cannot activate another tenant [42501]
+psql:database/tests/20_hardening.sql:94: NOTICE:  PASS: internal authorization helper is not directly executable [42501]
+psql:database/tests/20_hardening.sql:96: NOTICE:  PASS: bootstrap retry validates full semantic payload [22023]
+psql:database/tests/20_hardening.sql:97: NOTICE:  PASS: archived site cannot be returned as newly created [23514]
+psql:database/tests/20_hardening.sql:100: NOTICE:  PASS: sensitive changes record before and after state
+psql:database/tests/20_hardening.sql:104: NOTICE:  PASS: review records exact configuration revision
+psql:database/tests/20_hardening.sql:106: NOTICE:  PASS: membership changes invalidate reviewed snapshot even with fresh revision [23514]
+psql:database/tests/20_hardening.sql:110: NOTICE:  PASS: updated configuration must be reviewed before activation
+psql:database/tests/20_hardening.sql:113: NOTICE:  PASS: additional site creation advances configuration revision
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM quarry_test.results WHERE passed
+144
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -f database/drafts/202610100001_foundation.draft.sql
+BEGIN
+psql:database/drafts/202610100001_foundation.draft.sql:4: ERROR:  schema "quarry_private" already exists
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM public.organizations
+2
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -c BEGIN; CREATE TABLE quarry_test.rollback_probe(id integer); SELECT 1/0; COMMIT;
+BEGIN
+CREATE TABLE
+ERROR:  division by zero
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT to_regclass('quarry_test.rollback_probe') IS NULL
+t
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT id FROM public.organizations WHERE business_name='Deccan Stone Business'
+a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_authenticator -d postgres -v ON_ERROR_STOP=1 -v VERBOSITY=verbose -At -c SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000006',false); SET ROLE quarryone_executor
+SET
+00000000-0000-0000-0000-000000000006
+ERROR:  42501: permission denied to set role "quarryone_executor"
+LOCATION:  call_string_check_hook, guc.c:6947
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_authenticator -d postgres -v ON_ERROR_STOP=1 -v VERBOSITY=verbose -At -c SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',false); SELECT count(*)=0 FROM public.granite_blocks WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397'
+SET
+00000000-0000-0000-0000-000000000003
+t
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_authenticator -d postgres -v ON_ERROR_STOP=1 -v VERBOSITY=verbose -At -c SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false); UPDATE public.organization_settings SET multi_site_enabled=false WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397'
+SET
+00000000-0000-0000-0000-000000000001
+ERROR:  42501: permission denied for table organization_settings
+LOCATION:  aclcheck_error, aclchk.c:2845
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_authenticator -d postgres -v ON_ERROR_STOP=1 -v VERBOSITY=verbose -At -c SET ROLE authenticated; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false); SELECT quarry_private.reserve_block_number('a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397',2026,gen_random_uuid())
+SET
+00000000-0000-0000-0000-000000000001
+ERROR:  42501: permission denied for function reserve_block_number
+LOCATION:  aclcheck_error, aclchk.c:2845
+
+$ concurrent psql
+BLK-2026-000008
+
+$ concurrent psql
+BLK-2026-000009
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000001
+eeaaae0a-abb1-4837-9db4-22a479364f7c
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000001
+eeaaae0a-abb1-4837-9db4-22a479364f7c
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM public.organizations WHERE business_name='Concurrent Business'
+1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT id FROM public.organizations WHERE business_name='Concurrent Business'
+eeaaae0a-abb1-4837-9db4-22a479364f7c
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c INSERT INTO public.organization_memberships(organization_id,user_id,role,access_scope) VALUES('eeaaae0a-abb1-4837-9db4-22a479364f7c','00000000-0000-0000-0000-000000000002','OWNER','ALL_SITES')
+INSERT 0 1
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000001
+
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000002
+ERROR:  Cannot remove the last active owner
+CONTEXT:  PL/pgSQL function public.set_organization_member(uuid,uuid,text,text,boolean) line 16 at RAISE
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM public.organization_memberships WHERE organization_id='eeaaae0a-abb1-4837-9db4-22a479364f7c' AND role='OWNER' AND is_active
+1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT right(user_id::text,1) FROM public.organization_memberships WHERE organization_id='eeaaae0a-abb1-4837-9db4-22a479364f7c' AND role='OWNER' AND is_active
+2
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000002
+dd0e8e93-e97c-4b84-83bb-fae764c218ef
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000002
+ERROR:  Enable multi-site before adding another site
+CONTEXT:  PL/pgSQL function quarry_private.guard_site_mode() line 8 at RAISE
+SQL statement "INSERT INTO public.quarry_sites(organization_id,code,name) VALUES (p_org,upper(btrim(p_code)),btrim(p_name)) RETURNING id"
+PL/pgSQL function public.create_quarry_site(uuid,text,text) line 14 at SQL statement
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM public.quarry_sites WHERE organization_id='eeaaae0a-abb1-4837-9db4-22a479364f7c'
+1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT revision FROM public.organization_settings WHERE organization_id='eeaaae0a-abb1-4837-9db4-22a479364f7c'
+2
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000002
+
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000002
+ERROR:  Configuration changed; refresh before saving
+CONTEXT:  PL/pgSQL function public.set_multi_site(uuid,boolean,bigint) line 9 at RAISE
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT revision FROM public.organization_settings WHERE organization_id='eeaaae0a-abb1-4837-9db4-22a479364f7c'
+3
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c INSERT INTO quarry_private.block_number_counters(organization_id,numbering_year,last_sequence) VALUES('a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397',2050,999998)
+INSERT 0 1
+
+$ concurrent psql
+BLK-2050-999999
+
+$ concurrent psql
+ERROR:  Block-number capacity exhausted for organization/year
+CONTEXT:  PL/pgSQL function quarry_private.reserve_block_number(uuid,integer,uuid) line 9 at RAISE
+SQL function "allocate_block_number" statement 1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT primary_site_id FROM public.organization_settings WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397'
+865ccfd2-820b-4ddf-9149-d4a0bb3daae1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT id FROM public.quarry_pits WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397' AND site_id='865ccfd2-820b-4ddf-9149-d4a0bb3daae1' AND name='Pit A'
+2dc7d519-404b-4909-9d87-f7ef72317815
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT id FROM public.quarry_pits WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397' AND site_id='865ccfd2-820b-4ddf-9149-d4a0bb3daae1' AND name='Pit B'
+842cf4f6-9f51-4633-b941-2a291d254490
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c INSERT INTO public.stockyards(organization_id,site_id,name) VALUES('a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397','865ccfd2-820b-4ddf-9149-d4a0bb3daae1','Race Yard') RETURNING id
+055dd5ac-be6d-4c84-a6da-31a809d8a309
+INSERT 0 1
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT material_id FROM public.granite_blocks WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397' LIMIT 1
+94a95d5c-bcbc-470d-9f93-8921055ab6c0
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT grade_id FROM public.granite_blocks WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397' LIMIT 1
+c9aa5857-2695-4b19-89d3-484979ec5f76
+
+$ concurrent psql
+UPDATE 1
+
+$ concurrent psql
+ERROR:  Stockyard belongs to another pit
+CONTEXT:  PL/pgSQL function quarry_private.guard_block() line 13 at RAISE
+SQL statement "INSERT INTO public.granite_blocks(organization_id,site_id,pit_id,material_id,grade_id,stockyard_id,created_by,
+    block_number,production_date,length,width,height,dimension_unit,stockyard_location,supervisor_name,status,origin,opening_stock_as_of)
+  VALUES(p_org,p_site,p_pit,p_mat,p_grade,p_yard,p_user,p_number,'2026-10-10',p_length,p_width,p_height,p_unit,'Yard bay 1','Ramesh',p_status,p_origin,
+    CASE WHEN p_origin='OPENING_STOCK' THEN '2026-10-10'::date ELSE NULL END) RETURNING id"
+PL/pgSQL function quarry_test.make_block(uuid,uuid,uuid,uuid,uuid,uuid,uuid,text,numeric,numeric,numeric,text,text,text,boolean) line 4 at SQL statement
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT NOT EXISTS(SELECT 1 FROM public.granite_blocks b JOIN public.stockyards y ON y.id=b.stockyard_id WHERE y.pit_id IS NOT NULL AND y.pit_id<>b.pit_id)
+t
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name='quarry_hardening_revoker' AND wait_event='PgSleep')
+f
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name='quarry_hardening_revoker' AND wait_event='PgSleep')
+t
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000006
+ERROR:  Not authorized
+CONTEXT:  PL/pgSQL function quarry_private.require_admin(uuid) line 8 at RAISE
+SQL statement "SELECT quarry_private.require_admin(p_org)"
+PL/pgSQL function public.create_quarry_site(uuid,text,text) line 4 at PERFORM
+
+$ concurrent psql
+SET
+00000000-0000-0000-0000-000000000001
+SET
+BEGIN
+
+
+COMMIT
+
+$ psql -X -h 127.0.0.1 -p 64855 -U quarry_test_superuser -d postgres -v ON_ERROR_STOP=1 -At -c SELECT count(*) FROM public.quarry_sites WHERE organization_id='a98ca1a6-1d0c-4eee-b4e1-d426d3ef1397' AND code='REVOKED_RACE'
+0
+
+$ pg_ctl -D C:\Users\Chiru\AppData\Local\Temp\quarryone-sql-f0f9c107-a910-4e24-b281-70bd7abbec28\cluster -m fast -w stop
+waiting for server to shut down.... done
+server stopped

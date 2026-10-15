@@ -1,5 +1,19 @@
 # QuarryOne V0.4.2 — Supabase development rollout
 
+## V0.4.2B2.2 current gate — Option A implemented locally, review pending
+
+Option A is implemented in all three draft/promoted pairs. The trusted postgres-owned current-request verification bridge replaces direct executor Auth reads; operational identity uses the invoker helper matching the observed Auth claim precedence. Explicit SET-only migration membership, signature ownership manifests and final ACL/schema checks preserve restricted operational ownership. The local migration harness now uses a non-superuser CLI-like session, including explicit restoration to postgres after executor DDL.
+
+Fresh checks passed: TypeScript, ESLint, 53 application tests, 185 SQL assertions, eight non-superuser API/executor process checks, eight concurrency scenarios, wrong-principal rejection and both rollback checks. Read-only hosted metadata confirms absent migration history/quarry_private schema and current auth.uid() semantics on the exact approved Mumbai target. Updated hashes and byte equality are recorded in the promotion plan; prior B2 fingerprints are preserved in historical evidence.
+
+See the [B2.2 handoff](../verification/v042b22/README.md). Local permission compatibility is demonstrated; managed-platform DDL, actual CLI migration identity, transaction/history behavior, effective hosted ACLs and real JWT/RLS tests remain pending. No hosted deployment, dry run, roles/grants/DDL change, Docker or mobile change is authorized/performed. Review this implementation before granting any next preflight/dry-run/deployment scope. Migration execution remains disabled. Earlier milestone notes below are historical.
+
+## V0.4.2B2.1 current gate — permission architecture review
+
+The [permission compatibility proposal](SUPABASE_PERMISSION_RESOLUTION.md) recommends a single trusted postgres-owned, current-user-only Auth verification helper, plus an unprivileged request-identity helper, while keeping all operational controllers/predicates under quarryone_executor. It evaluates alternative ownership and Edge verification paths, maps exact proposed migration changes and records unverified ownership/grant assumptions. Both blanket ownership-transfer loops must preserve the proposed verification helper's trusted owner; operational role SET authority must be explicit.
+
+This is design only. The proposed helpers do not exist; SQL drafts, promoted files, config and promotion fingerprints remain unchanged. Fresh existing application/security/concurrency/rollback checks passed, but do not prove the proposal. No new hosted operation or Git push occurred. Await architecture review before implementing changes, and separate approval before any dry run or deployment. B2's Auth grant blocker remains active.
+
 ## V0.4.2B2 current gate — locally promoted, Auth grant blocker
 
 The operator chose native PostgreSQL tests plus the isolated hosted development environment, explicitly skipping Docker/Supabase-stack rehearsal. On 2026-10-14, fresh checks verified the exact Mumbai link/project and PostgreSQL 17.11. No application objects/history were found. Three versioned migration files were promoted locally as byte-identical copies, with reviewed hashes/order preserved; no test stubs were included. Existing local checks passed again: TypeScript, ESLint, 53 application tests, 144 SQL assertions, four non-superuser checks, eight concurrency scenarios and rollback checks.

@@ -4,6 +4,12 @@ CREATE ROLE authenticated NOLOGIN;
 CREATE ROLE service_role NOLOGIN BYPASSRLS;
 CREATE ROLE quarry_test_authenticator LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
 GRANT anon,authenticated TO quarry_test_authenticator;
+-- Model the hosted migration principal without introducing any bypass attribute.
+CREATE ROLE postgres LOGIN NOSUPERUSER NOCREATEDB CREATEROLE INHERIT NOBYPASSRLS;
+CREATE ROLE quarry_test_migrator LOGIN NOINHERIT NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS;
+GRANT postgres TO quarry_test_migrator WITH SET TRUE, INHERIT FALSE;
+GRANT CREATE ON DATABASE postgres TO postgres;
+GRANT USAGE,CREATE ON SCHEMA public TO postgres WITH GRANT OPTION;
 CREATE SCHEMA auth;
 CREATE TABLE auth.users (
   id uuid PRIMARY KEY,
@@ -12,9 +18,12 @@ CREATE TABLE auth.users (
   is_anonymous boolean NOT NULL DEFAULT false
 );
 CREATE FUNCTION auth.uid() RETURNS uuid LANGUAGE sql STABLE AS $$
-  SELECT nullif(current_setting('request.jwt.claim.sub', true),'')::uuid
+  SELECT coalesce(nullif(current_setting('request.jwt.claim.sub',true),''),
+    (nullif(current_setting('request.jwt.claims',true),'')::jsonb ->> 'sub'))::uuid
 $$;
-GRANT USAGE ON SCHEMA auth TO anon, authenticated;
+GRANT USAGE ON SCHEMA auth TO anon,authenticated,service_role,postgres;
+GRANT SELECT(id,email_confirmed_at,phone_confirmed_at,is_anonymous) ON auth.users TO postgres WITH GRANT OPTION;
+GRANT REFERENCES(id) ON auth.users TO postgres;
 GRANT EXECUTE ON FUNCTION auth.uid() TO anon, authenticated;
 INSERT INTO auth.users(id,email_confirmed_at) SELECT
   ('00000000-0000-0000-0000-' || lpad(n::text,12,'0'))::uuid, now() FROM generate_series(1,7) n;
@@ -46,3 +55,7 @@ GRANT EXECUTE ON FUNCTION quarry_test.ok(boolean,text),quarry_test.expect_error(
 -- Simulate permissive provider defaults; migrations must revoke, not assume safe defaults.
 ALTER DEFAULT PRIVILEGES GRANT ALL ON TABLES TO anon,authenticated,service_role;
 ALTER DEFAULT PRIVILEGES GRANT EXECUTE ON FUNCTIONS TO anon,authenticated,service_role;
+
+-- Defaults on the non-superuser migration role deliberately begin permissive.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO anon,authenticated,service_role;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT EXECUTE ON FUNCTIONS TO anon,authenticated,service_role;

@@ -1,6 +1,12 @@
--- REVIEW DRAFT ONLY. Not in supabase/migrations; never apply to a live project.
+-- REVIEWED SQL SOURCE. Promoted copy prepared locally; hosted deployment requires approval.
 -- PostgreSQL 17+. auth.users is supplied by Supabase (stubbed only in local tests).
 BEGIN;
+DO $principal$
+BEGIN
+  IF current_user <> 'postgres' OR NOT EXISTS (
+    SELECT 1 FROM pg_catalog.pg_roles WHERE rolname=current_user AND NOT rolsuper AND rolcreaterole
+  ) THEN RAISE EXCEPTION 'Migrations require the stable non-superuser postgres principal with CREATEROLE' USING ERRCODE='42501'; END IF;
+END $principal$;
 CREATE SCHEMA quarry_private;
 REVOKE ALL ON SCHEMA quarry_private FROM PUBLIC, anon, authenticated, service_role;
 REVOKE CREATE ON SCHEMA public FROM PUBLIC, anon, authenticated;

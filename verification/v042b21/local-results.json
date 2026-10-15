@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-14",
+  "baseline": "3b1f2e4",
+  "typecheck": "passed",
+  "eslint": "passed",
+  "application_tests": {
+    "passed": 53,
+    "failed": 0
+  },
+  "native_postgresql": {
+    "assertions": 144,
+    "authorization_checks": 4,
+    "concurrency_scenarios": 8,
+    "rollback_checks": 2,
+    "passed": true,
+    "scratch_stopped": true
+  },
+  "sql_checks": [
+    {
+      "source": "database/drafts/202610100001_foundation.draft.sql",
+      "target": "supabase/migrations/20261013000000_foundation.sql",
+      "fingerprint_unchanged": true,
+      "byte_identical": true
+    },
+    {
+      "source": "database/drafts/202610100002_access.draft.sql",
+      "target": "supabase/migrations/20261013000001_access.sql",
+      "fingerprint_unchanged": true,
+      "byte_identical": true
+    },
+    {
+      "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
+      "target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
+      "fingerprint_unchanged": true,
+      "byte_identical": true
+    }
+  ],
+  "proposed_solution_implemented": false,
+  "proposed_solution_tested": false,
+  "new_hosted_commands": 0,
+  "hosted_evidence": "Existing same-day B2 catalog and Auth ACL records; not refreshed",
+  "sql_and_promotion_metadata_changed": false,
+  "mobile_changed": false,
+  "local_commit": "not requested; documentation/evidence left uncommitted",
+  "push": false
+}

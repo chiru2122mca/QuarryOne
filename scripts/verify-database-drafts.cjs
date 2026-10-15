@@ -7,7 +7,7 @@ const net = require("node:net");
 const { randomUUID } = require("node:crypto");
 const { spawn, spawnSync } = require("node:child_process");
 const root = path.resolve(__dirname, "..");
-const output = path.join(root, "verification", "v0411");
+const output = path.join(root, "verification", "v042b22");
 const scratch = path.join(os.tmpdir(), `quarryone-sql-${randomUUID()}`);
 const bin =
   process.env.QUARRYONE_PG_BIN ??
@@ -134,15 +134,45 @@ const apiQuery = (sql, id, allowFailure = false) => {
       "start",
     ]);
     run("psql", [...connection(), "-f", "database/tests/00_auth_stub.sql"]);
+    const migrationConnection = connection();
+    migrationConnection[migrationConnection.indexOf("-U") + 1] =
+      "quarry_test_migrator";
+    migrationConnection.push("-c", "SET ROLE postgres");
+    const wrongPrincipal = run(
+      "psql",
+      [
+        ...connection(),
+        "-f",
+        "database/drafts/202610100001_foundation.draft.sql",
+      ],
+      true,
+    );
+    check(
+      wrongPrincipal.status !== 0 &&
+        query("SELECT to_regnamespace('quarry_private') IS NULL") === "t",
+      "unexpected migration principal rejected before DDL",
+    );
     for (const file of fs
       .readdirSync(path.join(root, "database", "drafts"))
       .filter((file) => file.endsWith(".draft.sql"))
       .sort()) {
-      run("psql", [...connection(), "-f", `database/drafts/${file}`]);
+      run("psql", [...migrationConnection, "-f", `database/drafts/${file}`]);
+      if (file.includes("002_access")) {
+        run("psql", [
+          ...connection(),
+          "-c",
+          "ALTER DEFAULT PRIVILEGES FOR ROLE quarryone_executor GRANT EXECUTE ON FUNCTIONS TO anon,authenticated,service_role",
+        ]);
+      }
       check(true, `transactional migration parses and applies: ${file}`);
     }
     run("psql", [...connection(), "-f", "database/tests/10_foundation.sql"]);
     run("psql", [...connection(), "-f", "database/tests/20_hardening.sql"]);
+    run("psql", [
+      ...connection(),
+      "-f",
+      "database/tests/30_permission_architecture.sql",
+    ]);
     const sqlAssertions = Number(
       query("SELECT count(*) FROM quarry_test.results WHERE passed"),
     );
@@ -154,7 +184,7 @@ const apiQuery = (sql, id, allowFailure = false) => {
     const duplicate = run(
       "psql",
       [
-        ...connection(),
+        ...migrationConnection,
         "-f",
         "database/drafts/202610100001_foundation.draft.sql",
       ],
@@ -214,6 +244,53 @@ const apiQuery = (sql, id, allowFailure = false) => {
     check(
       apiPrivate.status !== 0 && apiPrivate.stderr.includes("42501"),
       "non-superuser API session cannot execute private numbering function",
+    );
+    const bridgeDenied = apiQuery(
+      "SELECT quarry_private.require_verified_request_user()",
+      1,
+      true,
+    );
+    check(
+      bridgeDenied.status !== 0 && bridgeDenied.stderr.includes("42501"),
+      "non-superuser API cannot directly invoke Auth verification bridge",
+    );
+    const nativeExecutorArgs = [
+      ...migrationConnection,
+      "-v",
+      "VERBOSITY=verbose",
+      "-At",
+      "-c",
+    ];
+    const authDenied = run(
+      "psql",
+      [...nativeExecutorArgs, "SET ROLE quarryone_executor; SELECT auth.uid()"],
+      true,
+    );
+    check(
+      authDenied.status !== 0 && authDenied.stderr.includes("42501"),
+      "non-superuser executor process cannot call auth.uid directly",
+    );
+    const tableDenied = run(
+      "psql",
+      [
+        ...nativeExecutorArgs,
+        "SET ROLE quarryone_executor; SELECT id FROM auth.users",
+      ],
+      true,
+    );
+    check(
+      tableDenied.status !== 0 && tableDenied.stderr.includes("42501"),
+      "non-superuser executor process cannot read Auth users directly",
+    );
+    const bridgeAllowed = run("psql", [
+      ...nativeExecutorArgs,
+      "SET ROLE quarryone_executor; SELECT set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false); SELECT quarry_private.require_verified_request_user()",
+    ]);
+    check(
+      bridgeAllowed.stdout
+        .trim()
+        .endsWith("00000000-0000-0000-0000-000000000001"),
+      "non-superuser executor process succeeds through trusted verification bridge",
     );
     const numbers = await Promise.all([
       concurrent(

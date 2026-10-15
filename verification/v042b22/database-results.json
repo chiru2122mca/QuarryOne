@@ -1,0 +1,110 @@
+{
+  "version": "psql (PostgreSQL) 17.11",
+  "passed": true,
+  "checks": [
+    {
+      "label": "unexpected migration principal rejected before DDL",
+      "passed": true
+    },
+    {
+      "label": "transactional migration parses and applies: 202610100001_foundation.draft.sql",
+      "passed": true
+    },
+    {
+      "label": "transactional migration parses and applies: 202610100002_access.draft.sql",
+      "passed": true
+    },
+    {
+      "label": "transactional migration parses and applies: 202610100003_controlled_onboarding.draft.sql",
+      "passed": true
+    },
+    {
+      "label": "185 local SQL constraint/authorization/workflow assertions",
+      "passed": true
+    },
+    {
+      "label": "duplicate migration fails safely without changing data",
+      "passed": true
+    },
+    {
+      "label": "failed migration transaction rolls back DDL",
+      "passed": true
+    },
+    {
+      "label": "non-superuser API session cannot assume executor role",
+      "passed": true
+    },
+    {
+      "label": "non-superuser API session enforces revoked organization access",
+      "passed": true
+    },
+    {
+      "label": "non-superuser owner API session has no direct mutation rights",
+      "passed": true
+    },
+    {
+      "label": "non-superuser API session cannot execute private numbering function",
+      "passed": true
+    },
+    {
+      "label": "non-superuser API cannot directly invoke Auth verification bridge",
+      "passed": true
+    },
+    {
+      "label": "non-superuser executor process cannot call auth.uid directly",
+      "passed": true
+    },
+    {
+      "label": "non-superuser executor process cannot read Auth users directly",
+      "passed": true
+    },
+    {
+      "label": "non-superuser executor process succeeds through trusted verification bridge",
+      "passed": true
+    },
+    {
+      "label": "concurrent number allocation returns distinct numbers",
+      "passed": true
+    },
+    {
+      "label": "concurrent bootstrap retries create one tenant",
+      "passed": true
+    },
+    {
+      "label": "concurrent owner removals retain exactly one active owner",
+      "passed": true
+    },
+    {
+      "label": "concurrent single-site creation cannot create two sites",
+      "passed": true
+    },
+    {
+      "label": "concurrent settings changes enforce expected revision",
+      "passed": true
+    },
+    {
+      "label": "concurrent final-slot allocation has one winner and explicit exhaustion",
+      "passed": true
+    },
+    {
+      "label": "concurrent yard reassignment and block creation preserve pit consistency",
+      "passed": true
+    },
+    {
+      "label": "revocation race holds the organization lock before competing request",
+      "passed": true
+    },
+    {
+      "label": "waiting admin mutation rechecks membership after concurrent revocation",
+      "passed": true
+    }
+  ],
+  "failure": null,
+  "scratchDirectory": "C:\\Users\\Chiru\\AppData\\Local\\Temp\\quarryone-sql-a11afffa-eb52-46a6-8a2d-a95aa8e14cd2",
+  "scratchStopped": true,
+  "liveSupabase": "not created, connected or tested",
+  "limitations": [
+    "Synthetic auth.users/auth.uid() and database roles; no signed JWT gateway or live Supabase verification",
+    "Invitation delivery/acceptance, stage-save and operational-write integration remain future contracts"
+  ]
+}

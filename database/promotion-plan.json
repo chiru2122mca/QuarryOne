@@ -1,75 +1,79 @@
 {
-  "stage": "V0.4.2B2",
-  "status": "promoted_locally_not_deployed_blocked_auth_schema_grant",
-  "baseline_commit": "a0c0b76",
+  "stage": "V0.4.2B2.2",
+  "status": "option_a_implemented_locally_pending_review_and_hosted_validation",
+  "baseline_commit": "3b1f2e4",
   "intended_project_name": "quarryone-dev",
   "hosted_project_ref": "vfwdcrptpawfsiaqumjb",
   "checksum_method": "UTF-8 SQL with CRLF normalized to LF; no other transformation",
-  "version_status": "Locally promoted in reviewed order; hosted history absent at B2 preflight; hosted dry run stopped on Auth grant prerequisite",
+  "version_status": "Same unapplied versions; history/application schema absent in 2026-10-15 read-only target snapshot; no dry run or deployment authorized",
   "migrations": [
     {
       "order": 1,
       "source": "database/drafts/202610100001_foundation.draft.sql",
-      "sha256_normalized_lf": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
+      "sha256_normalized_lf": "41b29e626b2904eaebca830bd983b3854770789397734624365e1197d48207ab",
       "proposed_target": "supabase/migrations/20261013000000_foundation.sql",
       "proposed_version": "20261013000000"
     },
     {
       "order": 2,
       "source": "database/drafts/202610100002_access.draft.sql",
-      "sha256_normalized_lf": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
+      "sha256_normalized_lf": "274d9c8d1aaa32be223120b533cd4f463fb02bd481cb883752fea1824850c162",
       "proposed_target": "supabase/migrations/20261013000001_access.sql",
       "proposed_version": "20261013000001"
     },
     {
       "order": 3,
       "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
-      "sha256_normalized_lf": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
+      "sha256_normalized_lf": "8b2237310db08181fc7f2b5ce40be9fe2d2230a8bebefb306778d15898876c48",
       "proposed_target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
       "proposed_version": "20261013000002"
     }
   ],
   "target_preflight": {
-    "stage": "V0.4.2B1",
-    "date": "2026-10-14",
-    "operator_confirmed": true,
+    "stage": "V0.4.2B2.2",
+    "date": "2026-10-15",
     "region": "ap-south-1",
     "postgres_version": "17.11",
     "history_table_exists": false,
-    "application_tables": 0,
+    "application_schema_exists": false,
+    "evidence": "verification/v042b22/hosted-readonly.json",
     "deployment_authorized": false
   },
   "promotion": {
-    "baseline_commit": "be52f88",
-    "date": "2026-10-14",
+    "date": "2026-10-15",
+    "baseline_commit": "3b1f2e4",
+    "approval": "User V0.4.2B2.2 request: Option A local implementation/testing only",
     "files": [
       {
         "source": "database/drafts/202610100001_foundation.draft.sql",
         "target": "supabase/migrations/20261013000000_foundation.sql",
         "version": "20261013000000",
-        "sha256_normalized_lf": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
-        "byte_identical": true,
-        "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+        "previous_b2_sha256": "58a8e767baa9dfdeda56b660a05e0d81bf6b05fd71c124c0e1f820f9cc97485b",
+        "sha256_normalized_lf": "41b29e626b2904eaebca830bd983b3854770789397734624365e1197d48207ab",
+        "byte_identical": true
       },
       {
         "source": "database/drafts/202610100002_access.draft.sql",
         "target": "supabase/migrations/20261013000001_access.sql",
         "version": "20261013000001",
-        "sha256_normalized_lf": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
-        "byte_identical": true,
-        "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+        "previous_b2_sha256": "639cbab003c262a22acd149fd2437ce7435e3740d8cb9dd3b0ec8fe710f34459",
+        "sha256_normalized_lf": "274d9c8d1aaa32be223120b533cd4f463fb02bd481cb883752fea1824850c162",
+        "byte_identical": true
       },
       {
         "source": "database/drafts/202610100003_controlled_onboarding.draft.sql",
         "target": "supabase/migrations/20261013000002_controlled_onboarding.sql",
         "version": "20261013000002",
-        "sha256_normalized_lf": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
-        "byte_identical": true,
-        "differences": "Filename/path only; SQL, comments, BEGIN/COMMIT unchanged"
+        "previous_b2_sha256": "685d03c23d875dd734e69e1fa3c411a7a20a3cccf8848f32f033aa19626e3d52",
+        "sha256_normalized_lf": "8b2237310db08181fc7f2b5ce40be9fe2d2230a8bebefb306778d15898876c48",
+        "byte_identical": true
       }
     ],
-    "sql_logic_changed": false,
-    "dry_run": "not executed: hosted Auth schema grant prerequisite incompatible",
-    "deployment_authorized": false
+    "source_target_differences": "None; byte-identical copies including comments",
+    "sql_logic_changed": true,
+    "review_status": "Implementation awaits review; hosted compatibility not established",
+    "dry_run": "not executed; expressly prohibited in B2.2",
+    "deployment_authorized": false,
+    "previous_plan": "verification/v042b22/previous-promotion-plan.json"
   }
 }
