@@ -19,7 +19,7 @@ major_version = 17
 [db.migrations]
 # Defensive opt-out only; never treat configuration as permission to deploy.
 # Stage B must explicitly review promotion and enable migrations before applying them.
-enabled = false
+enabled = true
 schema_paths = []
 
 [db.seed]
