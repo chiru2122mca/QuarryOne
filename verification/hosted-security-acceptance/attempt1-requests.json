@@ -1,0 +1,252 @@
+[
+  {
+    "label": "Create disposable ownerA",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerA",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerA",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable ownerB",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerB",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerB",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable supervisor",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in supervisor",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session supervisor",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable revoked",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in revoked",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session revoked",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable admin",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in admin",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session admin",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "admin password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable unverified",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in unverified",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 400,
+    "code": "email_not_confirmed"
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerB RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerB RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerA RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerB RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 400,
+    "code": "22023"
+  },
+  {
+    "label": "anon RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "public anon key, no user session",
+    "status": 401,
+    "code": "42501"
+  },
+  {
+    "label": "anon read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "public anon key, no user session",
+    "status": 401,
+    "code": "42501"
+  },
+  {
+    "label": "ownerA RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA RPC set_site_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_site_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  }
+]

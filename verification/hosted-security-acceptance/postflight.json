@@ -1,0 +1,36 @@
+{
+  "audit_count": 9,
+  "bootstrap_receipts": 2,
+  "function_acl_or_owner_drift": 0,
+  "inventory_rows": 0,
+  "production_rows": 0,
+  "retained_memberships": [
+    {
+      "active": true,
+      "role": "OWNER",
+      "scope": "ALL_SITES",
+      "user_id": "de7f3908-efe1-421b-a64e-d25afbed6330"
+    },
+    {
+      "active": true,
+      "role": "PRODUCTION_SUPERVISOR",
+      "scope": "ASSIGNED_SITES",
+      "user_id": "e4a3d205-2193-4f82-a695-251f3ab0dc98"
+    },
+    {
+      "active": true,
+      "role": "ADMIN",
+      "scope": "ALL_SITES",
+      "user_id": "c252ebfd-4eda-4312-8748-eb70f2f9cbf6"
+    },
+    {
+      "active": false,
+      "role": "PRODUCTION_SUPERVISOR",
+      "scope": "ASSIGNED_SITES",
+      "user_id": "49edbfd4-3a0d-4039-9814-f9f0e653babf"
+    }
+  ],
+  "site_count": 2,
+  "synthetic_organizations": 2,
+  "wrong_audit_actor": 0
+}

@@ -1,0 +1,8 @@
+{
+  "reason": "Void RPC returned successful HTTP 204; initial driver incorrectly required 200",
+  "security_defect": false,
+  "original_evidence": "attempt1-*",
+  "correction": "Accept 200/204 for successful void RPCs; no deployed SQL/security change",
+  "resume": "Retained all existing users/business fixtures; rotated only synthetic verified-account passwords in memory; did not replay successful supervisor grant",
+  "completed": true
+}

@@ -1,0 +1,14 @@
+{
+  "api_members": 0,
+  "function_count": 31,
+  "function_mismatches": 0,
+  "history": [
+    "20261013000000",
+    "20261013000001",
+    "20261013000002"
+  ],
+  "rls_tables": 13,
+  "tables": 13,
+  "unsafe_executor": false,
+  "unsafe_table_grants": 0
+}

@@ -1,0 +1,905 @@
+[
+  {
+    "label": "Create disposable ownerA",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerA",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerA",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable ownerB",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerB",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerB",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable supervisor",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in supervisor",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session supervisor",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable revoked",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in revoked",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session revoked",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable admin",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in admin",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session admin",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "admin password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Create disposable unverified",
+    "method": "POST",
+    "endpoint": "/auth/v1/admin/users",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in unverified",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 400,
+    "code": "email_not_confirmed"
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerB RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerB RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerA read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerB read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "ownerA RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerB RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerA RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 400,
+    "code": "22023"
+  },
+  {
+    "label": "anon RPC bootstrap_organization",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/bootstrap_organization",
+    "context": "public anon key, no user session",
+    "status": 401,
+    "code": "42501"
+  },
+  {
+    "label": "anon read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "public anon key, no user session",
+    "status": 401,
+    "code": "42501"
+  },
+  {
+    "label": "ownerA RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA RPC set_site_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_site_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  },
+  {
+    "label": "Validate retained synthetic identity ownerA",
+    "method": "GET",
+    "endpoint": "/auth/v1/admin/users/de7f3908-efe1-421b-a64e-d25afbed6330",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Rotate only disposable password ownerA",
+    "method": "PUT",
+    "endpoint": "/auth/v1/admin/users/de7f3908-efe1-421b-a64e-d25afbed6330",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerA",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerA",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Validate retained synthetic identity ownerB",
+    "method": "GET",
+    "endpoint": "/auth/v1/admin/users/f6292989-3d26-49a7-b7a5-70fb8225d5a5",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Rotate only disposable password ownerB",
+    "method": "PUT",
+    "endpoint": "/auth/v1/admin/users/f6292989-3d26-49a7-b7a5-70fb8225d5a5",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in ownerB",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session ownerB",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Validate retained synthetic identity supervisor",
+    "method": "GET",
+    "endpoint": "/auth/v1/admin/users/e4a3d205-2193-4f82-a695-251f3ab0dc98",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Rotate only disposable password supervisor",
+    "method": "PUT",
+    "endpoint": "/auth/v1/admin/users/e4a3d205-2193-4f82-a695-251f3ab0dc98",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in supervisor",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session supervisor",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Validate retained synthetic identity revoked",
+    "method": "GET",
+    "endpoint": "/auth/v1/admin/users/49edbfd4-3a0d-4039-9814-f9f0e653babf",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Rotate only disposable password revoked",
+    "method": "PUT",
+    "endpoint": "/auth/v1/admin/users/49edbfd4-3a0d-4039-9814-f9f0e653babf",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in revoked",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session revoked",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "Validate retained synthetic identity admin",
+    "method": "GET",
+    "endpoint": "/auth/v1/admin/users/c252ebfd-4eda-4312-8748-eb70f2f9cbf6",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Rotate only disposable password admin",
+    "method": "PUT",
+    "endpoint": "/auth/v1/admin/users/c252ebfd-4eda-4312-8748-eb70f2f9cbf6",
+    "context": "privileged Auth fixture setup only",
+    "status": 200
+  },
+  {
+    "label": "Password sign-in admin",
+    "method": "POST",
+    "endpoint": "/auth/v1/token",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Auth validates signed session admin",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "admin password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "ownerA RPC set_site_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_site_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  },
+  {
+    "label": "supervisor read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA read organization_settings",
+    "method": "GET",
+    "endpoint": "/rest/v1/organization_settings",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA RPC set_multi_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_multi_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  },
+  {
+    "label": "supervisor read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "supervisor read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "supervisor read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "supervisor read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "supervisor RPC set_organization_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_organization_member",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "admin RPC set_organization_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_organization_member",
+    "context": "admin password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerB RPC set_organization_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_organization_member",
+    "context": "ownerB password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "ownerA RPC set_organization_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_organization_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 400,
+    "code": "23514"
+  },
+  {
+    "label": "Protected INSERT profiles",
+    "method": "POST",
+    "endpoint": "/rest/v1/profiles",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE profiles",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/profiles",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent profiles",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/profiles",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT organizations",
+    "method": "POST",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE organizations",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent organizations",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT organization_settings",
+    "method": "POST",
+    "endpoint": "/rest/v1/organization_settings",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE organization_settings",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/organization_settings",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent organization_settings",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/organization_settings",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT quarry_sites",
+    "method": "POST",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE quarry_sites",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent quarry_sites",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT quarry_pits",
+    "method": "POST",
+    "endpoint": "/rest/v1/quarry_pits",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE quarry_pits",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/quarry_pits",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent quarry_pits",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/quarry_pits",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT stockyards",
+    "method": "POST",
+    "endpoint": "/rest/v1/stockyards",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE stockyards",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/stockyards",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent stockyards",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/stockyards",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT organization_memberships",
+    "method": "POST",
+    "endpoint": "/rest/v1/organization_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE organization_memberships",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/organization_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent organization_memberships",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/organization_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT site_memberships",
+    "method": "POST",
+    "endpoint": "/rest/v1/site_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE site_memberships",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/site_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent site_memberships",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/site_memberships",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT materials",
+    "method": "POST",
+    "endpoint": "/rest/v1/materials",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE materials",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/materials",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent materials",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/materials",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT granite_grades",
+    "method": "POST",
+    "endpoint": "/rest/v1/granite_grades",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE granite_grades",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/granite_grades",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent granite_grades",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/granite_grades",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT granite_blocks",
+    "method": "POST",
+    "endpoint": "/rest/v1/granite_blocks",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE granite_blocks",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/granite_blocks",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent granite_blocks",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/granite_blocks",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT production_entries",
+    "method": "POST",
+    "endpoint": "/rest/v1/production_entries",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE production_entries",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/production_entries",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent production_entries",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/production_entries",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected INSERT customers",
+    "method": "POST",
+    "endpoint": "/rest/v1/customers",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected UPDATE customers",
+    "method": "PATCH",
+    "endpoint": "/rest/v1/customers",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Protected DELETE nonexistent customers",
+    "method": "DELETE",
+    "endpoint": "/rest/v1/customers",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Private schema explicit RPC attempt",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/require_verified_request_user",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 406,
+    "code": "PGRST106"
+  },
+  {
+    "label": "ownerA RPC require_verified_request_user",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/require_verified_request_user",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 404,
+    "code": "PGRST202"
+  },
+  {
+    "label": "Tampered executor-role JWT",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 401,
+    "code": "PGRST301"
+  },
+  {
+    "label": "ownerA RPC set_site_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_site_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  },
+  {
+    "label": "supervisor read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "supervisor password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "revoked read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200,
+    "row_count": 1
+  },
+  {
+    "label": "ownerA RPC set_organization_member",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/set_organization_member",
+    "context": "ownerA password-session JWT + public API key",
+    "status": 204
+  },
+  {
+    "label": "Old JWT still authenticates after membership revoke",
+    "method": "GET",
+    "endpoint": "/auth/v1/user",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200
+  },
+  {
+    "label": "revoked read organizations",
+    "method": "GET",
+    "endpoint": "/rest/v1/organizations",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "revoked read quarry_sites",
+    "method": "GET",
+    "endpoint": "/rest/v1/quarry_sites",
+    "context": "revoked password-session JWT + public API key",
+    "status": 200,
+    "row_count": 0
+  },
+  {
+    "label": "revoked RPC create_quarry_site",
+    "method": "POST",
+    "endpoint": "/rest/v1/rpc/create_quarry_site",
+    "context": "revoked password-session JWT + public API key",
+    "status": 403,
+    "code": "42501"
+  },
+  {
+    "label": "Public Auth capabilities",
+    "method": "GET",
+    "endpoint": "/auth/v1/settings",
+    "context": "public anon key, no user session",
+    "status": 200
+  },
+  {
+    "label": "Request ordinary anonymous Auth session",
+    "method": "POST",
+    "endpoint": "/auth/v1/signup",
+    "context": "public anon key, no user session",
+    "status": 422,
+    "code": "anonymous_provider_disabled"
+  }
+]

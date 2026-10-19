@@ -1,0 +1,26 @@
+{
+  "run": "qone-security-c6aa0df8",
+  "project_ref": "vfwdcrptpawfsiaqumjb",
+  "region": "ap-south-1",
+  "counts": {
+    "PASS": 97,
+    "FAIL": 0,
+    "NOT TESTABLE": 4
+  },
+  "total_cases": 101,
+  "http_requests": 119,
+  "privileged_auth_setup_requests": 16,
+  "real_user_session_requests": 88,
+  "client_mutation_denials": 39,
+  "identities_created": 6,
+  "retained_organizations": 2,
+  "retained_sites": 2,
+  "retained_application_audit_events": 9,
+  "security_defects_found": 0,
+  "harness_assertion_correction": "HTTP 204 success for void RPC; original attempt retained",
+  "secrets_persisted": false,
+  "global_auth_settings_changed": false,
+  "rls_or_grants_changed": false,
+  "migrations_deployed": false,
+  "mobile_changed": false
+}

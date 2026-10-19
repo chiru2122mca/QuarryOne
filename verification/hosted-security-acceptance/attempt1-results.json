@@ -1,0 +1,177 @@
+{
+  "run": "qone-security-c6aa0df8",
+  "project": "vfwdcrptpawfsiaqumjb",
+  "started_utc": "2026-10-19T18:33:30.438Z",
+  "stage": "Controlled membership fixtures and site tests",
+  "results": [
+    {
+      "name": "Deployed history, 13 RLS tables, 31 owners/grants and executor match approval",
+      "status": "PASS",
+      "context": "read-only catalog"
+    },
+    {
+      "name": "Private schema excluded from current Data API exposure",
+      "status": "PASS",
+      "schemas": [
+        "public",
+        "graphql_public"
+      ]
+    },
+    {
+      "name": "Real Auth-issued signed session accepted: ownerA",
+      "status": "PASS",
+      "user_id": "de7f3908-efe1-421b-a64e-d25afbed6330"
+    },
+    {
+      "name": "Real Auth-issued signed session accepted: ownerB",
+      "status": "PASS",
+      "user_id": "f6292989-3d26-49a7-b7a5-70fb8225d5a5"
+    },
+    {
+      "name": "Real Auth-issued signed session accepted: supervisor",
+      "status": "PASS",
+      "user_id": "e4a3d205-2193-4f82-a695-251f3ab0dc98"
+    },
+    {
+      "name": "Real Auth-issued signed session accepted: revoked",
+      "status": "PASS",
+      "user_id": "49edbfd4-3a0d-4039-9814-f9f0e653babf"
+    },
+    {
+      "name": "Real Auth-issued signed session accepted: admin",
+      "status": "PASS",
+      "user_id": "c252ebfd-4eda-4312-8748-eb70f2f9cbf6"
+    },
+    {
+      "name": "Unverified account cannot obtain a password session",
+      "status": "PASS",
+      "http_status": 400,
+      "auth_code": "email_not_confirmed"
+    },
+    {
+      "name": "Direct bootstrap with an unverified real JWT",
+      "status": "NOT TESTABLE",
+      "reason": "Auth correctly blocks sign-in before issuing a JWT; no global verification requirement bypassed"
+    },
+    {
+      "name": "Verified ownerA bootstraps",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerA idempotent bootstrap returns identical organization",
+      "status": "PASS"
+    },
+    {
+      "name": "Verified ownerB bootstraps",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerB idempotent bootstrap returns identical organization",
+      "status": "PASS"
+    },
+    {
+      "name": "Both bootstraps create exactly fixed OWNER/ALL_SITES memberships",
+      "status": "PASS"
+    },
+    {
+      "name": "Bootstrap audit actor matches each real signed owner",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerA reads own tenant",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerA cannot read other tenant",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerA cannot read guessed foreign UUID",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerB reads own tenant",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerB cannot read other tenant",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerB cannot read guessed foreign UUID",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerA cross-tenant site RPC denied",
+      "status": "PASS"
+    },
+    {
+      "name": "ownerB cross-tenant site RPC denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Bootstrap idempotency payload mismatch denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Rejected tenant/idempotency operations preserve full business/audit snapshot",
+      "status": "PASS"
+    },
+    {
+      "name": "Unauthenticated bootstrap denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Unauthenticated tenant read denied",
+      "status": "PASS"
+    },
+    {
+      "name": "Owner creates primary synthetic site",
+      "status": "PASS"
+    },
+    {
+      "name": "Owner authorizes A1 site for supervisor",
+      "status": "FAIL"
+    }
+  ],
+  "identities": [
+    {
+      "role": "ownerA",
+      "id": "de7f3908-efe1-421b-a64e-d25afbed6330",
+      "verified": true
+    },
+    {
+      "role": "ownerB",
+      "id": "f6292989-3d26-49a7-b7a5-70fb8225d5a5",
+      "verified": true
+    },
+    {
+      "role": "supervisor",
+      "id": "e4a3d205-2193-4f82-a695-251f3ab0dc98",
+      "verified": true
+    },
+    {
+      "role": "revoked",
+      "id": "49edbfd4-3a0d-4039-9814-f9f0e653babf",
+      "verified": true
+    },
+    {
+      "role": "admin",
+      "id": "c252ebfd-4eda-4312-8748-eb70f2f9cbf6",
+      "verified": true
+    },
+    {
+      "role": "unverified",
+      "id": "a271b124-6b2c-4d73-a5a0-367d4cf45d8d",
+      "verified": false
+    }
+  ],
+  "fixtures": {
+    "requestA": "34c66bf0-c286-4623-80c9-0e5ae11457bb",
+    "requestB": "fca8e7e4-697a-4c74-9a81-ff9de526f325",
+    "orgA": "a452ada3-3539-43e6-9e57-ec0440ea2499",
+    "orgB": "428d6505-e984-4fd4-83b2-f42c649ea7e8",
+    "siteA1": "ecedce84-5402-4382-8b39-1fed3b8f383b"
+  },
+  "request_count": 34
+}

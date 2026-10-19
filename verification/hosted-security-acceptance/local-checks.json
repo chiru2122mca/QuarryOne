@@ -1,0 +1,6 @@
+{
+  "typecheck": { "command": "npm run typecheck", "exit_code": 0, "result": "PASS" },
+  "lint": { "command": "npm run lint", "exit_code": 0, "result": "PASS" },
+  "application_test_suite": "Not rerun for this hosted acceptance documentation-only task",
+  "scope": "Documentation and sanitized hosted acceptance evidence only; no mobile or SQL changes"
+}
