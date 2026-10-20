@@ -52,6 +52,8 @@ export interface BusinessDraft {
   ownerDisplayName: string;
   contactPhone: string;
   stateName: string;
+  district: string;
+  address: string;
   gstin: string;
 }
 export interface PitDraft {
@@ -124,6 +126,8 @@ export function createOnboardingState(): OnboardingState {
         ownerDisplayName: "",
         contactPhone: "",
         stateName: "",
+        district: "",
+        address: "",
         gstin: "",
       },
       multiSiteEnabled: false,

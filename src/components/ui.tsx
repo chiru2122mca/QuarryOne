@@ -11,6 +11,7 @@ import {
   Modal,
   type StyleProp,
   type ViewStyle,
+  type TextInputProps,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -349,6 +350,10 @@ export function FormField({
   multiline = false,
   secure = false,
   uppercase = false,
+  required = false,
+  error,
+  hint,
+  keyboardType,
 }: {
   label: string;
   value: string;
@@ -357,14 +362,25 @@ export function FormField({
   multiline?: boolean;
   secure?: boolean;
   uppercase?: boolean;
+  required?: boolean;
+  error?: string;
+  hint?: string;
+  keyboardType?: TextInputProps["keyboardType"];
 }) {
   return (
     <View>
-      <Text style={s.label}>{label}</Text>
+      <Text style={s.label}>
+        {label}
+        {required ? " *" : ""}
+      </Text>
       <TextInput
         accessibilityLabel={label}
+        accessibilityHint={error ?? hint}
+        aria-required={required || undefined}
+        aria-invalid={!!error || undefined}
         style={[
           s.input,
+          !!error && { borderColor: c.error },
           multiline && {
             height: 100,
             textAlignVertical: "top",
@@ -374,13 +390,28 @@ export function FormField({
         value={value}
         onChangeText={(text) => onChange(uppercase ? text.toUpperCase() : text)}
         autoCapitalize={
-          uppercase ? "characters" : number ? "none" : "sentences"
+          uppercase
+            ? "characters"
+            : number || keyboardType === "phone-pad"
+              ? "none"
+              : "sentences"
         }
-        autoCorrect={!uppercase && !number && !secure}
-        keyboardType={number ? "decimal-pad" : "default"}
+        autoCorrect={
+          !uppercase && !number && !secure && keyboardType !== "phone-pad"
+        }
+        keyboardType={keyboardType ?? (number ? "decimal-pad" : "default")}
         secureTextEntry={secure}
         multiline={multiline}
       />
+      {hint && <Text style={[s.muted, { marginTop: 5 }]}>{hint}</Text>}
+      {error && (
+        <Text
+          accessibilityLiveRegion="polite"
+          style={[s.text, { color: c.error, marginTop: 5 }]}
+        >
+          {error}
+        </Text>
+      )}
     </View>
   );
 }

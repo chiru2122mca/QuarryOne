@@ -53,7 +53,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a1";
+  const directory = "verification/v043a2";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -85,6 +85,35 @@ async function localPreview() {
         page
           .getByText("Demo draft saved for this session.", { exact: true })
           .filter({ visible: true });
+      const input = (name) =>
+        page
+          .getByRole("textbox", { name, exact: true })
+          .filter({ visible: true })
+          .first();
+      const names = [
+        "Business Name",
+        "Legal Business Name",
+        "Business Contact Number",
+        "State",
+        "District",
+        "Business Address",
+        "GSTIN",
+        "Owner Display Name",
+      ];
+      const values = [
+        "Demo Quarry",
+        "Demo Legal",
+        "+919876543210",
+        "తెలంగాణ",
+        "కరీంనగర్",
+        "Yard 1\nRoad 2",
+        "36ABCDE1234F1Z5",
+        "రమేష్ కుమార్",
+      ];
+      const assertValues = async (expected) => {
+        for (let i = 0; i < names.length; i++)
+          assert.equal(await input(names[i]).inputValue(), expected[i]);
+      };
       const layout = async () => {
         assert.equal(
           await page.evaluate(
@@ -117,15 +146,95 @@ async function localPreview() {
       assert.equal(await page.getByRole("tab").count(), 5);
       await page.getByRole("button", { name: /Demo Business Setup/ }).click();
       await title("Business Registration").waitFor();
-      await page
-        .getByText("Single quarry · FT / CFT", { exact: true })
-        .waitFor();
-      await page.getByText("INR · Asia/Kolkata", { exact: true }).waitFor();
+      await assertValues(names.map(() => ""));
+      for (const name of names) {
+        const bounds = await input(name).boundingBox();
+        assert(
+          bounds &&
+            bounds.height >= 48 &&
+            bounds.x >= 0 &&
+            bounds.x + bounds.width <= width + 1,
+        );
+      }
+      assert.equal(
+        await input("Business Contact Number").getAttribute("type"),
+        "tel",
+      );
+      for (const name of [
+        "Business Name",
+        "Business Contact Number",
+        "State",
+        "Owner Display Name",
+      ]) {
+        assert.equal(await input(name).getAttribute("aria-required"), "true");
+      }
       await layout();
+      await button("Continue").click();
+      await title("Business Registration").waitFor();
+      assert.equal(
+        await page
+          .getByRole("textbox")
+          .filter({ visible: true })
+          .evaluateAll(
+            (inputs) =>
+              inputs.filter(
+                (input) => input.getAttribute("aria-invalid") === "true",
+              ).length,
+          ),
+        4,
+      );
+      await button("Save Draft").click();
+      assert.equal(
+        await saved().count(),
+        0,
+        "Invalid Save Draft must not report success",
+      );
+      await button("Reset demo draft").click();
+      assert.equal(
+        await page.getByRole("alert").filter({ visible: true }).count(),
+        0,
+        "Reset also clears validation errors",
+      );
+      await input("Business Name").fill("  Incomplete demo  ");
+      await input("District").fill("  Draft district  ");
+      await button("Back").click();
+      await page.getByRole("button", { name: /Demo Business Setup/ }).click();
+      await title("Business Registration").waitFor();
+      assert.equal(
+        await input("Business Name").inputValue(),
+        "  Incomplete demo  ",
+      );
+      assert.equal(await input("District").inputValue(), "  Draft district  ");
+      for (let i = 0; i < names.length; i++)
+        await input(names[i]).fill(`  ${values[i]}  `);
+      await input("Business Contact Number").fill("123");
+      await input("GSTIN").fill("wrong");
+      await button("Continue").click();
+      await title("Business Registration").waitFor();
+      assert.equal(
+        await input("Business Contact Number").getAttribute("aria-invalid"),
+        "true",
+      );
+      assert.equal(await input("GSTIN").getAttribute("aria-invalid"), "true");
+      assert.equal(await saved().count(), 0);
+      await input("Business Contact Number").scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: `${directory}/validation-${width}.png`,
+        fullPage: true,
+      });
+      await input("Business Contact Number").fill(" +91 98765-43210 ");
+      await input("GSTIN").fill(" 36abcde1234f1z5 ");
       await button("Save Draft").click();
       await saved().waitFor();
+      await assertValues(values);
+      await title("Business Registration").scrollIntoViewIfNeeded();
       await page.screenshot({
         path: `${directory}/business-${width}.png`,
+        fullPage: true,
+      });
+      await input("Owner Display Name").scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: `${directory}/owner-actions-${width}.png`,
         fullPage: true,
       });
       const stages = [
@@ -146,6 +255,10 @@ async function localPreview() {
           String(i + 2),
         );
         await layout();
+        if (i === 0)
+          await page
+            .getByText("Single quarry · FT / CFT", { exact: true })
+            .waitFor();
       }
       assert.equal(await button("Continue").isDisabled(), true);
       await page.screenshot({
@@ -161,6 +274,7 @@ async function localPreview() {
         await button("Back").click();
         await title(stage).waitFor();
       }
+      await assertValues(values);
       await button("Continue").click();
       await title("Quarry Configuration").waitFor();
       // Browser history changes the root route without reloading the React provider.
@@ -172,20 +286,38 @@ async function localPreview() {
       await button("Reset demo draft").click();
       await title("Business Registration").waitFor();
       assert.equal(await saved().count(), 0);
+      await assertValues(names.map(() => ""));
       await button("Go back").click();
       await page.getByRole("button", { name: /Demo Business Setup/ }).waitFor();
       assert.equal(await page.getByRole("tab").count(), 5);
       // Query parameters are not navigation destinations.
       await page.goto(`${base}/onboarding?step=/sales`);
       await title("Business Registration").waitFor();
+      await input("Business Name").fill("Demo");
+      await input("Business Contact Number").fill("9876543210");
+      await input("State").fill("Telangana");
+      await input("Owner Display Name").fill("Demo Owner");
       await button("Save Draft").click();
       await saved().waitFor();
       await page.reload();
       await title("Business Registration").waitFor();
+      await assertValues(names.map(() => ""));
       assert.equal(
         await saved().count(),
         0,
         "Reload starts a fresh session draft",
+      );
+      // Saving from a future placeholder cannot imply that invalid Business Registration succeeded.
+      await page.goto(`${base}/onboarding/quarry`);
+      await title("Quarry Configuration").waitFor();
+      await button("Save Draft").click();
+      await saved().waitFor();
+      await button("Back").click();
+      await title("Business Registration").waitFor();
+      assert.equal(
+        await saved().count(),
+        0,
+        "Invalid business hides a confirmation from another stage",
       );
       results.push({
         width,
@@ -195,6 +327,11 @@ async function localPreview() {
         route_allowlist: true,
         no_horizontal_overflow: true,
         minimum_touch_targets: 48,
+        registration_validation: true,
+        invalid_continue_and_save_blocked: true,
+        partial_back_retention: true,
+        normalized_field_restore: true,
+        telugu_input_preserved: true,
       });
       await page.close();
     }

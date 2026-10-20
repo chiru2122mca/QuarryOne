@@ -1,0 +1,49 @@
+{
+  "results": [
+    {
+      "width": 360,
+      "result": "PASS",
+      "forward_back": true,
+      "session_save_resume_reset": true,
+      "route_allowlist": true,
+      "no_horizontal_overflow": true,
+      "minimum_touch_targets": 48,
+      "registration_validation": true,
+      "invalid_continue_and_save_blocked": true,
+      "partial_back_retention": true,
+      "normalized_field_restore": true,
+      "telugu_input_preserved": true
+    },
+    {
+      "width": 390,
+      "result": "PASS",
+      "forward_back": true,
+      "session_save_resume_reset": true,
+      "route_allowlist": true,
+      "no_horizontal_overflow": true,
+      "minimum_touch_targets": 48,
+      "registration_validation": true,
+      "invalid_continue_and_save_blocked": true,
+      "partial_back_retention": true,
+      "normalized_field_restore": true,
+      "telugu_input_preserved": true
+    },
+    {
+      "width": 412,
+      "result": "PASS",
+      "forward_back": true,
+      "session_save_resume_reset": true,
+      "route_allowlist": true,
+      "no_horizontal_overflow": true,
+      "minimum_touch_targets": 48,
+      "registration_validation": true,
+      "invalid_continue_and_save_blocked": true,
+      "partial_back_retention": true,
+      "normalized_field_restore": true,
+      "telugu_input_preserved": true
+    }
+  ],
+  "page_errors": [],
+  "mutation_or_backend_requests": [],
+  "physical_android": "PENDING MANUAL CHECK"
+}

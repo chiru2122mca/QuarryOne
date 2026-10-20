@@ -1,0 +1,23 @@
+{
+  "milestone": "V0.4.3A.2",
+  "base_commit": "f29afbe",
+  "typecheck": { "command": "npm run typecheck", "exit_code": 0, "result": "PASS" },
+  "lint": { "command": "npm run lint", "exit_code": 0, "result": "PASS" },
+  "tests": {
+    "command": "node --require ./tests/register-typescript.cjs --test tests/blocks/*.test.cjs tests/onboarding/*.test.cjs",
+    "exit_code": 0,
+    "total": 72,
+    "existing_operational": 53,
+    "existing_onboarding": 10,
+    "business_registration": 9,
+    "failed": 0
+  },
+  "web_export": { "command": "node node_modules/expo/bin/cli export --platform web", "exit_code": 0, "static_routes": 73 },
+  "responsive": { "command": "node scripts/verify-onboarding.cjs", "exit_code": 0, "widths": [360, 390, 412], "evidence": "responsive-results.json", "screenshots": 12 },
+  "physical_android": "PENDING MANUAL CHECK",
+  "soft_keyboard_and_native_safe_areas": "PENDING MANUAL ANDROID CHECK",
+  "database_or_auth_mutations": false,
+  "persistent_storage": false,
+  "dependencies_changed": false,
+  "operational_business_logic_changed": false
+}
