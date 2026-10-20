@@ -1,11 +1,11 @@
 {
-  "stage": "V0.4.2B2.2",
-  "status": "option_a_implemented_locally_pending_review_and_hosted_validation",
+  "stage": "V0.4.2_development_deployment",
+  "status": "deployed_to_approved_development_project_hosted_security_acceptance_completed_with_limitations",
   "baseline_commit": "3b1f2e4",
   "intended_project_name": "quarryone-dev",
   "hosted_project_ref": "vfwdcrptpawfsiaqumjb",
   "checksum_method": "UTF-8 SQL with CRLF normalized to LF; no other transformation",
-  "version_status": "Same unapplied versions; history/application schema absent in 2026-10-15 read-only target snapshot; no dry run or deployment authorized",
+  "version_status": "All three versions applied and recorded on approved Mumbai development target; do not edit applied migrations",
   "migrations": [
     {
       "order": 1,
@@ -75,5 +75,86 @@
     "dry_run": "not executed; expressly prohibited in B2.2",
     "deployment_authorized": false,
     "previous_plan": "verification/v042b22/previous-promotion-plan.json"
+  },
+  "deployment": {
+    "date": "2026-10-19",
+    "environment": "development_only",
+    "project_ref": "vfwdcrptpawfsiaqumjb",
+    "region": "ap-south-1",
+    "repo_commit": "e52c437e1a1ba0c0d10c3a78592c0fa1d4376240",
+    "cli_version": "2.120.0",
+    "approval": "User: QuarryOne V0.4.2 Approved Development Deployment, 2026-10-19",
+    "command": "npm exec --yes --package=supabase@2.120.0 -- supabase db push --linked --skip-vault",
+    "exit_code": 0,
+    "history": [
+      {
+        "name": "foundation",
+        "version": "20261013000000"
+      },
+      {
+        "name": "access",
+        "version": "20261013000001"
+      },
+      {
+        "name": "controlled_onboarding",
+        "version": "20261013000002"
+      }
+    ],
+    "effective_principal": "postgres (all reviewed principal guards succeeded)",
+    "public_tables": 13,
+    "public_tables_rls_enabled": 13,
+    "reviewed_functions": 31,
+    "catalog_checks_passed": 104,
+    "private_schema_excluded_from_data_api": true,
+    "real_auth_jwt_rls_tests": "Completed after separate user authorization: 97 PASS, 0 FAIL, 4 NOT TESTABLE; see hosted_security_acceptance",
+    "evidence": "verification/v042-development-deployment-20261019/README.md",
+    "note": "Historical promotion/target_preflight blocks retain their earlier local-only authorization state; this block records the later approved hosted outcome",
+    "real_auth_jwt_rls_tests_at_deployment": "not authorized or performed; awaiting review"
+  },
+  "hosted_security_acceptance": {
+    "status": "completed_with_four_not_testable_cases",
+    "project_ref": "vfwdcrptpawfsiaqumjb",
+    "region": "ap-south-1",
+    "environment": "development_only",
+    "run": "qone-security-c6aa0df8",
+    "authorization": "User: QuarryOne V0.4.2 Hosted Auth/JWT/RLS Security Acceptance; synthetic identities and controlled fixtures only; no SQL, Auth-setting, RLS or grant changes authorized",
+    "counts": {
+      "PASS": 97,
+      "FAIL": 0,
+      "NOT TESTABLE": 4
+    },
+    "total_cases": 101,
+    "evidence": "verification/hosted-security-acceptance/README.md",
+    "results": "verification/hosted-security-acceptance/results.json",
+    "summary": "verification/hosted-security-acceptance/summary.json",
+    "documentation_commit": "a1cc70d",
+    "not_testable": [
+      {
+        "scenario": "Direct bootstrap with an unverified signed user JWT",
+        "reason": "Auth refused password login before issuing a JWT. Upstream sign-in denial passed; direct unverified-JWT bootstrap was not exercised. No forged claims or privileged token substituted."
+      },
+      {
+        "scenario": "Authenticated-anonymous JWT bootstrap",
+        "reason": "Anonymous sign-in returned HTTP 422 anonymous_provider_disabled. Global Auth settings were unchanged. Unauthenticated no-session bootstrap/read denial was separately tested and passed."
+      },
+      {
+        "scenario": "Invitation acceptance / membership onboarding API",
+        "reason": "Endpoint is not implemented. Explicitly authorized privileged membership fixtures supported RLS tests only and do not prove invitation acceptance."
+      },
+      {
+        "scenario": "Production-save / operational inventory mutation endpoint",
+        "reason": "Endpoint is not implemented. Direct table-write denial was tested; no inventory or production history was fabricated."
+      }
+    ],
+    "security_defects_found_in_executed_checks": 0,
+    "retained_synthetic_state": {
+      "auth_identities": 6,
+      "organizations": 2,
+      "sites": 2,
+      "organization_memberships": 5,
+      "application_audit_events": 9
+    },
+    "limitations": "Scoped hosted acceptance does not prove unavailable endpoints, email/phone verification delivery, full hosted concurrency/recovery or mobile onboarding readiness. Historical preflight/promotion/deployment evidence and authorization remain unchanged.",
+    "next_gate": "Review acceptance limitations before separately authorizing missing endpoint implementation or mobile integration; applied SQL remains immutable"
   }
 }

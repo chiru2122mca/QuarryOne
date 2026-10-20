@@ -1,6 +1,25 @@
 # QuarryOne V0.4.2 — Supabase development rollout
 
-## V0.4.2B2.2 current gate — Option A implemented locally, review pending
+## V0.4.2 current gate — deployed; hosted security acceptance completed with limitations
+
+On 2026-10-19, the user approved deploying the three fingerprinted migrations to vfwdcrptpawfsiaqumjb (quarryone-dev, ap-south-1). After fresh target/history/hash/dry-run checks, pinned CLI 2.120.0 applied all three versions once with --skip-vault and exit 0. Read-only verification confirmed all 13 public tables with RLS, 31 exact function owner/security/ACL configurations, restricted executor attributes/membership, expected table/sequence privileges, all three history versions and quarry_private exclusion from the Data API/search path. No migration retry, repair, reset, user creation or security workaround occurred.
+
+The [deployment handoff](../verification/v042-development-deployment-20261019/README.md) contains output, assertions, remaining limitations and the review gate. Promotion metadata now records the applied development versions; never edit those applied SQL files. No mobile code or dependencies changed, and no GitHub push occurred. The deployment-only review gate was subsequently superseded by separate user authorization for hosted security acceptance, recorded below. Mobile integration remains a separate review gate. Earlier milestone notes below describe historical preparation/approval boundaries.
+
+## Hosted Auth/JWT/RLS acceptance — completed, four paths not testable
+
+The separately authorized development-only run qone-security-c6aa0df8 completed with **97 PASS, 0 FAIL and 4 NOT TESTABLE** (101 recorded cases). The [acceptance report](../verification/hosted-security-acceptance/README.md), committed as a1cc70d, preserves identities by role, real JWT/API evidence, exact controlled fixture setup, audit checks and limitations. Real password-session JWT checks passed for cross-tenant isolation, site restrictions, old-token membership revocation, role-escalation prevention, direct-write denial and private-schema isolation. No security defect was found in the executed checks; no SQL, Auth security settings, RLS policies or grants were changed.
+
+The four NOT TESTABLE cases remain explicit:
+
+1. **Direct bootstrap with an unverified signed JWT:** Auth refused password login before issuing that JWT. Upstream sign-in denial passed; direct unverified-JWT bootstrap was not exercised and no privileged token or forged claims were substituted.
+2. **Authenticated-anonymous JWT bootstrap:** anonymous sign-in returned HTTP 422 / anonymous_provider_disabled. Global Auth settings were unchanged. Unauthenticated no-session bootstrap/read denial separately passed.
+3. **Invitation acceptance / membership onboarding API:** not implemented. Authorized privileged membership fixtures supported RLS tests only; they do not prove invitation acceptance.
+4. **Production-save / operational inventory endpoint:** not implemented. Direct table-write denial passed; no artificial production or inventory history was created.
+
+Six synthetic Auth identities, two organizations, two sites, five organization memberships and nine immutable audit events remain retained. Client authorization proof used public API credentials plus real user JWTs; privileged Auth administration and membership fixture setup are documented separately. Email/phone verification delivery, missing endpoints, full hosted concurrency/recovery and mobile integration are not established by this acceptance. Review these limitations before separately approving further implementation. The earlier deployment report and preparation matrix remain historical evidence, not current status or claims that every planned scenario passed.
+
+## V0.4.2B2.2 historical gate — Option A implemented locally, review pending
 
 Option A is implemented in all three draft/promoted pairs. The trusted postgres-owned current-request verification bridge replaces direct executor Auth reads; operational identity uses the invoker helper matching the observed Auth claim precedence. Explicit SET-only migration membership, signature ownership manifests and final ACL/schema checks preserve restricted operational ownership. The local migration harness now uses a non-superuser CLI-like session, including explicit restoration to postgres after executor DDL.
 
@@ -125,7 +144,7 @@ For a future disposable **local** rehearsal, reviewed commands are supabase star
 
 The six public SQL controllers are implemented in the drafts; private policy predicates, reserve/allocate helpers and triggers support them but are not client write APIs. The [onboarding architecture](ONBOARDING_ARCHITECTURE.md) defines five stages, whitelists and acceptance contracts; the [schema](DATABASE_SCHEMA.md) and [permission matrix](ROLE_PERMISSION_MATRIX.md) define hierarchy, preferences, lineage and permissions. Stage-save/invitation/site-activation contracts remain future work, with no delivery, UI or backend integration in Stage A.
 
-## Live Auth/JWT/RLS verification matrix — no users created
+## Historical planned Auth/JWT/RLS verification matrix — pre-acceptance
 
 Use disposable synthetic business data in the approved development target and real verified Auth identities. Planned identities: A Owner, B Owner, A Site-1 Production Supervisor, revoked A member, unauthenticated anon role; also two Owners for a last-owner race and an authenticated anonymous Auth account to distinguish it from anon. Never reuse real customers/blocks or log access tokens.
 
@@ -146,7 +165,7 @@ Use disposable synthetic business data in the approved development target and re
 | Exposure/ownership              | Inspect PostgREST schema/ACLs/role graph and real migration principal                                 | No private API endpoint; restricted executor and fixed search_path; no unexpected default grants/owner bypass exposed to users                               |
 | Failure/recovery                | Force controlled-operation failures and rehearse failed promotion/backup restore on disposable target | Transaction/audit consistency, known migration history, preserved IDs/volumes, documented recovery rather than history repair                                |
 
-REST/RPC tests must use real signed-JWT gateway requests, not server admin keys or SET ROLE alone. Local PostgreSQL tests remain valuable for FK/math/concurrency cases but do not validate Auth issuance, token expiry, JWKS/gateway handling, email/phone verification or effective hosted API settings. User creation, token issuance and all matrix actions are pending Stage B approval.
+REST/RPC tests must use real signed-JWT gateway requests, not server admin keys or SET ROLE alone. Local PostgreSQL tests remain valuable for FK/math/concurrency cases but do not validate Auth issuance, token expiry, JWKS/gateway handling, email/phone verification or effective hosted API settings. At the time of this historical plan, user creation, token issuance and all matrix actions were pending Stage B approval. The completed hosted acceptance above supersedes that gate only for its documented scope; it does not establish that every scenario in this broader matrix was executed.
 
 Number/import/production concurrency can initially be rehearsed only through isolated privileged fixtures to test internal invariants. Signed-JWT write tests for those operations are gated on implementing separately reviewed public write RPCs; never grant clients the private number allocator merely to make the matrix executable. The same distinction applies to invitation acceptance and later site activation: their contracts exist, but their live endpoints do not.
 
