@@ -1,6 +1,8 @@
 # QuarryOne V0.4.1.1 — Configurable onboarding
 
-Status: proposed architecture, local SQL drafts only. No onboarding screen, authentication client or Supabase project is implemented or connected. The approved app, shared mock store and operational behavior remain unchanged.
+Current mobile milestone: V0.4.3A.1 adds a session-only prototype wizard through **More → Demo Business Setup**. Its five placeholders, allowlisted navigation and isolated draft context are documented in the [foundation report](../verification/v043a1/README.md). It does not implement business forms, authentication, server saves, invitations or activation. The existing block store and operational behavior are unchanged. Hosted deployment/security acceptance status is tracked separately in the [Supabase rollout plan](SUPABASE_ROLLOUT_PLAN.md).
+
+Historical architecture baseline: the specification below was proposed against local SQL drafts before onboarding UI or hosted project deployment. Its future server-save, invitation and lifecycle contracts remain separate from the new in-memory prototype; navigation progress does not establish readiness or authorization.
 
 ## Organization and site model
 

@@ -5,6 +5,12 @@ import { Screen, Brand, s } from "../components/ui";
 import { branding, workspace, colors as c } from "../config/theme";
 const items = [
   {
+    label: "Demo Business Setup",
+    route: "/onboarding",
+    icon: "◇",
+    note: "Prototype · Session-only onboarding draft",
+  },
+  {
     label: "Block Inventory",
     route: "/more/stock",
     icon: "▤",
