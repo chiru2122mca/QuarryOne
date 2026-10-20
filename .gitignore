@@ -50,3 +50,9 @@ app-example
 # generated native folders
 /ios
 /android
+
+# QuarryOne local Supabase deployment diagnostics
+verification/final-preflight/*.json
+verification/migrations-enabled-preflight/*.json
+verification/v042-development-deployment-20261019/*.json
+verification/v042-development-deployment-20261019/*.log
