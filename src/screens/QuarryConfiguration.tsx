@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, ScrollView, Text, View, Pressable } from "react-native";
 import { FormField, SelectField, PrimaryButton, s } from "../components/ui";
 import { OnboardingStepLayout } from "../components/onboarding/OnboardingStepLayout";
@@ -14,10 +14,17 @@ export default function QuarryConfiguration() {
   const { state, dispatch } = useOnboardingDraft();
   const [attempted, setAttempted] = useState(false);
   const [removal, setRemoval] = useState<{
-    name: string;
+    title: string;
+    message: string;
     command: QuarryCommand;
   } | null>(null);
   const { draft } = state;
+  useEffect(() => {
+    dispatch({
+      type: "QUARRY_COMMAND",
+      command: { type: "INITIALIZE_PRIMARY" },
+    });
+  }, [dispatch]);
   const validation = validateQuarrySetup(draft);
   const send = (command: QuarryCommand) =>
     dispatch({ type: "QUARRY_COMMAND", command });
@@ -124,8 +131,35 @@ export default function QuarryConfiguration() {
                 Automatically assigned · Primary quarry cannot be removed.
               </Text>
             )}
+            {site.isPrimary && (
+              <PrimaryButton
+                secondary
+                title="Copy Business Details"
+                onPress={() =>
+                  setRemoval({
+                    title: "Replace quarry details?",
+                    message:
+                      "Copy the latest Business Name, State, District and Address from Step 1? This replaces these four quarry fields, including your edits. Quarry code, pits and benches will be kept.",
+                    command: {
+                      type: "COPY_BUSINESS",
+                      siteId: site.id,
+                      confirmed: true,
+                    },
+                  })
+                }
+              />
+            )}
             {field("name", "Quarry Name")}
             {field("code", "Quarry Code")}
+            <Text style={s.muted}>
+              Suggested once. You can edit the code or regenerate it from the
+              current quarry name.
+            </Text>
+            <PrimaryButton
+              secondary
+              title="Regenerate Code"
+              onPress={() => send({ type: "REGENERATE_CODE", siteId: site.id })}
+            />
             {field("stateName", "State")}
             {field("district", "District")}
             {field("address", "Address", false)}
@@ -193,7 +227,8 @@ export default function QuarryConfiguration() {
                   title={`Remove pit / bench ${i + 1}`}
                   onPress={() =>
                     setRemoval({
-                      name: pit.name.trim() || `Pit / Bench ${i + 1}`,
+                      title: "Remove entry?",
+                      message: `Remove ${pit.name.trim() || `Pit / Bench ${i + 1}`} from this demo draft? Referenced entries cannot be removed.`,
                       command: {
                         type: "REMOVE_PIT",
                         siteId: site.id,
@@ -216,7 +251,8 @@ export default function QuarryConfiguration() {
                 title="Remove Quarry"
                 onPress={() =>
                   setRemoval({
-                    name: site.name.trim() || "Additional Quarry",
+                    title: "Remove entry?",
+                    message: `Remove ${site.name.trim() || "Additional Quarry"} from this demo draft? Referenced entries cannot be removed.`,
                     command: {
                       type: "REMOVE_SITE",
                       siteId: site.id,
@@ -271,12 +307,9 @@ export default function QuarryConfiguration() {
             accessibilityViewIsModal
           >
             <Text accessibilityRole="header" style={s.heading}>
-              Remove entry?
+              {removal?.title}
             </Text>
-            <Text style={s.text}>
-              Remove {removal?.name} from this demo draft? Referenced entries
-              cannot be removed.
-            </Text>
+            <Text style={s.text}>{removal?.message}</Text>
             {removal?.command.type === "REMOVE_SITE" && (
               <Text style={s.text}>
                 Its pits and benches will also be removed from the draft.
@@ -288,7 +321,11 @@ export default function QuarryConfiguration() {
               onPress={() => setRemoval(null)}
             />
             <PrimaryButton
-              title="Confirm removal"
+              title={
+                removal?.command.type === "COPY_BUSINESS"
+                  ? "Confirm copy"
+                  : "Confirm removal"
+              }
               onPress={() => {
                 if (removal) send(removal.command);
                 setRemoval(null);

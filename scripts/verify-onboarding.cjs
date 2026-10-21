@@ -1,4 +1,4 @@
-const { chromium } = require("@playwright/test");
+const { chromium, expect } = require("@playwright/test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
@@ -53,7 +53,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a3";
+  const directory = "verification/v043a3-1";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -312,6 +312,132 @@ async function localPreview() {
           assert.equal(await button("Add Quarry").count(), 0);
           assert.equal(await button("Remove Quarry").count(), 0);
           await checkQuarryLayout();
+          await expect(siteInput(primary(), "Quarry Name")).toHaveValue(
+            values[0],
+          );
+          for (const [label, value] of [
+            ["State", values[3]],
+            ["District", values[4]],
+            ["Address", values[5]],
+            ["Quarry Code", "DEQ01"],
+          ])
+            assert.equal(await siteInput(primary(), label).inputValue(), value);
+          await title("Quarry Configuration").scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: `${directory}/prefill-${width}.png`,
+            fullPage: true,
+          });
+          for (const [label, value] of [
+            ["Quarry Name", "Custom Quarry"],
+            ["State", "Quarry State"],
+            ["District", "Quarry District"],
+            ["Address", "Quarry Road"],
+          ])
+            await siteInput(primary(), label).fill(value);
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "DEQ01",
+          );
+          await button("Back").click();
+          await title("Business Registration").waitFor();
+          await assertValues(values);
+          for (const [label, value] of [
+            ["Business Name", "Latest Business"],
+            ["State", "Latest State"],
+            ["District", "Latest District"],
+            ["Business Address", "Latest Business Road"],
+          ])
+            await input(label).fill(value);
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            "Custom Quarry",
+          );
+          assert.equal(
+            await siteInput(primary(), "Address").inputValue(),
+            "Quarry Road",
+          );
+          await siteButton(primary(), "Copy Business Details").click();
+          await button("Cancel").click();
+          await button("Confirm copy").waitFor({ state: "hidden" });
+          assert.equal(
+            await siteInput(primary(), "Address").inputValue(),
+            "Quarry Road",
+          );
+          await siteButton(primary(), "Copy Business Details").click();
+          await button("Confirm copy").click();
+          await button("Confirm copy").waitFor({ state: "hidden" });
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            "Latest Business",
+          );
+          assert.equal(
+            await siteInput(primary(), "Address").inputValue(),
+            "Latest Business Road",
+          );
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "DEQ01",
+          );
+          await siteInput(primary(), "Quarry Code").fill(" manual99 ");
+          await button("Back").click();
+          await title("Business Registration").waitFor();
+          assert.equal(
+            await input("Business Name").inputValue(),
+            "Latest Business",
+          );
+          assert.equal(
+            await input("Business Address").inputValue(),
+            "Latest Business Road",
+          );
+          for (let j = 0; j < names.length; j++)
+            await input(names[j]).fill(values[j]);
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            "Latest Business",
+          );
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "MANUAL99",
+          );
+          await siteButton(primary(), "Copy Business Details").click();
+          await button("Confirm copy").click();
+          await button("Confirm copy").waitFor({ state: "hidden" });
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            values[0],
+          );
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "MANUAL99",
+          );
+          await siteButton(primary(), "Regenerate Code").click();
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "DEQ01",
+          );
+          await siteInput(primary(), "Quarry Name").fill(
+            "Sri Lakshmi Granites",
+          );
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "DEQ01",
+          );
+          await siteButton(primary(), "Regenerate Code").click();
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "SLG01",
+          );
+          for (const label of [
+            "Quarry Name",
+            "Quarry Code",
+            "State",
+            "District",
+          ])
+            await siteInput(primary(), label).fill("");
           await button("Continue").click();
           await title("Quarry Configuration").waitFor();
           for (const label of [
@@ -340,6 +466,11 @@ async function localPreview() {
           assert.equal(
             await siteInput(primary(), "Quarry Name").inputValue(),
             " Partial quarry ",
+          );
+          assert.equal(
+            await siteInput(primary(), "Quarry Code").inputValue(),
+            "",
+            "Manual clearing survives remount without automatic overwrite",
           );
           await fillSite(primary(), " dsq01 ", " Demo Quarry ");
           await siteButton(primary(), "Add Pit / Bench").click();
@@ -382,6 +513,10 @@ async function localPreview() {
           await yes().click();
           await button("Add Quarry").click();
           const second = () => siteCards().nth(1);
+          assert.equal(
+            await siteInput(second(), "Quarry Code").inputValue(),
+            "QRY01",
+          );
           await button("Continue").click();
           await title("Quarry Configuration").waitFor();
           assert.equal(
@@ -402,7 +537,11 @@ async function localPreview() {
             ),
             "true",
           );
-          await siteInput(second(), "Quarry Code").fill(" q2 ");
+          await siteButton(second(), "Regenerate Code").click();
+          assert.equal(
+            await siteInput(second(), "Quarry Code").inputValue(),
+            "SEQ01",
+          );
           await checkQuarryLayout();
           await button("Save Draft").click();
           await saved().waitFor();
@@ -566,6 +705,11 @@ async function localPreview() {
         multi_mode_resolution_without_data_loss: true,
         pit_bench_edit_remove_confirmation: true,
         stable_site_and_pit_ids: true,
+        one_time_business_prefill: true,
+        independent_editable_quarry_fields: true,
+        latest_business_copy_confirmation: true,
+        stable_manual_and_generated_codes: true,
+        explicit_code_regeneration: true,
       });
       await page.close();
     }

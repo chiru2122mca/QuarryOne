@@ -1,0 +1,23 @@
+{
+  "milestone": "V0.4.3A.3.1",
+  "base_commit": "3075fb4",
+  "typecheck": { "command": "npm run typecheck", "exit_code": 0, "result": "PASS" },
+  "lint": { "command": "npm run lint", "exit_code": 0, "result": "PASS" },
+  "tests": {
+    "command": "node --require ./tests/register-typescript.cjs --test tests/blocks/*.test.cjs tests/onboarding/*.test.cjs",
+    "exit_code": 0,
+    "total": 102,
+    "existing": 88,
+    "prefill_and_code": 14,
+    "failed": 0
+  },
+  "web_export": { "command": "node node_modules/expo/bin/cli export --platform web", "exit_code": 0, "static_routes": 73, "cache_warning": "Metro file-map cache deserialization failed; automatic full crawl recovered and export passed" },
+  "responsive": { "command": "node scripts/verify-onboarding.cjs", "exit_code": 0, "widths": [360, 390, 412], "evidence": "responsive-results.json", "screenshots": 27 },
+  "physical_android": "PENDING MANUAL CHECK",
+  "native_keyboard_safe_areas_system_back": "PENDING MANUAL ANDROID CHECK",
+  "database_uuid_schema_auth_or_rls_changed": false,
+  "persistent_storage": false,
+  "dependencies_changed": false,
+  "business_registration_or_operational_logic_changed": false,
+  "code_limitations": "ASCII token prefixes; non-ASCII-only names fall back to QRY. Blank additional sites receive unique QRY codes, which stay stable until explicit regeneration. Suffixes expand beyond two digits after 99."
+}

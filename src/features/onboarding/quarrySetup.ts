@@ -4,12 +4,16 @@ import type {
   QuarrySiteDraft,
   PitDraft,
 } from "./model";
+import { suggestQuarryCode } from "./quarryCode";
 
 export type SiteFields = Pick<
   QuarrySiteDraft,
   "name" | "code" | "stateName" | "district" | "address"
 >;
 export type QuarryCommand =
+  | { type: "INITIALIZE_PRIMARY" }
+  | { type: "COPY_BUSINESS"; siteId: string; confirmed: boolean }
+  | { type: "REGENERATE_CODE"; siteId: string }
   | { type: "SET_MODE"; enabled: boolean }
   | { type: "ADD_SITE" }
   | { type: "EDIT_SITE"; siteId: string; fields: Partial<SiteFields> }
@@ -109,6 +113,12 @@ export function reduceQuarryCommand(
   let sites = draft.sites;
   let multiSiteEnabled = draft.multiSiteEnabled;
   let nextQuarryEntityId = state.nextQuarryEntityId;
+  let quarryPrefillInitialized = state.quarryPrefillInitialized;
+  const codeFor = (name: string, siteId?: string) =>
+    suggestQuarryCode(
+      name,
+      sites.filter((site) => site.id !== siteId).map((site) => site.code),
+    );
   const allocate = (kind: "site" | "pit") => {
     const existing = new Set(
       draft.sites.flatMap((site) => [
@@ -122,7 +132,26 @@ export function reduceQuarryCommand(
     } while (existing.has(id));
     return id;
   };
-  if (command.type === "SET_MODE") {
+  if (command.type === "INITIALIZE_PRIMARY") {
+    if (quarryPrefillInitialized) return state;
+    const primary = sites.find((site) => site.isPrimary);
+    if (!primary)
+      return fail(
+        "A primary quarry is required before copying business details.",
+      );
+    const business = draft.business;
+    // Preserve any existing nonempty draft values; never continuously synchronize fields.
+    const updated = {
+      ...primary,
+      name: primary.name || business.businessName.trim(),
+      stateName: primary.stateName || business.stateName.trim(),
+      district: primary.district || business.district.trim(),
+      address: primary.address || business.address.trim(),
+    };
+    updated.code = primary.code || codeFor(updated.name, primary.id);
+    sites = sites.map((site) => (site.id === primary.id ? updated : site));
+    quarryPrefillInitialized = true;
+  } else if (command.type === "SET_MODE") {
     if (!command.enabled && sites.length > 1)
       return fail(
         "Remove additional quarries explicitly before switching to Single Quarry. No entries were deleted.",
@@ -136,7 +165,7 @@ export function reduceQuarryCommand(
       {
         id: allocate("site"),
         name: "",
-        code: "",
+        code: codeFor(""),
         stateName: "",
         district: "",
         address: "",
@@ -152,7 +181,26 @@ export function reduceQuarryCommand(
     const site = sites.find((item) => item.id === command.siteId);
     if (!site) return fail("This quarry is no longer in the draft.");
     let updated = site;
-    if (command.type === "EDIT_SITE") {
+    if (command.type === "COPY_BUSINESS") {
+      if (!site.isPrimary)
+        return fail(
+          "Business details can only be copied to the primary quarry.",
+        );
+      if (!command.confirmed)
+        return fail(
+          "Confirm replacing quarry details with the latest business details first.",
+        );
+      updated = {
+        ...site,
+        name: draft.business.businessName.trim(),
+        stateName: draft.business.stateName.trim(),
+        district: draft.business.district.trim(),
+        address: draft.business.address.trim(),
+      };
+      quarryPrefillInitialized = true;
+    } else if (command.type === "REGENERATE_CODE") {
+      updated = { ...site, code: codeFor(site.name, site.id) };
+    } else if (command.type === "EDIT_SITE") {
       const f = command.fields;
       updated = {
         ...site,
@@ -219,6 +267,7 @@ export function reduceQuarryCommand(
   }
   return {
     ...state,
+    quarryPrefillInitialized,
     nextQuarryEntityId,
     quarryIssue: "",
     savedForSession: false,

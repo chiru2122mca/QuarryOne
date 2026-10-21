@@ -112,6 +112,7 @@ export interface OnboardingDraft {
   invitations: UserInvitationDraft[];
 }
 export interface OnboardingState {
+  quarryPrefillInitialized: boolean;
   nextQuarryEntityId: number;
   quarryIssue: string;
   draft: OnboardingDraft;
@@ -121,6 +122,7 @@ export interface OnboardingState {
 export const demoDraftSavedMessage = "Demo draft saved for this session.";
 export function createOnboardingState(): OnboardingState {
   return {
+    quarryPrefillInitialized: false,
     nextQuarryEntityId: 1,
     quarryIssue: "",
     currentStep: "business",
