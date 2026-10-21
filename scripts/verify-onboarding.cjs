@@ -53,7 +53,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a2";
+  const directory = "verification/v043a3";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -246,6 +246,236 @@ async function localPreview() {
       for (let i = 0; i < stages.length; i++) {
         await button("Continue").click();
         await title(stages[i]).waitFor();
+        if (i === 0) {
+          const siteCards = () =>
+            page
+              .locator('[data-testid^="quarry-site-"]')
+              .filter({ visible: true });
+          const primary = () => siteCards().first();
+          const siteInput = (site, label) =>
+            site.getByRole("textbox", { name: label, exact: true });
+          const siteButton = (site, name) =>
+            site.getByRole("button", { name, exact: true });
+          const pits = (site) => site.locator('[data-testid^="quarry-pit-"]');
+          const no = () =>
+            page.getByRole("radio", {
+              name: "No — Single Quarry",
+              exact: true,
+            });
+          const yes = () =>
+            page.getByRole("radio", {
+              name: "Yes — Multiple Quarries",
+              exact: true,
+            });
+          const confirm = async (name) => {
+            for (const label of ["Cancel", "Confirm removal"]) {
+              const box = await button(label).boundingBox();
+              assert(
+                box &&
+                  box.height >= 48 &&
+                  box.x >= 0 &&
+                  box.x + box.width <= width + 1,
+                "Removal dialog touch targets and bounds",
+              );
+            }
+            await button(name).click();
+            await button("Confirm removal").waitFor({ state: "hidden" });
+          };
+          const fillSite = async (site, code, name) => {
+            for (const [label, value] of [
+              ["Quarry Name", name],
+              ["Quarry Code", code],
+              ["State", " Telangana "],
+              ["District", " Karimnagar "],
+              ["Address", " Yard 1 "],
+            ])
+              await siteInput(site, label).fill(value);
+          };
+          const checkQuarryLayout = async () => {
+            await layout();
+            for (const role of ["textbox", "radio", "button"]) {
+              const controls = page.getByRole(role).filter({ visible: true });
+              for (const control of await controls.all()) {
+                const box = await control.boundingBox();
+                assert(
+                  box &&
+                    box.height >= 48 &&
+                    box.x >= 0 &&
+                    box.x + box.width <= width + 1,
+                  `Quarry ${role} touch target/bounds at ${width}`,
+                );
+              }
+            }
+          };
+          assert.equal(await no().getAttribute("aria-checked"), "true");
+          assert.equal(await siteCards().count(), 1);
+          assert.equal(await button("Add Quarry").count(), 0);
+          assert.equal(await button("Remove Quarry").count(), 0);
+          await checkQuarryLayout();
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          for (const label of [
+            "Quarry Name",
+            "Quarry Code",
+            "State",
+            "District",
+          ])
+            assert.equal(
+              await siteInput(primary(), label).getAttribute("aria-invalid"),
+              "true",
+            );
+          await page
+            .getByText("Add at least one pit or bench for this quarry.", {
+              exact: true,
+            })
+            .waitFor();
+          await button("Save Draft").click();
+          await saved().waitFor();
+          await siteInput(primary(), "Quarry Name").fill(" Partial quarry ");
+          await button("Back").click();
+          await title("Business Registration").waitFor();
+          await assertValues(values);
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            " Partial quarry ",
+          );
+          await fillSite(primary(), " dsq01 ", " Demo Quarry ");
+          await siteButton(primary(), "Add Pit / Bench").click();
+          const firstPitId = await pits(primary())
+            .first()
+            .getAttribute("data-testid");
+          await siteInput(pits(primary()).first(), "Pit / Bench Name").fill(
+            " Pit A ",
+          );
+          await siteButton(primary(), "Add Pit / Bench").click();
+          await siteInput(pits(primary()).nth(1), "Pit / Bench Name").fill(
+            " pit a ",
+          );
+          await button("Continue").click();
+          assert.equal(
+            await siteInput(
+              pits(primary()).nth(1),
+              "Pit / Bench Name",
+            ).getAttribute("aria-invalid"),
+            "true",
+          );
+          await siteInput(pits(primary()).nth(1), "Pit / Bench Name").fill(
+            " Bench 1 ",
+          );
+          await pits(primary())
+            .nth(1)
+            .getByRole("button", { name: /^Type:/ })
+            .click();
+          await page.getByRole("button", { name: /^BENCH/ }).click();
+          await siteButton(primary(), "Remove pit / bench 2").click();
+          await confirm("Cancel");
+          assert.equal(await pits(primary()).count(), 2);
+          await siteButton(primary(), "Remove pit / bench 2").click();
+          await confirm("Confirm removal");
+          assert.equal(await pits(primary()).count(), 1);
+          assert.equal(
+            await pits(primary()).first().getAttribute("data-testid"),
+            firstPitId,
+          );
+          await yes().click();
+          await button("Add Quarry").click();
+          const second = () => siteCards().nth(1);
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          assert.equal(
+            await siteInput(second(), "Quarry Name").getAttribute(
+              "aria-invalid",
+            ),
+            "true",
+          );
+          await fillSite(second(), " dsq01 ", " Second Quarry ");
+          await siteButton(second(), "Add Pit / Bench").click();
+          await siteInput(pits(second()).first(), "Pit / Bench Name").fill(
+            "Pit A",
+          );
+          await button("Continue").click();
+          assert.equal(
+            await siteInput(second(), "Quarry Code").getAttribute(
+              "aria-invalid",
+            ),
+            "true",
+          );
+          await siteInput(second(), "Quarry Code").fill(" q2 ");
+          await checkQuarryLayout();
+          await button("Save Draft").click();
+          await saved().waitFor();
+          await button("Back").click();
+          await title("Business Registration").waitFor();
+          await assertValues(values);
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          assert.equal(await siteCards().count(), 2);
+          assert.equal(
+            await siteInput(second(), "Quarry Name").inputValue(),
+            "Second Quarry",
+          );
+          await no().click();
+          assert.equal(await yes().getAttribute("aria-checked"), "true");
+          assert.equal(await siteCards().count(), 2);
+          await page
+            .getByText(/No entries were deleted/)
+            .scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: `${directory}/multi-mode-blocked-${width}.png`,
+            fullPage: true,
+          });
+          await second()
+            .getByRole("heading", { name: "Additional Quarry 1" })
+            .scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: `${directory}/second-quarry-${width}.png`,
+            fullPage: true,
+          });
+          await siteButton(second(), "Remove Quarry").click();
+          await confirm("Cancel");
+          assert.equal(await siteCards().count(), 2);
+          await siteButton(second(), "Remove Quarry").click();
+          await confirm("Confirm removal");
+          assert.equal(await siteCards().count(), 1);
+          await no().click();
+          assert.equal(await no().getAttribute("aria-checked"), "true");
+          assert.equal(await button("Add Quarry").count(), 0);
+          assert.equal(
+            await siteInput(primary(), "Quarry Name").inputValue(),
+            "Demo Quarry",
+          );
+          await siteButton(primary(), "Remove pit / bench 1").click();
+          await confirm("Confirm removal");
+          await button("Continue").click();
+          await title("Quarry Configuration").waitFor();
+          await page
+            .getByText("Add at least one pit or bench for this quarry.", {
+              exact: true,
+            })
+            .waitFor();
+          await siteButton(primary(), "Add Pit / Bench").click();
+          assert.notEqual(
+            await pits(primary()).first().getAttribute("data-testid"),
+            firstPitId,
+          );
+          await siteInput(pits(primary()).first(), "Pit / Bench Name").fill(
+            " Pit A ",
+          );
+          await button("Save Draft").click();
+          await saved().waitFor();
+          await title("Quarry Configuration").scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: `${directory}/quarry-${width}.png`,
+            fullPage: true,
+          });
+          await pits(primary()).first().scrollIntoViewIfNeeded();
+          await page.screenshot({
+            path: `${directory}/pits-actions-${width}.png`,
+            fullPage: true,
+          });
+        }
         await saved().waitFor();
         const progress = page
           .getByRole("progressbar")
@@ -255,7 +485,7 @@ async function localPreview() {
           String(i + 2),
         );
         await layout();
-        if (i === 0)
+        if (i === 1)
           await page
             .getByText("Single quarry · FT / CFT", { exact: true })
             .waitFor();
@@ -332,6 +562,10 @@ async function localPreview() {
         partial_back_retention: true,
         normalized_field_restore: true,
         telugu_input_preserved: true,
+        quarry_validation_and_step3_gate: true,
+        multi_mode_resolution_without_data_loss: true,
+        pit_bench_edit_remove_confirmation: true,
+        stable_site_and_pit_ids: true,
       });
       await page.close();
     }

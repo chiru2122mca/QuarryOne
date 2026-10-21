@@ -1,0 +1,25 @@
+{
+  "milestone": "V0.4.3A.3",
+  "base_commit": "083d45b",
+  "typecheck": { "command": "npm run typecheck", "exit_code": 0, "result": "PASS" },
+  "lint": { "command": "npm run lint", "exit_code": 0, "result": "PASS" },
+  "tests": {
+    "command": "node --require ./tests/register-typescript.cjs --test tests/blocks/*.test.cjs tests/onboarding/*.test.cjs",
+    "exit_code": 0,
+    "total": 88,
+    "existing_operational": 53,
+    "existing_onboarding_foundation": 10,
+    "existing_business_registration": 9,
+    "quarry_setup": 16,
+    "failed": 0
+  },
+  "web_export": { "command": "node node_modules/expo/bin/cli export --platform web", "exit_code": 0, "static_routes": 73 },
+  "responsive": { "command": "node scripts/verify-onboarding.cjs", "exit_code": 0, "widths": [360, 390, 412], "evidence": "responsive-results.json", "screenshots": 24 },
+  "physical_android": "PENDING MANUAL CHECK",
+  "native_keyboard_safe_areas_system_back": "PENDING MANUAL ANDROID CHECK",
+  "database_or_auth_mutations": false,
+  "persistent_storage": false,
+  "dependencies_changed": false,
+  "business_registration_or_operational_logic_changed": false,
+  "reference_guard_tests": "Synthetic in-memory stockyard/invitation fixtures; later-stage forms are not implemented"
+}

@@ -1,3 +1,5 @@
+import { reduceQuarryCommand } from "./quarrySetup";
+import type { QuarryCommand } from "./quarrySetup";
 /** Explicit destinations: never treat a supplied step identifier as a route. */
 export const onboardingSteps = [
   {
@@ -110,6 +112,8 @@ export interface OnboardingDraft {
   invitations: UserInvitationDraft[];
 }
 export interface OnboardingState {
+  nextQuarryEntityId: number;
+  quarryIssue: string;
   draft: OnboardingDraft;
   currentStep: OnboardingStepId;
   savedForSession: boolean;
@@ -117,6 +121,8 @@ export interface OnboardingState {
 export const demoDraftSavedMessage = "Demo draft saved for this session.";
 export function createOnboardingState(): OnboardingState {
   return {
+    nextQuarryEntityId: 1,
+    quarryIssue: "",
     currentStep: "business",
     savedForSession: false,
     draft: {
@@ -170,6 +176,7 @@ type UpdateAction = {
 }[keyof OnboardingDraft];
 export type OnboardingAction =
   | UpdateAction
+  | { type: "QUARRY_COMMAND"; command: QuarryCommand }
   | { type: "NAVIGATE"; step: OnboardingStepId }
   | { type: "SAVE_DRAFT" }
   | { type: "RESET_DEMO" };
@@ -179,6 +186,8 @@ export function onboardingReducer(
   action: OnboardingAction,
 ): OnboardingState {
   switch (action.type) {
+    case "QUARRY_COMMAND":
+      return reduceQuarryCommand(state, action.command);
     case "UPDATE_DRAFT":
       return {
         ...state,
@@ -192,6 +201,9 @@ export function onboardingReducer(
     case "SAVE_DRAFT":
       return { ...state, savedForSession: true };
     case "RESET_DEMO":
-      return createOnboardingState();
+      return {
+        ...createOnboardingState(),
+        nextQuarryEntityId: state.nextQuarryEntityId,
+      };
   }
 }
