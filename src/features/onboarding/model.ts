@@ -1,5 +1,7 @@
 import { reduceQuarryCommand } from "./quarrySetup";
 import type { QuarryCommand } from "./quarrySetup";
+import { reduceMaterialsCommand } from "./materialsSetup";
+import type { MaterialsCommand } from "./materialsSetup";
 /** Explicit destinations: never treat a supplied step identifier as a route. */
 export const onboardingSteps = [
   {
@@ -112,6 +114,8 @@ export interface OnboardingDraft {
   invitations: UserInvitationDraft[];
 }
 export interface OnboardingState {
+  nextStockyardDraftId: number;
+  materialsIssue: string;
   quarryPrefillInitialized: boolean;
   nextQuarryEntityId: number;
   quarryIssue: string;
@@ -122,6 +126,8 @@ export interface OnboardingState {
 export const demoDraftSavedMessage = "Demo draft saved for this session.";
 export function createOnboardingState(): OnboardingState {
   return {
+    nextStockyardDraftId: 1,
+    materialsIssue: "",
     quarryPrefillInitialized: false,
     nextQuarryEntityId: 1,
     quarryIssue: "",
@@ -179,6 +185,7 @@ type UpdateAction = {
 export type OnboardingAction =
   | UpdateAction
   | { type: "QUARRY_COMMAND"; command: QuarryCommand }
+  | { type: "MATERIALS_COMMAND"; command: MaterialsCommand }
   | { type: "NAVIGATE"; step: OnboardingStepId }
   | { type: "SAVE_DRAFT" }
   | { type: "RESET_DEMO" };
@@ -188,6 +195,8 @@ export function onboardingReducer(
   action: OnboardingAction,
 ): OnboardingState {
   switch (action.type) {
+    case "MATERIALS_COMMAND":
+      return reduceMaterialsCommand(state, action.command);
     case "QUARRY_COMMAND":
       return reduceQuarryCommand(state, action.command);
     case "UPDATE_DRAFT":
@@ -206,6 +215,7 @@ export function onboardingReducer(
       return {
         ...createOnboardingState(),
         nextQuarryEntityId: state.nextQuarryEntityId,
+        nextStockyardDraftId: state.nextStockyardDraftId,
       };
   }
 }

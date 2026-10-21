@@ -3,6 +3,9 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
+const {
+  verifyMaterialsScenarios,
+} = require("./verify-materials-scenarios.cjs");
 
 // Serve the existing static web export on an ephemeral loopback port.
 async function localPreview() {
@@ -53,7 +56,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a3-1";
+  const directory = "verification/v043a4";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -615,6 +618,16 @@ async function localPreview() {
             fullPage: true,
           });
         }
+        if (i === 1)
+          await verifyMaterialsScenarios({
+            page,
+            button,
+            title,
+            saved,
+            layout,
+            width,
+            directory,
+          });
         await saved().waitFor();
         const progress = page
           .getByRole("progressbar")
@@ -624,10 +637,6 @@ async function localPreview() {
           String(i + 2),
         );
         await layout();
-        if (i === 1)
-          await page
-            .getByText("Single quarry · FT / CFT", { exact: true })
-            .waitFor();
       }
       assert.equal(await button("Continue").isDisabled(), true);
       await page.screenshot({
@@ -710,6 +719,10 @@ async function localPreview() {
         latest_business_copy_confirmation: true,
         stable_manual_and_generated_codes: true,
         explicit_code_regeneration: true,
+        material_grade_stockyard_configuration: true,
+        single_multi_quarry_and_pit_id_associations: true,
+        stockyard_reference_guards_and_confirmed_removal: true,
+        measurement_preferences_and_conversion_example: true,
       });
       await page.close();
     }
