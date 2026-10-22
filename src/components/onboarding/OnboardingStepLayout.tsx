@@ -22,6 +22,7 @@ export function OnboardingStepLayout({
   onReset,
   showPreferences = true,
   showSaveConfirmation = true,
+  finalAction,
 }: {
   step: OnboardingStepId;
   children?: ReactNode;
@@ -30,6 +31,7 @@ export function OnboardingStepLayout({
   onReset?: () => void;
   showPreferences?: boolean;
   showSaveConfirmation?: boolean;
+  finalAction?: { title: string; onPress: () => void; feedback?: ReactNode };
 }) {
   const { state, dispatch } = useOnboardingDraft();
   const current = getOnboardingStep(step)!;
@@ -80,13 +82,15 @@ export function OnboardingStepLayout({
           {demoDraftSavedMessage}
         </Text>
       )}
-      {!next && (
+      {!next && !finalAction && (
         <Text style={s.text}>
           Activation is unavailable in this prototype. Use Back to review
           earlier steps.
         </Text>
       )}
+      {!next && finalAction?.feedback}
       <OnboardingNavigationActions
+        primaryTitle={!next && finalAction ? finalAction.title : "Continue"}
         onBack={back}
         onContinue={
           next
@@ -94,7 +98,7 @@ export function OnboardingStepLayout({
                 if (!beforeContinue || beforeContinue())
                   router.replace(next.route);
               }
-            : undefined
+            : finalAction?.onPress
         }
         onSave={() => {
           if (!beforeSave || beforeSave()) dispatch({ type: "SAVE_DRAFT" });

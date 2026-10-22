@@ -71,7 +71,28 @@ exports.verifyUsersScenarios = async ({
   });
   await skip().click();
   await title("Review & Activate").waitFor();
-  assert.equal(await button("Continue").isDisabled(), true);
+  assert.equal(await button("Preview Activation").isEnabled(), true);
+  await page
+    .getByTestId("review-users")
+    .filter({ visible: true })
+    .getByText("Owner-only setup. No additional team member drafts.", {
+      exact: true,
+    })
+    .waitFor();
+  await button("Preview Activation").click();
+  const ownerPreview = page
+    .getByTestId("activation-preview")
+    .filter({ visible: true });
+  await expect(ownerPreview).toContainText(
+    "1 Owner · 0 additional team members",
+  );
+  await page.screenshot({
+    path: `${directory}/owner-preview-${width}.png`,
+    fullPage: true,
+    animations: "disabled",
+  });
+  await button("Return to Review").click();
+  await ownerPreview.waitFor({ state: "hidden" });
   await button("Back").click();
   await title("Users & Roles").waitFor();
   await button("Add Team Member").click();
@@ -329,6 +350,13 @@ exports.verifySingleUsersScenarios = async ({
   });
   await button("Continue").click();
   await title("Review & Activate").waitFor();
+  await button("Preview Activation").click();
+  const preview = page
+    .getByTestId("activation-preview")
+    .filter({ visible: true });
+  await expect(preview).toContainText("1 Owner · 1 additional team member");
+  await button("Return to Review").click();
+  await preview.waitFor({ state: "hidden" });
   await button("Back").click();
   await title("Users & Roles").waitFor();
   assert.equal(

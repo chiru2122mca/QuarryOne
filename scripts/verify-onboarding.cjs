@@ -10,6 +10,10 @@ const {
   verifyUsersScenarios,
   verifySingleUsersScenarios,
 } = require("./verify-users-scenarios.cjs");
+const {
+  verifyReviewScenarios,
+  verifyIncompleteReview,
+} = require("./verify-review-scenarios.cjs");
 
 // Serve the existing static web export on an ephemeral loopback port.
 async function localPreview() {
@@ -60,7 +64,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a5";
+  const directory = "verification/v043a6";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -142,7 +146,11 @@ async function localPreview() {
           "Reset demo draft",
           "Go back",
         ]) {
-          const bounds = await button(name).boundingBox();
+          const actionName =
+            name === "Continue" && (await button("Preview Activation").count())
+              ? "Preview Activation"
+              : name;
+          const bounds = await button(actionName).boundingBox();
           assert(
             bounds && bounds.height >= 48,
             `${width}: ${name} touch target`,
@@ -443,8 +451,12 @@ async function localPreview() {
             "Quarry Code",
             "State",
             "District",
-          ])
-            await siteInput(primary(), label).fill("");
+          ]) {
+            const field = siteInput(primary(), label);
+            await field.fill(" ");
+            await field.blur();
+            await expect(field).toHaveValue(label === "Quarry Code" ? "" : " ");
+          }
           await button("Continue").click();
           await title("Quarry Configuration").waitFor();
           for (const label of [
@@ -654,7 +666,15 @@ async function localPreview() {
         );
         await layout();
       }
-      assert.equal(await button("Continue").isDisabled(), true);
+      await verifyReviewScenarios({
+        page,
+        button,
+        title,
+        saved,
+        layout,
+        width,
+        directory,
+      });
       await page.screenshot({
         path: `${directory}/review-${width}.png`,
         fullPage: true,
@@ -723,6 +743,16 @@ async function localPreview() {
         directory,
         base,
       });
+      await verifyIncompleteReview({
+        page,
+        button,
+        title,
+        saved,
+        layout,
+        width,
+        directory,
+        base,
+      });
       results.push({
         width,
         result: "PASS",
@@ -753,6 +783,10 @@ async function localPreview() {
         team_contact_role_site_validation: true,
         team_confirmation_and_session_resume: true,
         single_quarry_automatic_team_assignment: true,
+        review_summary_and_four_edit_destinations: true,
+        readiness_errors_and_invalid_preview_blocked: true,
+        valid_demo_preview_and_return_to_review: true,
+        review_session_resume_and_stable_ids: true,
       });
       await page.close();
     }

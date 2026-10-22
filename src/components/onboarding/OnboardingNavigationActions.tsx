@@ -5,15 +5,17 @@ export function OnboardingNavigationActions({
   onBack,
   onContinue,
   onSave,
+  primaryTitle = "Continue",
 }: {
   onBack: () => void;
   onContinue?: () => void;
   onSave: () => void;
+  primaryTitle?: string;
 }) {
   return (
     <View style={{ gap: 10 }}>
       <PrimaryButton
-        title="Continue"
+        title={primaryTitle}
         onPress={() => onContinue?.()}
         disabled={!onContinue}
       />
