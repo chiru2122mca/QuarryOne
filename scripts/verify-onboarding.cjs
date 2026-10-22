@@ -6,6 +6,10 @@ const path = require("node:path");
 const {
   verifyMaterialsScenarios,
 } = require("./verify-materials-scenarios.cjs");
+const {
+  verifyUsersScenarios,
+  verifySingleUsersScenarios,
+} = require("./verify-users-scenarios.cjs");
 
 // Serve the existing static web export on an ephemeral loopback port.
 async function localPreview() {
@@ -56,7 +60,7 @@ async function localPreview() {
     ? null
     : await localPreview();
   const base = process.env.QUARRYONE_PREVIEW_URL || preview.url;
-  const directory = "verification/v043a4";
+  const directory = "verification/v043a5";
   fs.mkdirSync(directory, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true });
   const errors = [];
@@ -449,8 +453,8 @@ async function localPreview() {
             "State",
             "District",
           ])
-            assert.equal(
-              await siteInput(primary(), label).getAttribute("aria-invalid"),
+            await expect(siteInput(primary(), label)).toHaveAttribute(
+              "aria-invalid",
               "true",
             );
           await page
@@ -628,6 +632,18 @@ async function localPreview() {
             width,
             directory,
           });
+        if (i === 2)
+          await verifyUsersScenarios({
+            page,
+            button,
+            title,
+            saved,
+            layout,
+            width,
+            directory,
+            ownerName: values[7],
+            ownerPhone: values[2],
+          });
         await saved().waitFor();
         const progress = page
           .getByRole("progressbar")
@@ -697,6 +713,16 @@ async function localPreview() {
         0,
         "Invalid business hides a confirmation from another stage",
       );
+      await verifySingleUsersScenarios({
+        page,
+        button,
+        title,
+        saved,
+        layout,
+        width,
+        directory,
+        base,
+      });
       results.push({
         width,
         result: "PASS",
@@ -723,6 +749,10 @@ async function localPreview() {
         single_multi_quarry_and_pit_id_associations: true,
         stockyard_reference_guards_and_confirmed_removal: true,
         measurement_preferences_and_conversion_example: true,
+        primary_owner_and_owner_only_skip: true,
+        team_contact_role_site_validation: true,
+        team_confirmation_and_session_resume: true,
+        single_quarry_automatic_team_assignment: true,
       });
       await page.close();
     }

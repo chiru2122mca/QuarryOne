@@ -2,6 +2,8 @@ import { reduceQuarryCommand } from "./quarrySetup";
 import type { QuarryCommand } from "./quarrySetup";
 import { reduceMaterialsCommand } from "./materialsSetup";
 import type { MaterialsCommand } from "./materialsSetup";
+import { primaryOwnerFromBusiness, reduceUsersCommand } from "./usersSetup";
+import type { UsersCommand } from "./usersSetup";
 /** Explicit destinations: never treat a supplied step identifier as a route. */
 export const onboardingSteps = [
   {
@@ -91,6 +93,8 @@ export interface MeasurementPreferencesDraft {
 }
 export interface UserInvitationDraft {
   id: string;
+  name: string;
+  remarks: string;
   recipient: string;
   channel: "EMAIL" | "PHONE";
   role:
@@ -104,6 +108,13 @@ export interface UserInvitationDraft {
 }
 /** Incomplete, request-local drafts; none of these identifiers convey authorization. */
 export interface OnboardingDraft {
+  primaryOwner: {
+    readonly id: "draft-primary-owner";
+    readonly role: "OWNER";
+    readonly accessScope: "ALL_SITES";
+    readonly displayName: string;
+    readonly contactPhone: string;
+  };
   business: BusinessDraft;
   multiSiteEnabled: boolean;
   sites: QuarrySiteDraft[];
@@ -114,6 +125,8 @@ export interface OnboardingDraft {
   invitations: UserInvitationDraft[];
 }
 export interface OnboardingState {
+  nextInvitationDraftId: number;
+  usersIssue: string;
   nextStockyardDraftId: number;
   materialsIssue: string;
   quarryPrefillInitialized: boolean;
@@ -126,6 +139,8 @@ export interface OnboardingState {
 export const demoDraftSavedMessage = "Demo draft saved for this session.";
 export function createOnboardingState(): OnboardingState {
   return {
+    nextInvitationDraftId: 1,
+    usersIssue: "",
     nextStockyardDraftId: 1,
     materialsIssue: "",
     quarryPrefillInitialized: false,
@@ -134,6 +149,10 @@ export function createOnboardingState(): OnboardingState {
     currentStep: "business",
     savedForSession: false,
     draft: {
+      primaryOwner: primaryOwnerFromBusiness({
+        ownerDisplayName: "",
+        contactPhone: "",
+      }),
       business: {
         businessName: "",
         legalName: "",
@@ -175,17 +194,19 @@ export function createOnboardingState(): OnboardingState {
     },
   };
 }
+type EditableSection = Exclude<keyof OnboardingDraft, "primaryOwner">;
 type UpdateAction = {
-  [K in keyof OnboardingDraft]: {
+  [K in EditableSection]: {
     type: "UPDATE_DRAFT";
     section: K;
     value: OnboardingDraft[K];
   };
-}[keyof OnboardingDraft];
+}[EditableSection];
 export type OnboardingAction =
   | UpdateAction
   | { type: "QUARRY_COMMAND"; command: QuarryCommand }
   | { type: "MATERIALS_COMMAND"; command: MaterialsCommand }
+  | { type: "USERS_COMMAND"; command: UsersCommand }
   | { type: "NAVIGATE"; step: OnboardingStepId }
   | { type: "SAVE_DRAFT" }
   | { type: "RESET_DEMO" };
@@ -195,14 +216,24 @@ export function onboardingReducer(
   action: OnboardingAction,
 ): OnboardingState {
   switch (action.type) {
+    case "USERS_COMMAND":
+      return reduceUsersCommand(state, action.command);
     case "MATERIALS_COMMAND":
       return reduceMaterialsCommand(state, action.command);
     case "QUARRY_COMMAND":
       return reduceQuarryCommand(state, action.command);
     case "UPDATE_DRAFT":
+      // The primary owner is always derived from Step 1, never an editable membership.
+      if ((action.section as string) === "primaryOwner") return state;
       return {
         ...state,
-        draft: { ...state.draft, [action.section]: action.value },
+        draft: {
+          ...state.draft,
+          [action.section]: action.value,
+          ...(action.section === "business"
+            ? { primaryOwner: primaryOwnerFromBusiness(action.value) }
+            : {}),
+        },
         savedForSession: false,
       };
     case "NAVIGATE":
@@ -216,6 +247,7 @@ export function onboardingReducer(
         ...createOnboardingState(),
         nextQuarryEntityId: state.nextQuarryEntityId,
         nextStockyardDraftId: state.nextStockyardDraftId,
+        nextInvitationDraftId: state.nextInvitationDraftId,
       };
   }
 }

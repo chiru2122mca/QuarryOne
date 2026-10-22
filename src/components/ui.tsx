@@ -354,6 +354,8 @@ export function FormField({
   error,
   hint,
   keyboardType,
+  autoCapitalize,
+  autoCorrect,
 }: {
   label: string;
   value: string;
@@ -366,6 +368,8 @@ export function FormField({
   error?: string;
   hint?: string;
   keyboardType?: TextInputProps["keyboardType"];
+  autoCapitalize?: TextInputProps["autoCapitalize"];
+  autoCorrect?: boolean;
 }) {
   return (
     <View>
@@ -390,14 +394,16 @@ export function FormField({
         value={value}
         onChangeText={(text) => onChange(uppercase ? text.toUpperCase() : text)}
         autoCapitalize={
-          uppercase
+          autoCapitalize ??
+          (uppercase
             ? "characters"
             : number || keyboardType === "phone-pad"
               ? "none"
-              : "sentences"
+              : "sentences")
         }
         autoCorrect={
-          !uppercase && !number && !secure && keyboardType !== "phone-pad"
+          autoCorrect ??
+          (!uppercase && !number && !secure && keyboardType !== "phone-pad")
         }
         keyboardType={keyboardType ?? (number ? "decimal-pad" : "default")}
         secureTextEntry={secure}

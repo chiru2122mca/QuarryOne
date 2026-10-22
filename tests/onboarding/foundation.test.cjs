@@ -131,7 +131,16 @@ test("every typed draft section is retained across all forward/back transitions"
     state = onboardingReducer(state, { type: "UPDATE_DRAFT", section, value });
   for (const step of [...onboardingSteps, ...onboardingSteps.toReversed()]) {
     state = onboardingReducer(state, { type: "NAVIGATE", step: step.id });
-    assert.deepEqual(state.draft, sections);
+    assert.deepEqual(state.draft, {
+      ...sections,
+      primaryOwner: {
+        id: "draft-primary-owner",
+        role: "OWNER",
+        accessScope: "ALL_SITES",
+        displayName: sections.business.ownerDisplayName,
+        contactPhone: sections.business.contactPhone,
+      },
+    });
   }
 });
 test("Save Draft keeps entered values and reports only current-session retention", () => {

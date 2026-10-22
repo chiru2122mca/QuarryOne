@@ -4,6 +4,8 @@ Proposed Supabase Auth integration only. Current static Login and app navigation
 
 ## Permission model
 
+Mobile V0.4.3A.5 represents these intentions in session-only **Demo Invitation Setup**; see the [implementation and verification report](../verification/v043a5/README.md). The primary Owner follows Step 1 and is fixed to OWNER/ALL_SITES. Admin drafts require ALL_SITES. Operational drafts default to ASSIGNED_SITES and offer explicit ALL_SITES in accordance with the matrix below. These drafts do not authorize a user, send invitations or create memberships. Historical database/security notes below remain their original architectural baseline; hosted acceptance evidence is tracked in the Supabase rollout plan.
+
 Auth proves identity; database memberships determine permissions. Organization membership is mandatory before any tenant access. OWNER/ADMIN have ALL_SITES; operational roles default to ASSIGNED_SITES. An Owner/Admin may explicitly grant ALL_SITES to an operational role through the controlled membership operation; role capabilities remain unchanged. Site assignments apply the organization role at each assigned site; different roles at different sites are a future decision, not an implicit privilege.
 
 | Capability                                             | Owner                | Admin             | Quarry Manager     | Production Supervisor     | Sales / Accountant      | Dispatch / Gate       |
